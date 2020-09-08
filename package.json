@@ -15,12 +15,13 @@
     "tsc": "tsc -p .",
     "clean": "rimraf lib && rimraf types",
     "test": "npm run lint && jest --testPathPattern=test/",
+    "test:ci": "npm run lint && node utils/wait-for.js core 8080 10000 && jest --testPathPattern=test/",
     "build": "tsc -p .",
     "watch": "tsc -w -p .",
     "prestart": "npm run build",
     "start": "node .",
     "start:dev": "knex migrate:latest && nodemon",
-    "start:ci": "knex migrate:latest && node ."
+    "start:ci": "node utils/wait-for.js postgres 5432 10000 && knex migrate:latest && npm run tsc && node ."
   },
   "keywords": [
     "mesto.co",

@@ -16,4 +16,13 @@
 
 const environment = process.env.ENVIRONMENT || 'development';
 const config = require('../knexfile.js')[environment];
-export default require('knex')(config);
+
+function knexPromise() {
+  try {
+    return require('knex')(config);
+  } catch (e) {
+    console.log(e.stack);
+  }
+}
+
+export default knexPromise();
