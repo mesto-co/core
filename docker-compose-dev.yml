@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  core:
+    build: .
+    ports:
+     - "8080:8080"
+    depends_on:
+     - postgres
+    links:
+     - postgres
+    command: "npm run start:dev"
+    volumes:
+      - './src:/usr/src/app/src'
+
+  postgres:
+    image: postgres
+    environment:
+     - POSTGRES_PASSWORD=testtesttest

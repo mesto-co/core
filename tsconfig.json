@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "commonjs",
+    "lib": ["esnext"],
+    "sourceMap": true,
+    "incremental": true,
+    "rootDir": "./src",
+    "outDir": "./app",
+    "strict": true,
+    "declaration": false,
+    "esModuleInterop": true
+  },
+  "compileOnSave": true,
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
+}

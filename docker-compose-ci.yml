@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  test:
+    build: .
+    depends_on:
+     - core
+    command: "npm run test"
+
+  core:
+    build: .
+    depends_on:
+     - postgres
+    links:
+     - postgres
+    command: "npm run start:ci"
+
+  postgres:
+    image: postgres
+    environment:
+     - POSTGRES_PASSWORD=testtesttest

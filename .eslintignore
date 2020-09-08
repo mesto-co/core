@@ -1,0 +1,4 @@
+app/
+/types/*
+node_modules/
+.eslintrc.js
