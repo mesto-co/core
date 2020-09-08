@@ -2,20 +2,25 @@ version: '3'
 
 services:
   test:
-    build: .
+    image: core_image
     depends_on:
      - core
-    command: "npm run test"
+    command: "npm run test:ci"
 
   core:
     build: .
+    image: core_image
     depends_on:
      - postgres
     links:
      - postgres
+    ports:
+     - "8080:8080"
     command: "npm run start:ci"
 
   postgres:
     image: postgres
+    ports:
+     - "5432:5432"
     environment:
      - POSTGRES_PASSWORD=testtesttest

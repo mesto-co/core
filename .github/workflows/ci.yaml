@@ -6,6 +6,7 @@ jobs:
     name: ci
     runs-on: ubuntu-latest
     steps:
-      - name: run-tests
+      - name: checkout
         uses: actions/checkout@v2
+      - name: run-tests
         run: docker-compose -f docker-compose-ci.yml up --exit-code-from test
