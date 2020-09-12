@@ -7,7 +7,8 @@
 ## Как запустить?
 
 ```
-npm run start
+npm run start:dev
+npm run test # чтобы прогнать тесты
 ```
 
 ## Возможности

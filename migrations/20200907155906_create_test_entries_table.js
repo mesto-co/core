@@ -16,7 +16,7 @@
 exports.up = function(knex) {
   return knex.schema.createTable('test_entries', function(table) {
     table.increments('id');
-    table.integer('fieldA').unique();
+    table.integer('fieldA').notNullable();
     table.string('fieldB').notNullable();
   });
 };

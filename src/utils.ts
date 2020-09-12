@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 import express from 'express';
-import test from './test';
 
-const v1 = express.Router();
+const argsSymbol = Symbol('args');
+function getArgs(request: express.Request): any {
+  if (typeof request === 'object') {
+    const requestObject = request as any;
+    if (!requestObject[argsSymbol])
+      requestObject[argsSymbol] = Object.assign({}, request.body, request.params, request.query);
+    return requestObject[argsSymbol];
+  }
+  return {};
+}
 
-v1.get('/', function(req, res) {
-  res.send('v1 API');
-});
-v1.use('/test', test);
-
-export default v1;
+export {getArgs};
