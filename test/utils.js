@@ -15,14 +15,20 @@
  */
 const http = require('http');
 
+const debug = require('debug')('fetch');
+
 function fetch(url, method, body) {
+  debug('<', url, method, body);
   let requestFinished;
   const requestPromise = new Promise(resolve => requestFinished = resolve);
-  const req = http.request(url, { method: 'GET' }, res => {
+  const req = http.request(url, { method: method, headers: { 'Content-Type': 'application/json' } }, res => {
     res.setEncoding('utf8');
     let data = '';
     res.on('data', chunk => data += chunk);
-    res.on('end', () => requestFinished({data: JSON.parse(data), code: res.statusCode}));
+    res.on('end', () => {
+      debug('>', data, res.statusCode);
+      requestFinished({data: data ? JSON.parse(data) : {}, code: res.statusCode});
+    });
   });
   if (body)
     req.write(body);
@@ -30,4 +36,20 @@ function fetch(url, method, body) {
   return requestPromise;
 }
 
-module.exports = { fetch };
+function get(url) {
+  return fetch(url, 'GET', null);
+}
+
+function post(url, body) {
+  return fetch(url, 'POST', body);
+}
+
+function put(url, body) {
+  return fetch(url, 'PUT', body);
+}
+
+function del(url) {
+  return fetch(url, 'DELETE', null);
+}
+
+module.exports = { get, post, put, del };

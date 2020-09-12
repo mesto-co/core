@@ -13,19 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import express from 'express';
-import v1 from './v1/v1';
-
-const app = express();
+const {default: app} = require('./app/app.js');
 const port = 8080;
-
-app.get('/', (req, res) => {
-  res.send('Hello world!');
-});
-
-app.use('/v1', v1);
-
 app.listen(port, () => {
   console.log(`server started at http://localhost:${port}`);
 });

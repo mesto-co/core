@@ -1,0 +1,42 @@
+[
+    {
+        "$id": "#GET>/v1/test/:id",
+        "allOf": [{ "$ref": "#RequestBase" }],
+        "properties": {
+            "id": { "type": "number" }
+        },
+        "required": [ "id" ]
+    },
+    {
+        "$id": "#PUT>/v1/test/:id",
+        "allOf": [{ "$ref": "#RequestBase" }],
+        "properties": {
+            "id": { "type": "number" },
+            "fieldA": { "type": "number" },
+            "fieldB": { "type": "string" }
+        },
+        "required": [ "id", "fieldA", "fieldB" ]
+    },
+    {
+        "$id": "#DELETE>/v1/test/:id",
+        "allOf": [{ "$ref": "#RequestBase" }],
+        "properties": {
+            "id": { "type": "number" }
+        },
+        "required": [ "id" ]
+    },
+    {
+        "$id": "#GET>/v1/test/",
+        "allOf": [{ "$ref": "#RequestBase" }],
+        "properties": {}
+    },
+    {
+        "$id": "#POST>/v1/test/",
+        "allOf": [{ "$ref": "#RequestBase" }],
+        "properties": {
+            "fieldA": { "type": "number" },
+            "fieldB": { "type": "string" }
+        },
+        "required": [ "fieldA", "fieldB" ]
+    }
+]

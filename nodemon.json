@@ -1,5 +1,5 @@
 {
-  "watch": ["src"],
-  "ext": "ts",
-  "exec": "npm run start"
+  "watch": ["src","index.js"],
+  "ext": "ts,json,js",
+  "exec": "npm run start:inspect"
 }

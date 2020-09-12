@@ -3,6 +3,8 @@ version: '3'
 services:
   test:
     image: core_image
+    environment:
+     - CI=1
     depends_on:
      - core
     command: "npm run test:ci"
@@ -16,7 +18,7 @@ services:
      - postgres
     ports:
      - "8080:8080"
-    command: "npm run start:ci"
+    command: "npm run start:in-docker:ci"
 
   postgres:
     image: postgres
