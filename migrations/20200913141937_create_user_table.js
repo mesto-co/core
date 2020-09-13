@@ -23,7 +23,7 @@ const userStatuses = [
 exports.up = function(knex) {
   return knex.schema.createTable('User', function(table) {
     table.uuid('id').defaultTo(knex.raw('uuid_generate_v4()')).primary();
-    table.string('surname').nullable();
+    table.string('lastName').nullable();
     table.string('firstName').nullable();
     table.string('middleName').nullable();
     table.string('username', 30).nullable().unique();
