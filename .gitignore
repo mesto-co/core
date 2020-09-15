@@ -3,6 +3,7 @@
 *.swp
 *.pyc
 .vscode
+.idea
 yarn.lock
 /types/*
 jest-report.json
