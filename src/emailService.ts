@@ -26,7 +26,7 @@ import { SES } from 'aws-sdk';
 import { SendEmailRequest } from 'aws-sdk/clients/ses';
 import handlebars from 'handlebars';
 import path from 'path';
-import * as fs from 'fs';
+import { promises as fs } from 'fs';
 
 const FROM_EMAIL = process.env.SENDER_EMAIL_ADDRESS;
 
@@ -42,11 +42,11 @@ const ses = new SES();
 const compiledTemplates: CompiledTemplatesType = {};
 const templatesDir = './templates';
 
-export function getCompiledTemplate(templateName: string) {
+export async function getCompiledTemplate(templateName: string): Promise<any> {
   let compiledTemplate = compiledTemplates[templateName];
   if (!compiledTemplate) {
     const templatePath = path.resolve(templatesDir, templateName + '.html');
-    const template = fs.readFileSync(templatePath, 'utf8');
+    const template = await fs.readFile(templatePath, 'utf8');
     compiledTemplate = handlebars.compile(template);
     compiledTemplates[templateName] = compiledTemplate;
   }
@@ -54,8 +54,8 @@ export function getCompiledTemplate(templateName: string) {
   return compiledTemplate;
 }
 
-export function sendEmailByTemplate(templateName: string, recipient: string, subject: string, context: EmailContext) {
-  const content = getCompiledTemplate(templateName)(context);
+export async function sendEmailByTemplate(templateName: string, recipient: string, subject: string, context: EmailContext) {
+  const content = (await getCompiledTemplate(templateName))(context);
 
   const params: SendEmailRequest = {
     Destination: {

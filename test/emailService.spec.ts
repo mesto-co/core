@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 import {getCompiledTemplate, sendEmailByTemplate} from '../src/emailService';
-import * as fs from 'fs';
+import { promises as fs } from 'fs';
 
 test('should compile templates', async () => {
-  const compiledTemplate = getCompiledTemplate('test');
+  const compiledTemplate = await getCompiledTemplate('test');
   expect(compiledTemplate).toBeDefined();
   const result = compiledTemplate({'name': 'ABC', 'link': 'http://magicLink'});
-  expect(result).toEqual(fs.readFileSync('./test/data/expectedOutput.html', 'utf8'));
+  expect(result).toEqual(await fs.readFile('./test/data/expectedOutput.html', 'utf8'));
 });
 
 // Integration test for AWS SES
