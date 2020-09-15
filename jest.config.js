@@ -16,7 +16,7 @@
 const fs = require('fs');
 
 module.exports = {
-  roots: ['<rootDir>'],
+  roots: ['<rootDir>/test'],
   transform: {
     '^.+\\.tsx?$': 'ts-jest'
   },
