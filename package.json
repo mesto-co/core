@@ -15,7 +15,7 @@
     "tsc": "tsc -p .",
     "clean": "rm tsconfig.tsbuildinfo && docker-compose -f ./docker-compose-dev.yml rm --force && rimraf app",
     "test": "npm run lint && jest --testPathPattern=test/",
-    "test:ci": "node utils/wait-for.js core 8080 10000 && npm run test",
+    "test:ci": "npm run lint && node utils/wait-for.js core 8080 15000 && jest --testPathPattern=test/",
     "build": "tsc -p .",
     "prestart": "npm run build",
     "start": "node .",
