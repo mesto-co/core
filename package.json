@@ -21,7 +21,7 @@
     "start": "node .",
     "start:inspect": "node --inspect=0.0.0.0:9229 .",
     "start:dev": "npm run build && docker-compose -f docker-compose-dev.yml up --force-recreate --build --exit-code-from core",
-    "start:in-docker:dev": "knex migrate:latest && nodemon",
+    "start:in-docker:dev": "knex migrate:latest && knex seed:run && nodemon",
     "start:in-docker:ci": "node utils/wait-for.js postgres 5432 10000 && npm run build && knex migrate:latest && node ."
   },
   "author": {
