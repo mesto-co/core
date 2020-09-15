@@ -9,3 +9,4 @@ jest-report.json
 drivers/
 tsconfig.tsbuildinfo
 app/
+jest.env.dev.js
