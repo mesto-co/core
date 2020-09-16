@@ -19,6 +19,8 @@ import express from 'express';
 import validator from './validator';
 import {TestController, TestEntryController} from './controllers/testController';
 import {ProfileController} from './controllers/profileController';
+import {AuthMagicLinkController} from './controllers/authController';
+import {EmailMagicLinkSenderController} from './controllers/emailSenderController';
 
 import { errorHandler, notFoundHandler } from './errorHandler';
 
@@ -34,6 +36,8 @@ function register(app: express.Express, endpoint: string, router: express.Router
 
 register(app, '/v1/test/:id', TestEntryController);
 register(app, '/v1/test/', TestController);
+register(app, '/v1/auth/magicLink', AuthMagicLinkController);
+register(app, '/v1/email/sendMagicLink', EmailMagicLinkSenderController);
 
 // Profiles end-points
 register(app, '/v1/profile/search/', ProfileController);

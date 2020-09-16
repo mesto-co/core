@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-const environment = process.env.ENVIRONMENT || 'development';
+const {
+  ENVIRONMENT: environment = 'development',
+  MAGIC_LINK_JWT_EXPIRES_IN: magicLinkJwtExpiresIn = '15m',
+  MAGIC_LINK_JWT_SECRET: magicLinkJwtSecret = 'secret',
+  MAGIC_LINK_URL: magicLinkUrl = 'https://mesto.co/',
+} = process.env;
 db = require('./knexfile');
 
 const config = {
@@ -38,6 +43,11 @@ const config = {
 
 currentConfig = config[environment];
 currentConfig.db = db[environment];
+currentConfig.magicLink = {
+  jwtExpiresIn: magicLinkJwtExpiresIn,
+  jwtSecret: magicLinkJwtSecret,
+  url: magicLinkUrl
+};
 
 module.exports = currentConfig;
 

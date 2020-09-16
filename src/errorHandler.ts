@@ -17,20 +17,23 @@
 import express from 'express';
 
 import {ValidationError} from './validator';
+import {getArgs} from './utils';
 
 function errorHandler(err: any, request: express.Request, response: express.Response, next: express.NextFunction) {
-  // TODO(ak239spb): we should pass RqUid here as well.
+  const {RqUid} = getArgs(request);
+
   if (err instanceof SyntaxError)
-    return response.status(400).send({ message: err.message });
+    return response.status(400).send({ message: err.message, RqUid });
   if (err instanceof ValidationError)
-    return response.status(400).send({ message: err.message });
+    return response.status(400).send({ message: err.message, RqUid });
   if (err instanceof Error)
-    return response.status(400).send({ message: err.message });
+    return response.status(400).send({ message: err.message, RqUid });
   next();
 }
 
 function notFoundHandler(request: express.Request, response: express.Response, next: express.NextFunction) {
-  return response.status(404).send({ message: 'endpoint not found'});
+  const {RqUid} = request.body;
+  return response.status(404).send({ message: 'endpoint not found', RqUid});
 }
 
 export { errorHandler, notFoundHandler };

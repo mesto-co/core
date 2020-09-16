@@ -52,4 +52,13 @@ function del(url) {
   return fetch(url, 'DELETE', null);
 }
 
-module.exports = { get, post, put, del };
+function getRqUid() {
+  return 'd5ab3356-f4b4-11ea-adc1-0242ac120002';
+}
+
+function getHost() {
+  const IS_CI = !!process.env.CI;
+  return `http://${IS_CI ? 'core' : 'localhost'}:8080`;
+}
+
+module.exports = { get, post, put, del, getRqUid, getHost };
