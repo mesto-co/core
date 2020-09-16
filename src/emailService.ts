@@ -24,6 +24,7 @@ SENDER_EMAIL_ADDRESS=email
 
 import { SES } from 'aws-sdk';
 import { SendEmailRequest } from 'aws-sdk/clients/ses';
+const config = require('../config.js');
 import magickLinkTemplate from './templates/magickLinkEmail';
 
 const FROM_EMAIL = process.env.SENDER_EMAIL_ADDRESS;
@@ -32,10 +33,20 @@ const ses = new SES();
 
 export async function sendMagickLinkEmail(recipient: string, name: string, magickLink: string) {
   const content = magickLinkTemplate(name, magickLink);
-  await sendEmail(recipient, 'Линк для входа в mesto.', content);
+  const subject = 'Линк для входа в mesto.';
+  await sendEmail(recipient, subject, content);
 }
 
 export async function sendEmail(recipient: string, subject: string, content: string) {
+  // used by tests
+  if (config.emailService.stub)
+    (config.emailService.stub as any)(recipient, subject, content);
+
+  if (config.emailService.debug) {
+    console.log(`Email sent: ${recipient}, subject: ${subject}, body:\n${content}`);
+    return;
+  }
+
   const params: SendEmailRequest = {
     Destination: {
       ToAddresses: [recipient],
