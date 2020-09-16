@@ -13,15 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const fs = require('fs');
 
-const config = require('../config.js');
+module.exports = {
+  roots: ['<rootDir>/test'],
+  setupFiles: [returnIfExists('./jest.env.dev.js')].filter(t => !!t),
+  moduleFileExtensions: ['js', 'json', 'node'],
+};
 
-function knexPromise() {
-  try {
-    return require('knex')(config.db);
-  } catch (e) {
-    console.log(e.stack);
-  }
+function returnIfExists(filePath) {
+  if (fs.existsSync(filePath))
+    return filePath;
+  else
+    return null;
 }
-
-export default knexPromise();

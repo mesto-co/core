@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-const config = require('../config.js');
+export default (name: string, magickLink: string) => `
+<p>Привет ${name}!</p>
 
-function knexPromise() {
-  try {
-    return require('knex')(config.db);
-  } catch (e) {
-    console.log(e.stack);
-  }
-}
+<h1>Magic Link</h1>
 
-export default knexPromise();
+<p>
+  Твой линк <a href="${magickLink}">${magickLink}</a>
+</p>
+`;
