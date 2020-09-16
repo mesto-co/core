@@ -13,7 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {sendEmail} from '../src/emailService';
+import {sendEmail, sendMagickLinkEmail} from '../src/emailService';
+const config = require('../config.js');
+
+test('should sendMagickLinkEmail', async () => {
+  // TODO(desunit): consider using sinon.
+  config.emailService.stub = function(recipient: string, subject: string, content: string) {
+    expect(recipient).toBe('sergey@songtive.com');
+    expect(subject).toBe('Линк для входа в mesto.');
+    expect(content).toContain('NAME');
+    expect(content).toContain('http://link');
+  };
+  await sendMagickLinkEmail('sergey@songtive.com', 'NAME', 'http://link');
+  config.emailService.stub = null;
+});
+
 
 // Integration test for AWS SES
 if (!!process.env.AWS_ACCESS_KEY_ID && !process.env.CI) {

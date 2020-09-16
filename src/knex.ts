@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-const environment = process.env.ENVIRONMENT || 'development';
-const config = require('../knexfile.js')[environment];
+const config = require('../config.js');
 
 function knexPromise() {
   try {
-    return require('knex')(config);
+    return require('knex')(config.db);
   } catch (e) {
     console.log(e.stack);
   }

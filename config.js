@@ -13,9 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-module.exports = {
+const config = {
   development: {
-    client: 'postgresql',
-    connection: 'postgres://postgres:testtesttest@postgres:5432/postgres'
+    db: {
+      client: 'postgresql',
+      connection: 'postgres://postgres:testtesttest@postgres:5432/postgres'
+    },
+    emailService: {
+      debug: true
+    }
+  },
+  production: {
+    emailService: {
+      debug: false
+    }
   }
 };
+
+const environment = process.env.ENVIRONMENT || 'development';
+module.exports = config[environment];
+
