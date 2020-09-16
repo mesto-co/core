@@ -13,25 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-const environment = process.env.ENVIRONMENT || 'development';
-db = require('./knexfile');
-
-const config = {
+module.exports = {
   development: {
-    emailService: {
-      debug: true
-    }
-  },
-  production: {
-    emailService: {
-      debug: false
-    }
+    client: 'postgresql',
+    connection: 'postgres://postgres:testtesttest@postgres:5432/postgres'
   }
 };
-
-currentConfig = config[environment];
-currentConfig.db = db[environment];
-
-module.exports = currentConfig;
-
