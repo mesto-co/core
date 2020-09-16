@@ -17,12 +17,8 @@ const fs = require('fs');
 
 module.exports = {
   roots: ['<rootDir>/test'],
-  transform: {
-    '^.+\\.tsx?$': 'ts-jest'
-  },
   setupFiles: [returnIfExists('./jest.env.dev.js')].filter(t => t !== null),
-  testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.tsx?$',
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  moduleFileExtensions: ['js', 'json', 'node'],
 };
 
 function returnIfExists(filePath) {

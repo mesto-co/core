@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {sendEmail, sendMagickLinkEmail} from '../src/emailService';
+const {sendEmail, sendMagickLinkEmail} = require('../app/emailService');
 const config = require('../config.js');
 
 test('should sendMagickLinkEmail', async () => {
   // TODO(desunit): consider using sinon.
-  config.emailService.stub = function(recipient: string, subject: string, content: string) {
+  config.emailService.stub = function(recipient, subject, content) {
     expect(recipient).toBe('sergey@songtive.com');
     expect(subject).toBe('Линк для входа в mesto.');
     expect(content).toContain('NAME');
