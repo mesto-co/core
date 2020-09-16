@@ -24,39 +24,18 @@ SENDER_EMAIL_ADDRESS=email
 
 import { SES } from 'aws-sdk';
 import { SendEmailRequest } from 'aws-sdk/clients/ses';
-import handlebars from 'handlebars';
-import path from 'path';
-import { promises as fs } from 'fs';
+import magickLinkTemplate from './templates/magickLinkEmail';
 
 const FROM_EMAIL = process.env.SENDER_EMAIL_ADDRESS;
 
-interface CompiledTemplatesType {
-  [key: string]: any;
-}
-
-interface EmailContext {
-  [key: string]: any;
-}
-
 const ses = new SES();
-const compiledTemplates: CompiledTemplatesType = {};
-const templatesDir = './templates';
 
-export async function getCompiledTemplate(templateName: string): Promise<any> {
-  let compiledTemplate = compiledTemplates[templateName];
-  if (!compiledTemplate) {
-    const templatePath = path.resolve(templatesDir, templateName + '.html');
-    const template = await fs.readFile(templatePath, 'utf8');
-    compiledTemplate = handlebars.compile(template);
-    compiledTemplates[templateName] = compiledTemplate;
-  }
-
-  return compiledTemplate;
+export async function sendMagickLinkEmail(recipient: string, name: string, magickLink: string) {
+  const content = magickLinkTemplate(name, magickLink);
+  await sendEmail(recipient, 'Линк для входа в mesto.', content);
 }
 
-export async function sendEmailByTemplate(templateName: string, recipient: string, subject: string, context: EmailContext) {
-  const content = (await getCompiledTemplate(templateName))(context);
-
+export async function sendEmail(recipient: string, subject: string, content: string) {
   const params: SendEmailRequest = {
     Destination: {
       ToAddresses: [recipient],
