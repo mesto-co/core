@@ -47,6 +47,23 @@
            "currentPage": { "type": "number","default": 1 }
         },
          "required": [ "query"]
-     
+
+    },
+    {
+      "$id": "#POST>/v1/auth/magicLink",
+      "allOf": [{ "$ref": "#RequestBase" }],
+      "properties": {
+        "email": { "type": "string", "format": "email" }
+      },
+      "required": [ "email" ]
+    },
+    {
+      "$id": "#POST>/v1/email/sendMagicLink",
+      "allOf": [{ "$ref": "#RequestBase" }],
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "tokenId": { "type": "string", "format": "uuid" }
+      },
+      "required": [ "email", "tokenId" ]
     }
 ]

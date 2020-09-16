@@ -31,8 +31,8 @@ class EmailService {
   FROM_EMAIL = process.env.SENDER_EMAIL_ADDRESS;
   ses = new SES();
 
-  async sendMagicLinkEmail(recipient: string, name: string, magicLink: string) {
-    const content = magicLinkTemplate(name, magicLink);
+  async sendMagicLinkEmail(recipient: string, fullName: string, magicLink: string) {
+    const content = magicLinkTemplate(fullName, magicLink);
     const subject = 'Линк для входа в mesto.';
     await this.sendEmail(recipient, subject, content);
   }

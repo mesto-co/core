@@ -16,7 +16,7 @@
 const { emailService } = require('../app/emailService');
 
 test('should sendMagicLinkEmail', async () => {
-  spyOn(emailService, 'sendEmail').and.callFake((ricipient, name, content) => {
+  spyOn(emailService, 'sendEmail').and.callFake((recipient, name, content) => {
     expect(content).toContain('NAME');
     expect(content).toContain('http://link');
   });

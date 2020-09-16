@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+// TODO(icekhab): we should cover with tests for adding to user table with all of enum's user statuses.
+enum UserStatus {
+  AWAITING = 'awaiting',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+  CLOSED = 'closed',
+}
 
-export default (fullName: string, magicLink: string) => `
-<p>Привет ${fullName}!</p>
-
-<h1>Magic Link</h1>
-
-<p>
-  Твой линк <a href="${magicLink}">${magicLink}</a>
-</p>
-`;
+export { UserStatus };

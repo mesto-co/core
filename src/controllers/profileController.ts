@@ -20,14 +20,6 @@ import knex from '../knex';
 import {getArgs} from '../utils';
 const config = require('../../config.js');
 
-/**
- * @typedef {Object} TestEntry
- * @property {number} fieldA
- * @property {string} fieldB
- *
- * @returns {Knex.QueryBuilder<TestEntry, {}>}
- */
-
 const UserEntries = () => knex('User');
 
 const router = express.Router();
@@ -37,9 +29,7 @@ router.route('/')
 
       // TODO(ak239spb): nice way to handle database errors.
       const entries = await UserEntries().select()
-          .whereRaw(`"firstName" ILIKE ?`, [`%${query}%`])
-          .orWhereRaw(`"lastName" ILIKE ?`, [`%${query}%`])
-          .orWhereRaw(`"middleName" ILIKE ?`, [`%${query}%`])
+          .whereRaw(`"fullName" ILIKE ?`, [`%${query}%`])
           .orWhereRaw(`"username" ILIKE ?`, [`%${query}%`])
           .orWhereRaw(`"location" ILIKE ?`, [`%${query}%`])
           .orWhereRaw(`"about" ILIKE ?`, [`%${query}%`])
