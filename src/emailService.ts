@@ -27,42 +27,42 @@ import { SendEmailRequest } from 'aws-sdk/clients/ses';
 const config = require('../config.js');
 import magickLinkTemplate from './templates/magickLinkEmail';
 
-const FROM_EMAIL = process.env.SENDER_EMAIL_ADDRESS;
+class EmailService {
+  FROM_EMAIL = process.env.SENDER_EMAIL_ADDRESS;
+  ses = new SES();
 
-const ses = new SES();
-
-export async function sendMagickLinkEmail(recipient: string, name: string, magickLink: string) {
-  const content = magickLinkTemplate(name, magickLink);
-  const subject = 'Линк для входа в mesto.';
-  await sendEmail(recipient, subject, content);
-}
-
-export async function sendEmail(recipient: string, subject: string, content: string) {
-  // used by tests
-  if (config.emailService.stub)
-    (config.emailService.stub as any)(recipient, subject, content);
-
-  if (config.emailService.debug) {
-    console.log(`Email sent: ${recipient}, subject: ${subject}, body:\n${content}`);
-    return;
+  async sendMagickLinkEmail(recipient: string, name: string, magickLink: string) {
+    const content = magickLinkTemplate(name, magickLink);
+    const subject = 'Линк для входа в mesto.';
+    await this.sendEmail(recipient, subject, content);
   }
 
-  const params: SendEmailRequest = {
-    Destination: {
-      ToAddresses: [recipient],
-    },
-    Message: {
-      Body: {
-        Html: { Data: content },
+  async sendEmail(recipient: string, subject: string, content: string) {
+    if (config.emailService.debug) {
+      console.log(`Email sent: ${recipient}, subject: ${subject}, body:\n${content}`);
+      return;
+    }
+
+    const params: SendEmailRequest = {
+      Destination: {
+        ToAddresses: [recipient],
       },
+      Message: {
+        Body: {
+          Html: {Data: content},
+        },
 
-      Subject: { Data: subject },
-    },
-    Source: FROM_EMAIL!,
-    ReplyToAddresses: [
-      FROM_EMAIL!
-    ]
-  };
+        Subject: {Data: subject},
+      },
+      Source: this.FROM_EMAIL!,
+      ReplyToAddresses: [
+        this.FROM_EMAIL!
+      ]
+    };
 
-  return ses.sendEmail(params).promise();
+    return this.ses.sendEmail(params).promise();
+  }
 }
+
+const emailService = new EmailService();
+export { emailService };
