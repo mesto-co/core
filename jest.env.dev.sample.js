@@ -13,15 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-const config = require('../config.js');
-
-function knexPromise() {
-  try {
-    return require('knex')(config.db);
-  } catch (e) {
-    console.log(e.stack);
-  }
-}
-
-export default knexPromise();
+process.env.AWS_REGION = 'eu-central-1';
+process.env.AWS_ACCESS_KEY_ID = 'YOUR ACCESS KEY';
+process.env.AWS_SECRET_ACCESS_KEY = 'YOUR SECRET KEY';
+process.env.SENDER_EMAIL_ADDRESS = 'sender@mesto.co';

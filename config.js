@@ -14,14 +14,24 @@
  * limitations under the License.
  */
 
-const config = require('../config.js');
+const environment = process.env.ENVIRONMENT || 'development';
+db = require('./knexfile');
 
-function knexPromise() {
-  try {
-    return require('knex')(config.db);
-  } catch (e) {
-    console.log(e.stack);
+const config = {
+  development: {
+    emailService: {
+      debug: true
+    }
+  },
+  production: {
+    emailService: {
+      debug: false
+    }
   }
-}
+};
 
-export default knexPromise();
+currentConfig = config[environment];
+currentConfig.db = db[environment];
+
+module.exports = currentConfig;
+
