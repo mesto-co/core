@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {sendEmail} from '../src/emailService';
 
-// Integration test for AWS SES
-if (!!process.env.AWS_ACCESS_KEY_ID && !process.env.CI) {
-  test('should send email by template based on passed variables', async () => {
-    await sendEmail('sergey@songtive.com', 'тест тема', 'тест контент');
-  });
-}
+export default (name: string, magickLink: string) => `
+<p>Привет ${name}!</p>
+
+<h1>Magic Link</h1>
+
+<p>
+  Твой линк <a href="${magickLink}">${magickLink}</a>
+</p>
+`;
