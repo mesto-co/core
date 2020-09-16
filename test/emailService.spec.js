@@ -13,25 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const {sendEmail, sendMagickLinkEmail} = require('../app/emailService');
-const config = require('../config.js');
+const { emailService } = require('../app/emailService');
 
 test('should sendMagickLinkEmail', async () => {
-  // TODO(desunit): consider using sinon.
-  config.emailService.stub = function(recipient, subject, content) {
-    expect(recipient).toBe('sergey@songtive.com');
-    expect(subject).toBe('Линк для входа в mesto.');
+  spyOn(emailService, 'sendEmail').and.callFake((ricipient, name, content) => {
     expect(content).toContain('NAME');
     expect(content).toContain('http://link');
-  };
-  await sendMagickLinkEmail('sergey@songtive.com', 'NAME', 'http://link');
-  config.emailService.stub = null;
+  });
+
+  await emailService.sendMagickLinkEmail('sergey@songtive.com', 'NAME', 'http://link');
+
+  // the last parameter is checked in fake function
+  expect(emailService.sendEmail).toHaveBeenCalledWith('sergey@songtive.com', 'Линк для входа в mesto.', jasmine.any(String));
 });
 
 
 // Integration test for AWS SES
 if (!!process.env.AWS_ACCESS_KEY_ID && !process.env.CI) {
   test('should send email by template based on passed variables', async () => {
-    await sendEmail('sergey@songtive.com', 'тест тема', 'тест контент');
+    await emailService.sendEmail('sergey@songtive.com', 'тест тема', 'тест контент');
   });
 }

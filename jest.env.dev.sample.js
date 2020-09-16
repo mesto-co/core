@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-process.env.AWS_REGION = 'us-east-1';
+process.env.AWS_REGION = 'eu-central-1';
 process.env.AWS_ACCESS_KEY_ID = 'YOUR ACCESS KEY';
 process.env.AWS_SECRET_ACCESS_KEY = 'YOUR SECRET KEY';
 process.env.SENDER_EMAIL_ADDRESS = 'sender@mesto.co';

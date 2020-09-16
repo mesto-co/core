@@ -17,7 +17,7 @@ const fs = require('fs');
 
 module.exports = {
   roots: ['<rootDir>/test'],
-  setupFiles: [returnIfExists('./jest.env.dev.js')].filter(t => t !== null),
+  setupFiles: [returnIfExists('./jest.env.dev.js')].filter(t => !!t),
   moduleFileExtensions: ['js', 'json', 'node'],
 };
 
