@@ -16,6 +16,9 @@
 
 const config = require('../config.js');
 
+const { attachPaginate } = require('knex-paginate');
+attachPaginate();
+
 function knexPromise() {
   try {
     return require('knex')(config.db);
