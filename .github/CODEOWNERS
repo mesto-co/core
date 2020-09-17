@@ -1,0 +1,13 @@
+# реализация и схема запросов и ответов API
+/srс @mesto-co/architects
+
+# база данных
+/migrations @mesto-co/architects
+
+# зависимости
+/package.json @mesto-co/architects
+
+# на всякий случай, чтобы CODEOWNERS точно требовал review от CODEOWNERS
+/.github @mesto-co/architects
+
+/index.js @mesto-co/architects
