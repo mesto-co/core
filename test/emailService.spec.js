@@ -15,13 +15,13 @@
  */
 const { emailService } = require('../app/emailService');
 
-test('should sendMagickLinkEmail', async () => {
+test('should sendMagicLinkEmail', async () => {
   spyOn(emailService, 'sendEmail').and.callFake((ricipient, name, content) => {
     expect(content).toContain('NAME');
     expect(content).toContain('http://link');
   });
 
-  await emailService.sendMagickLinkEmail('sergey@songtive.com', 'NAME', 'http://link');
+  await emailService.sendMagicLinkEmail('sergey@songtive.com', 'NAME', 'http://link');
 
   // the last parameter is checked in fake function
   expect(emailService.sendEmail).toHaveBeenCalledWith('sergey@songtive.com', 'Линк для входа в mesto.', jasmine.any(String));

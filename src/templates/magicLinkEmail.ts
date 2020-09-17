@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-export default (name: string, magickLink: string) => `
+export default (name: string, magicLink: string) => `
 <p>Привет ${name}!</p>
 
 <h1>Magic Link</h1>
 
 <p>
-  Твой линк <a href="${magickLink}">${magickLink}</a>
+  Твой линк <a href="${magicLink}">${magicLink}</a>
 </p>
 `;
