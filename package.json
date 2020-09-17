@@ -22,7 +22,7 @@
     "start:inspect": "node --inspect=0.0.0.0:9229 .",
     "start:dev": "npm run build && docker-compose -f docker-compose-dev.yml up --force-recreate --build --exit-code-from core",
     "start:in-docker:dev": "knex migrate:latest && knex seed:run && nodemon",
-    "start:in-docker:ci": "node utils/wait-for.js postgres 5432 50000 && npm run build && knex migrate:latest && node ."
+    "start:in-docker:ci": "node utils/wait-for.js postgres 5432 50000 && npm run build && knex migrate:latest &&  knex seed:run && node ."
   },
   "author": {
     "name": "Mesto.Team"
@@ -50,6 +50,7 @@
     "debug": "^4.1.1",
     "express": "^4.17.1",
     "knex": "^0.21.5",
+    "knex-paginate": "^1.2.3",
     "pg": "^8.3.3",
     "rimraf": "^3.0.2"
   }

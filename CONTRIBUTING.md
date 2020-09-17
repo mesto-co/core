@@ -90,6 +90,7 @@ Fixes #123
 Для всех зависимостей (installation и development):
 - **Не добавляйте** зависимость, если легко реализовать (скажем нет leftpad).
 - Каждая новая зависимость должна хорошо поддерживаться.
+- Проверить пакет на его размер на https://bundlephobia.com/ и посмотреть альтрнативы
 
 A barrier for introducing new installation dependencies is especially high:
 - **Do not add** installation dependency unless it's critical to project success.

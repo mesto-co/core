@@ -19,11 +19,17 @@ db = require('./knexfile');
 
 const config = {
   development: {
+    profilePagination: {
+      perPage: 20
+    },
     emailService: {
       debug: true
     }
   },
   production: {
+    profilePagination: {
+      perPage: 20
+    },
     emailService: {
       debug: false
     }
