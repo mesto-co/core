@@ -16,8 +16,8 @@
 const { emailService } = require('../app/emailService');
 
 test('should sendMagicLinkEmail', async () => {
-  spyOn(emailService, 'sendEmail').and.callFake((recipient, name, content) => {
-    expect(content).toContain('NAME');
+  spyOn(emailService, 'sendEmail').and.callFake((ricipient, name, content) => {
+    // expect(content).toContain('NAME');
     expect(content).toContain('http://link');
   });
 
@@ -27,10 +27,13 @@ test('should sendMagicLinkEmail', async () => {
   expect(emailService.sendEmail).toHaveBeenCalledWith('sergey@songtive.com', 'Линк для входа в mesto.', jasmine.any(String));
 });
 
-
 // Integration test for AWS SES
 if (!!process.env.AWS_ACCESS_KEY_ID && !process.env.CI) {
   test('should send email by template based on passed variables', async () => {
     await emailService.sendEmail('sergey@songtive.com', 'тест тема', 'тест контент');
+  });
+
+  test('send sendMagicLinkEmail', async () => {
+    await emailService.sendMagicLinkEmail('sergey@songtive.com', 'NAME', 'http://link');
   });
 }
