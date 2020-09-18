@@ -14,12 +14,23 @@
  * limitations under the License.
  */
 
-export default (fullName: string, magicLink: string) => `
-<p>Привет ${fullName}!</p>
+const pStyle = 'margin-right:auto;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;color:#000000;font-size:18px;line-height:1.45;';
+const hdrStyle = 'margin-right:auto;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;color:#000000;font-size:26px;font-weight:bold;';
+const btnStyle = 'display:table-cell;text-decoration:none;padding:15px 30px;font-size:15px;text-align:center;font-weight:bold;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;width:100%;color:#ffffff;border:solid;background-color:#370842;border-radius:0px;';
 
-<h1>Magic Link</h1>
+export default (name: string, magicLink: string) => `
+<div style="${hdrStyle}"><strong>Привет</strong><strong style="color:rgb(0,255,194)">.</strong></div>
 
-<p>
-  Твой линк <a href="${magicLink}">${magicLink}</a>
-</p>
+<p style='${pStyle}'>Ты просил нас отправить тебе Волшебную ссылку для входа в Место. Твоё желание исполнено.</p>
+
+<a href="${magicLink}" style="${btnStyle}">Войти в место</a>
+
+<p style='${pStyle}'>Ссылка текстом: <a href="${magicLink}">${magicLink}</a></p>
+
+<p style='${pStyle}'>Примечание: твоя ссылка будет работать 15 минут и может быть использована всего один раз.</p>
+
+<p style='${pStyle}'>Если ты не запрашивал ссылку - просто проигнорируй письмо.</p>
+
+<p style='${pStyle}'>С уважением,<br>
+команда Место.</p>
 `;
