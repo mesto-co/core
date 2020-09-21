@@ -17,6 +17,7 @@
 const config = require('../config.js');
 
 import { SES } from './aws';
+import { promises as fs } from 'fs';
 import { SendEmailRequest } from 'aws-sdk/clients/ses';
 import magicLinkTemplate from './templates/magicLinkEmail';
 
@@ -27,6 +28,10 @@ class EmailService {
   async sendMagicLinkEmail(recipient: string, fullName: string, magicLink: string) {
     const content = magicLinkTemplate(fullName, magicLink);
     const subject = 'Линк для входа в mesto.';
+
+    if (config.emailService.debug && config.emailService.saveFilePath)
+      await fs.writeFile(config.emailService.saveFilePath, magicLink, 'utf8');
+
     await this.sendEmail(recipient, subject, content);
   }
 

@@ -27,19 +27,23 @@ const router = express.Router();
 router.route('/')
     .post(async (request, response) => {
       const {RqUid,query,currentPage,perPage} = getArgs(request);
+      try {
+        const entries = await UserEntries().select().where((builder: Knex.QueryBuilder) => {
+          for (let index = 0; index < query.length; index++) {
+            builder.where((innerBuilder: Knex.QueryBuilder) => {
+              for (const [key, value] of Object.entries(query[index]))
+                innerBuilder.orWhere(key,'ilike', `%${value}%`);
+            });
+          }
+        }).where({status: UserStatus.APPROVED}).orderBy('createdAt','asc').paginate({ perPage, currentPage });
 
-      const entries = await UserEntries().select().where((builder: Knex.QueryBuilder) => {
-        for (let index = 0; index < query.length; index++) {
-          builder.where((innerBuilder: Knex.QueryBuilder) => {
-            for (const [key, value] of Object.entries(query[index]))
-              innerBuilder.orWhere(key,'ilike', `%${value}%`);
-          });
-        }
-      }).where({status: UserStatus.APPROVED}).orderBy('createdAt','asc').paginate({ perPage, currentPage });
+        // TODO(ak239spb): nice way to handle database errors.
 
-      // TODO(ak239spb): nice way to handle database errors.
-
-      response.status(200).json({RqUid, entries}).end();
+        response.status(200).json({RqUid, entries}).end();
+      } catch (e) {
+        console.debug('POST profile/search error', e);
+        response.status(500).json({RqUid}).end();
+      }
     });
 
 export { router as ProfileController};

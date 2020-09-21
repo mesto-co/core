@@ -23,8 +23,10 @@ import {emailService} from '../emailService';
 
 const {
   magicLink: {
-    jwtSecret: magicLinkJwtSecret,
     url: magicLinkUrl
+  },
+  refreshToken: {
+    jwtSecret: refreshJwtSecret,
   }
 } = require('../../config.js');
 
@@ -45,7 +47,7 @@ emailMagicLinkSenderRouter.route('/')
           const userToken = await UserTokenEntries().where('id', tokenId).andWhere('userId', id).first();
 
           if (userToken) {
-            return jsonwebtoken.verify(userToken.token, magicLinkJwtSecret, async (err: VerifyErrors | null) => {
+            return jsonwebtoken.verify(userToken.token, refreshJwtSecret,{algorithms: ['HS256']}, async (err: VerifyErrors | null) => {
               if (err)
                 return response.status(404).json({RqUid}).end();
 

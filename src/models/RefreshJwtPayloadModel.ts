@@ -13,16 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// TODO(icekhab): removal of expired tokens.
-exports.up = function(knex) {
-  return knex.schema.createTable('UserToken', function(table) {
-    table.uuid('id').defaultTo(knex.raw('uuid_generate_v4()')).primary();
-    table.string('token').notNullable();
-    table.uuid('userId').notNullable();
-    table.foreign('userId').references('User.id');
-  });
-};
+class RefreshJwtPayloadModel {
+  userId!: string;
+}
 
-exports.down = function(knex) {
-  return knex.schema.dropTable('UserToken');
-};
+export { RefreshJwtPayloadModel };

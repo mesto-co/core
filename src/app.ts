@@ -19,11 +19,12 @@ import express from 'express';
 import validator from './validator';
 import {TestController, TestEntryController} from './controllers/testController';
 import {ProfileController} from './controllers/profileController';
-import {AuthMagicLinkController} from './controllers/authController';
+import {AuthMagicLinkController, RefreshTokenController} from './controllers/authController';
 import {EmailMagicLinkSenderController} from './controllers/emailSenderController';
 import {UploadImageController} from './controllers/uploadImageController';
 
 import { errorHandler, notFoundHandler } from './errorHandler';
+import {accessTokenHandler} from './accessTokenHandler';
 import cors from 'cors';
 const app = express();
 
@@ -39,7 +40,11 @@ function register(app: express.Express, endpoint: string, router: express.Router
 register(app, '/v1/test/:id', TestEntryController);
 register(app, '/v1/test/', TestController);
 register(app, '/v1/auth/magicLink', AuthMagicLinkController);
+register(app, '/v1/auth/refresh', RefreshTokenController);
 register(app, '/v1/email/sendMagicLink', EmailMagicLinkSenderController);
+
+// all endpoints closed by authentication below this line
+app.use(accessTokenHandler);
 
 // Profiles end-points
 register(app, '/v1/profile/uploadImage', UploadImageController);
