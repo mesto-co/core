@@ -44,7 +44,7 @@
         "allOf": [{ "$ref": "#RequestBase" }],
         "properties": {
            "query": {
-                "type": "array", 
+                "type": "array",
                 "items":
                 {
                     "type" : "object",
@@ -99,5 +99,13 @@
         "tokenId": { "type": "string", "format": "uuid" }
       },
       "required": [ "email", "tokenId" ]
+    },
+    {
+      "$id": "#POST>/v1/auth/refresh",
+      "allOf": [{ "$ref": "#RequestBase" }],
+      "properties": {
+        "refreshToken": { "type": "string" }
+      },
+      "required": [ "refreshToken" ]
     }
 ]

@@ -13,6 +13,7 @@ services:
     command: "npm run start:in-docker:dev"
     volumes:
       - './src:/usr/src/app/src'
+      - './app:/usr/src/app/app'
       - './index.js:/usr/src/app/index.js'
 
   postgres:

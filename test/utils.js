@@ -15,14 +15,21 @@
  */
 const http = require('http');
 const https = require('https');
+const jsonwebtoken = require('jsonwebtoken');
 
 const debug = require('debug')('fetch');
+const {
+  accessToken: {
+    jwtExpiresIn: accessJwtExpiresIn,
+    jwtSecret: accessJwtSecret
+  }
+} = require('../config.js');
 
-function fetch(url, method, body) {
-  debug('<', url, method, body);
+function fetch(url, method, body, header = {}) {
+  debug('<', url, method, body, header);
   let requestFinished;
   const requestPromise = new Promise(resolve => requestFinished = resolve);
-  const req = (url.startsWith('https:') ? https : http).request(url, { method: method, headers: { 'Content-Type': 'application/json' } }, res => {
+  const req = (url.startsWith('https:') ? https : http).request(url, { method: method, headers: { 'Content-Type': 'application/json', ...header } }, res => {
     res.setEncoding('utf8');
     let data = '';
     res.on('data', chunk => data += chunk);
@@ -37,20 +44,20 @@ function fetch(url, method, body) {
   return requestPromise;
 }
 
-function get(url) {
-  return fetch(url, 'GET', null);
+function get(url, header) {
+  return fetch(url, 'GET', null, header);
 }
 
-function post(url, body) {
-  return fetch(url, 'POST', body);
+function post(url, body, header) {
+  return fetch(url, 'POST', body, header);
 }
 
-function put(url, body) {
-  return fetch(url, 'PUT', body);
+function put(url, body, header) {
+  return fetch(url, 'PUT', body, header);
 }
 
-function del(url) {
-  return fetch(url, 'DELETE', null);
+function del(url, header) {
+  return fetch(url, 'DELETE', null, header);
 }
 
 function getRqUid() {
@@ -61,4 +68,10 @@ function getHost() {
   return process.env.TEST_API_HOST || 'http://localhost:8080';
 }
 
-module.exports = { get, post, put, del, getRqUid, getHost };
+function getAuthHeader(user, jwtAlgorithm = 'HS256') {
+  return {
+    Authorization: `Bearer ${jsonwebtoken.sign(user, accessJwtSecret, {expiresIn: accessJwtExpiresIn, algorithm: jwtAlgorithm})}`
+  };
+}
+
+module.exports = { get, post, put, del, getRqUid, getHost, getAuthHeader };
