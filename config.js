@@ -22,10 +22,20 @@ const lambdaConfig = {
   magicLink: {
     jwtExpiresIn: process.env.MAGIC_LINK_JWT_EXPIRES_IN || '15m',
     url: process.env.MAGIC_LINK_URL || 'https://mesto.co/',
+  },
+  refreshToken: {
+    jwtExpiresIn: process.env.REFRESH_JWT_EXPIRES_IN || '60 days',
 
     // potential way to generate a secret:
     // require('crypto').randomBytes(256, (,buf) => console.log(buf.toString('base64)));
-    jwtSecret: Buffer.from(process.env.MAGIC_LINK_JWT_SECRET || '', 'base64')
+    jwtSecret: Buffer.from(process.env.REFRESH_JWT_SECRET || '', 'base64')
+  },
+  accessToken: {
+    jwtExpiresIn: process.env.ACCESS_JWT_EXPIRES_IN || '15m',
+
+    // potential way to generate a secret:
+    // require('crypto').randomBytes(256, (,buf) => console.log(buf.toString('base64)));
+    jwtSecret: Buffer.from(process.env.ACCESS_JWT_SECRET || '', 'base64')
   },
   emailService: {
     debug: false,
@@ -52,15 +62,22 @@ const developmentConfig = {
     connection: 'postgres://postgres:testtesttest@postgres:5432/postgres',
   },
 
-  magicLink: {
-    ...lambdaConfig.magicLink,
+  refreshToken: {
+    ...lambdaConfig.refreshToken,
 
-    jwtSecret: 'secret'
+    jwtSecret: 'refresh-secret'
+  },
+
+  accessToken: {
+    ...lambdaConfig.accessToken,
+
+    jwtSecret: 'access-secret'
   },
 
   emailService: {
     ...lambdaConfig.emailService,
 
+    saveFilePath: 'app/magic-link.txt',
     debug: true
   },
 

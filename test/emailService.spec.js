@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 const { emailService } = require('../app/emailService');
+const fs = require('fs').promises;
 
 test('should sendMagicLinkEmail', async () => {
   spyOn(emailService, 'sendEmail').and.callFake((ricipient, name, content) => {
     // expect(content).toContain('NAME');
     expect(content).toContain('http://link');
   });
+
+  spyOn(fs, 'writeFile');
 
   await emailService.sendMagicLinkEmail('sergey@songtive.com', 'NAME', 'http://link');
 

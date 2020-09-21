@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-exports.seed = function(knex) {
+exports.seed = async function(knex) {
+  await knex('UserToken')
+      .del();
+
   return knex('User')
       .del()
       .then(function() {

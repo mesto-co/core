@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const { post, getHost, getRqUid } = require('../../utils.js');
+const { post, getHost, getRqUid, getAuthHeader } = require('../../utils.js');
 const http = require('http');
 
 const fs = require('fs');
@@ -22,9 +22,13 @@ const os = require('os');
 const FormData = require('form-data');
 const ENDPOINT = `${getHost()}/v1/profile/uploadImage`;
 const TEST_FILE = './test/v1/profile/data/test-avatar.jpg';
+const authHeader = getAuthHeader({
+  id: '00000000-1111-2222-3333-000000000001',
+  fullName: 'Иван Рябинин',
+});
 
 test('/v1/profile/uploadImage POST without RqUid', async () => {
-  const {data, code} = await post(ENDPOINT, JSON.stringify({}));
+  const {data, code} = await post(ENDPOINT, JSON.stringify({}), authHeader);
   expect(code).toBe(400);
   expect(data.message).toBeDefined();
 });
@@ -59,13 +63,30 @@ test('/v1/profile/uploadImage POST with too large file', async () => {
   }
 });
 
+test('/v1/profile/uploadImage POST without access token', async () => {
+  const testEntry = {'perPage': 100,'query': [{'fullName': 'Иван','username': 'Иван','location': 'Иван'}]};
+  const {code} = await post(ENDPOINT, JSON.stringify(testEntry));
+  expect(code).toBe(401);
+});
+
+test('/v1/profile/uploadImage POST with access token algorithm none', async () => {
+  const invalidHeader = getAuthHeader({
+    id: '00000000-1111-2222-3333-000000000001',
+    fullName: 'Иван Рябинин',
+  }, 'none');
+
+  const testEntry = {'perPage': 100,'query': [{'fullName': 'Иван','username': 'Иван','location': 'Иван'}]};
+  const {code} = await post(ENDPOINT, JSON.stringify(testEntry), invalidHeader);
+  expect(code).toBe(401);
+});
+
 function uploadImage(file, mimeType) {
   const form = new FormData();
   form.append('file', fs.createReadStream(file), {filename: 'test.jpg', contentType: mimeType});
 
   let requestFinished;
   const requestPromise = new Promise(resolve => requestFinished = resolve);
-  const req = http.request(ENDPOINT + '?RqUid=' + getRqUid(), { method: 'POST', headers: form.getHeaders() }, res => {
+  const req = http.request(ENDPOINT + '?RqUid=' + getRqUid(), { method: 'POST', headers: { ...form.getHeaders(), ...authHeader } }, res => {
     let data = '';
     res.on('data', chunk => data += chunk);
     res.on('end', () => {

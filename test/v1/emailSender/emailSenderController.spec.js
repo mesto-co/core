@@ -77,11 +77,3 @@ test('/v1/email/sendMagicLink/ POST non-existed token', async () => {
   const {code} = await post(SEND_MAGIC_LINK_ENDPOINT, JSON.stringify({RqUid, email, tokenId: nonExistedToken}));
   expect(code).toBe(404);
 });
-
-test('/v1/email/sendMagicLink/ POST not last token', async () => {
-  const email = 'iryabinin@gmail.com';
-  const {data: { tokenId }} = await post(GENERATE_TOKEN_ENDPOINT, JSON.stringify({RqUid, email}));
-  await post(GENERATE_TOKEN_ENDPOINT, JSON.stringify({RqUid, email}));
-  const {code} = await post(SEND_MAGIC_LINK_ENDPOINT, JSON.stringify({RqUid, email, tokenId}));
-  expect(code).toBe(404);
-});

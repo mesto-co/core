@@ -5,6 +5,8 @@ services:
     image: core_image
     environment:
      - TEST_API_HOST=http://core:8080
+    volumes:
+     - './app:/usr/src/app/app'
     depends_on:
      - core
     command: "npm run test:ci"
@@ -12,6 +14,8 @@ services:
   core:
     build: .
     image: core_image
+    volumes:
+      - './app:/usr/src/app/app'
     depends_on:
      - postgres
     links:
