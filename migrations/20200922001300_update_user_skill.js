@@ -19,9 +19,9 @@ exports.up = function(knex) {
     table.json('skills');
   });
 };
-  
+
 exports.down = function(knex) {
   return knex.schema.table('User', function(table) {
-      table.dropColumn('skills');
+    table.dropColumn('skills');
   });
 };
