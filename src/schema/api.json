@@ -79,6 +79,11 @@
          "required": [ "query"]
     },
     {
+      "$id": "#POST>/v1/profile/uploadImage",
+      "allOf": [{ "$ref": "#RequestBase" }],
+      "properties": {}
+    },
+    {
       "$id": "#POST>/v1/auth/magicLink",
       "allOf": [{ "$ref": "#RequestBase" }],
       "properties": {
