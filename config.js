@@ -19,6 +19,9 @@ const {
   MAGIC_LINK_JWT_EXPIRES_IN: magicLinkJwtExpiresIn = '15m',
   MAGIC_LINK_JWT_SECRET: magicLinkJwtSecret = 'secret',
   MAGIC_LINK_URL: magicLinkUrl = 'https://mesto.co/',
+
+  IMAGE_UPLOAD_MAX_SIZE: imageUploadMaxSize = 50 * 1024,
+  IMAGE_UPLOAD_S3_BUCKET_NAME: imageUploadS3BucketName = ''
 } = process.env;
 db = require('./knexfile');
 
@@ -37,6 +40,11 @@ const config = {
 
 currentConfig = config[environment];
 currentConfig.db = db[environment];
+currentConfig.imageUpload = {
+  maxSize: imageUploadMaxSize,
+  bucketName: imageUploadS3BucketName,
+  skipUploadToS3: environment === 'development'
+};
 currentConfig.magicLink = {
   jwtExpiresIn: magicLinkJwtExpiresIn,
   jwtSecret: magicLinkJwtSecret,
