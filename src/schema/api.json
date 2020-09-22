@@ -40,14 +40,43 @@
         "required": [ "fieldA", "fieldB" ]
     },
     {
-        "$id": "#GET>/v1/profile/search/",
+        "$id": "#POST>/v1/profile/search/",
         "allOf": [{ "$ref": "#RequestBase" }],
         "properties": {
-           "query": { "type": "string" },
-           "currentPage": { "type": "number","default": 1 }
+           "query": {
+                "type": "array", 
+                "items":
+                {
+                    "type" : "object",
+                    "additionalProperties": false,
+                    "properties" : {
+                        "fullName" :  {
+                            "type" : "string",
+                            "maxLength":255
+                        },
+                        "username" : {
+                            "type" : "string",
+                            "maxLength":30
+                        },
+                        "location" : {
+                            "type" : "string",
+                            "maxLength":255
+                        },
+                        "about" : {
+                            "type" : "string",
+                            "maxLength":6000
+                        },
+                        "role" : {
+                            "type" : "string",
+                            "maxLength":255
+                        }
+                    }
+                }
+           },
+           "currentPage": { "type": "number","default": 1 },
+           "perPage": { "type": "number","default": 20, "maximum": 1000  }
         },
          "required": [ "query"]
-
     },
     {
       "$id": "#POST>/v1/auth/magicLink",

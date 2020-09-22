@@ -23,9 +23,10 @@ import {AuthMagicLinkController} from './controllers/authController';
 import {EmailMagicLinkSenderController} from './controllers/emailSenderController';
 
 import { errorHandler, notFoundHandler } from './errorHandler';
-
+import cors from 'cors';
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 

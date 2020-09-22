@@ -33,6 +33,7 @@ exports.up = function(knex) {
     table.string('about', 6000).nullable();
     table.string('role').nullable(); // TODO(icekhab): we need to create directory for roles.
     table.enum('status', userStatuses).notNullable();
+    table.timestamp('createdAt',{ useTz: false }).defaultTo(knex.fn.now());
   });
 };
 
