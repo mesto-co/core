@@ -20,7 +20,7 @@ exports.up = function(knex) {
     table.string('title').notNullable();
   });
 };
-  
+
 exports.down = function(knex) {
   return knex.schema.dropTable('Skill');
 };
