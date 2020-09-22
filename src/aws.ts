@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-const knex = require('knex')(require('../knexfile.js'));
-const { attachPaginate } = require('knex-paginate');
-attachPaginate();
-
-export default knex;
+const config = require('../config.js');
+import AWS from 'aws-sdk';
+AWS.config.update(config.aws);
+export * from 'aws-sdk';

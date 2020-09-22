@@ -14,42 +14,67 @@
  * limitations under the License.
  */
 
-const {
-  ENVIRONMENT: environment = 'development',
-  MAGIC_LINK_JWT_EXPIRES_IN: magicLinkJwtExpiresIn = '15m',
-  MAGIC_LINK_JWT_SECRET: magicLinkJwtSecret = 'secret',
-  MAGIC_LINK_URL: magicLinkUrl = 'https://mesto.co/',
-
-  IMAGE_UPLOAD_MAX_SIZE: imageUploadMaxSize = 50 * 1024,
-  IMAGE_UPLOAD_S3_BUCKET_NAME: imageUploadS3BucketName = ''
-} = process.env;
-db = require('./knexfile');
-
-const config = {
-  development: {
-    emailService: {
-      debug: true
-    }
+const lambdaConfig = {
+  database: {
+    client: 'postgresql',
+    connection: process.env.DATABASE,
   },
-  production: {
-    emailService: {
-      debug: false
-    }
+  magicLink: {
+    jwtExpiresIn: process.env.MAGIC_LINK_JWT_EXPIRES_IN || '15m',
+    url: process.env.MAGIC_LINK_URL || 'https://mesto.co/',
+
+    // potential way to generate a secret:
+    // require('crypto').randomBytes(256, (,buf) => console.log(buf.toString('base64)));
+    jwtSecret: Buffer.from(process.env.MAGIC_LINK_JWT_SECRET || '', 'base64')
+  },
+  emailService: {
+    debug: false,
+    senderEmailAddress: process.env.SENDER_EMAIL_ADDRESS
+  },
+  aws: {
+    region: process.env.AWS_REGION,
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+  },
+  imageUpload: {
+    maxSize: process.env.IMAGE_UPLOAD_MAX_SIZE || 50 * 1024,
+    bucketName: process.env.IMAGE_UPLOAD_S3_BUCKET_NAME || '',
+    skipUploadToS3: false
   }
 };
 
-currentConfig = config[environment];
-currentConfig.db = db[environment];
-currentConfig.imageUpload = {
-  maxSize: imageUploadMaxSize,
-  bucketName: imageUploadS3BucketName,
-  skipUploadToS3: environment === 'development'
-};
-currentConfig.magicLink = {
-  jwtExpiresIn: magicLinkJwtExpiresIn,
-  jwtSecret: magicLinkJwtSecret,
-  url: magicLinkUrl
+const developmentConfig = {
+  ...lambdaConfig,
+
+  database: {
+    ...lambdaConfig.database,
+
+    connection: 'postgres://postgres:testtesttest@postgres:5432/postgres',
+  },
+
+  magicLink: {
+    ...lambdaConfig.magicLink,
+
+    jwtSecret: 'secret'
+  },
+
+  emailService: {
+    ...lambdaConfig.emailService,
+
+    debug: true
+  },
+
+  imageUpload: {
+    ...lambdaConfig.imageUpload,
+
+    skipUploadToS3: true
+  }
 };
 
-module.exports = currentConfig;
+const config = {
+  development: developmentConfig,
+  test: developmentConfig,
+  lambda: lambdaConfig
+};
 
+module.exports = config[process.env.NODE_ENV || 'development'];

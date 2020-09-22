@@ -4,4 +4,9 @@
 
 !README.md
 !LICENSE
+!config.js
 !index.js
+!lambda.js
+!knexfile.js
+!app/**/*.js
+!app/**/*.json
