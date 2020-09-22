@@ -15,27 +15,29 @@
  */
 
 import express from 'express';
+import Knex from 'knex';
+import { UserStatus } from '../enums/UserStatus';
 import knex from '../knex';
 
 import {getArgs} from '../utils';
-const config = require('../../config.js');
 
 const UserEntries = () => knex('User');
 
 const router = express.Router();
 router.route('/')
-    .get(async (request, response) => {
-      const {RqUid,query,currentPage} = getArgs(request);
+    .post(async (request, response) => {
+      const {RqUid,query,currentPage,perPage} = getArgs(request);
+
+      const entries = await UserEntries().select().where((builder: Knex.QueryBuilder) => {
+        for (let index = 0; index < query.length; index++) {
+          builder.where((innerBuilder: Knex.QueryBuilder) => {
+            for (const [key, value] of Object.entries(query[index]))
+              innerBuilder.orWhere(key,'ilike', `%${value}%`);
+          });
+        }
+      }).where({status: UserStatus.APPROVED}).orderBy('createdAt','asc').paginate({ perPage, currentPage });
 
       // TODO(ak239spb): nice way to handle database errors.
-      const entries = await UserEntries().select()
-          .whereRaw(`"fullName" ILIKE ?`, [`%${query}%`])
-          .orWhereRaw(`"username" ILIKE ?`, [`%${query}%`])
-          .orWhereRaw(`"location" ILIKE ?`, [`%${query}%`])
-          .orWhereRaw(`"about" ILIKE ?`, [`%${query}%`])
-          .orWhereRaw(`"role" ILIKE ?`, [`%${query}%`])
-          .where({status: 'approved'})
-          .paginate({ perPage: config.profilePagination.perPage, currentPage });
 
       response.status(200).json({RqUid, entries}).end();
     });

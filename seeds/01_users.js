@@ -70,7 +70,6 @@ exports.seed = function(knex) {
             about: 'Привет всем! Я Жду подтверждения',
             role: null,
             status: 'awaiting'
-          }
-        ]);
+          }]);
       });
 };

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 const {default: app} = require('./app/app.js');
+
 const port = 8080;
+
 app.listen(port, () => {
   console.log(`server started at http://localhost:${port}`);
 });
