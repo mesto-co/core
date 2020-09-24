@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+
 exports.seed = async function(knex) {
+
+
   await knex('UserToken')
       .del();
 
@@ -33,7 +36,8 @@ exports.seed = async function(knex) {
             phone: '',
             about: 'Привет всем! Я Иван Рябинин',
             role: null,
-            status: 'approved'
+            status: 'approved',
+            skills: ['Improvements']
           },
           {
             id: knex.raw('\'00000000-1111-2222-3333-000000000002\'::uuid'),
@@ -46,7 +50,8 @@ exports.seed = async function(knex) {
             phone: '',
             about: 'Привет всем! Я Заблокирован',
             role: null,
-            status: 'closed'
+            status: 'closed',
+            skills: ['Improvements']
           },
           {
             id: knex.raw('\'00000000-1111-2222-3333-000000000003\'::uuid'),
@@ -59,7 +64,8 @@ exports.seed = async function(knex) {
             phone: '',
             about: 'Привет всем! Я Отклонен',
             role: null,
-            status: 'rejected'
+            status: 'rejected',
+            skills: ['Improvements']
           },
           {
             id: knex.raw('\'00000000-1111-2222-3333-000000000004\'::uuid'),
@@ -72,7 +78,8 @@ exports.seed = async function(knex) {
             phone: '',
             about: 'Привет всем! Я Жду подтверждения',
             role: null,
-            status: 'awaiting'
+            status: 'awaiting',
+            skills: ['Improvements']
           }]);
       });
 };
