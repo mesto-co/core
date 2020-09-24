@@ -21,6 +21,7 @@ import {TestController, TestEntryController} from './controllers/testController'
 import {ProfileController} from './controllers/profileController';
 import {AuthMagicLinkController} from './controllers/authController';
 import {EmailMagicLinkSenderController} from './controllers/emailSenderController';
+import {UploadImageController} from './controllers/uploadImageController';
 
 import { errorHandler, notFoundHandler } from './errorHandler';
 import cors from 'cors';
@@ -41,7 +42,9 @@ register(app, '/v1/auth/magicLink', AuthMagicLinkController);
 register(app, '/v1/email/sendMagicLink', EmailMagicLinkSenderController);
 
 // Profiles end-points
+register(app, '/v1/profile/uploadImage', UploadImageController);
 register(app, '/v1/profile/search/', ProfileController);
+
 
 // two handlers below should be last handlers and their order matters.
 app.use(notFoundHandler);

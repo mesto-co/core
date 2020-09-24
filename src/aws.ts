@@ -14,14 +14,7 @@
  * limitations under the License.
  */
 
-exports.up = function(knex) {
-  return knex.schema.table('User', function(table) {
-    table.json('skills');
-  });
-};
-
-exports.down = function(knex) {
-  return knex.schema.table('User', function(table) {
-    table.dropColumn('skills');
-  });
-};
+const config = require('../config.js');
+import AWS from 'aws-sdk';
+AWS.config.update(config.aws);
+export * from 'aws-sdk';

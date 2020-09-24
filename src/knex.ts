@@ -14,17 +14,8 @@
  * limitations under the License.
  */
 
-const config = require('../config.js');
-
+const knex = require('knex')(require('../knexfile.js'));
 const { attachPaginate } = require('knex-paginate');
 attachPaginate();
 
-function knexPromise() {
-  try {
-    return require('knex')(config.db);
-  } catch (e) {
-    console.log(e.stack);
-  }
-}
-
-export default knexPromise();
+export default knex;

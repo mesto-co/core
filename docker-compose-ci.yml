@@ -4,7 +4,7 @@ services:
   test:
     image: core_image
     environment:
-     - CI=1
+     - TEST_API_HOST=http://core:8080
     depends_on:
      - core
     command: "npm run test:ci"
