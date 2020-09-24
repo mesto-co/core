@@ -69,10 +69,6 @@
                         "role" : {
                             "type" : "string",
                             "maxLength":255
-                        },
-                        "skills" : {
-                            "type" : "string",
-                            "maxLength":255
                         }
                     }
                 }
@@ -81,6 +77,11 @@
            "perPage": { "type": "number","default": 20, "maximum": 1000  }
         },
          "required": [ "query"]
+    },
+    {
+      "$id": "#POST>/v1/profile/uploadImage",
+      "allOf": [{ "$ref": "#RequestBase" }],
+      "properties": {}
     },
     {
       "$id": "#POST>/v1/auth/magicLink",

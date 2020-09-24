@@ -28,15 +28,11 @@ router.route('/')
     .post(async (request, response) => {
       const {RqUid,query,currentPage,perPage} = getArgs(request);
 
-      const entries = await UserEntries().select(['id','fullName','username','location','about','role','skills','status']).where((builder: Knex.QueryBuilder) => {
+      const entries = await UserEntries().select().where((builder: Knex.QueryBuilder) => {
         for (let index = 0; index < query.length; index++) {
           builder.where((innerBuilder: Knex.QueryBuilder) => {
-            for (const [key, value] of Object.entries(query[index])) {
-              if (key !== 'skills')
-                innerBuilder.orWhere(key,'ilike', `%${value}%`);
-              else if (key === 'skills')
-                innerBuilder.orWhereRaw("array_to_string(skills, ',') ilike ?",[`%${value}%`]);
-            }
+            for (const [key, value] of Object.entries(query[index]))
+              innerBuilder.orWhere(key,'ilike', `%${value}%`);
           });
         }
       }).where({status: UserStatus.APPROVED}).orderBy('createdAt','asc').paginate({ perPage, currentPage });
