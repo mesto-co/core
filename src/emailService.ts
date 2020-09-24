@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
-const config = require('../config.js');
+/*
+The module requires the following env variables to be filled:
+AWS_REGION=us-east-1
+AWS_ACCESS_KEY_ID=YOURKEY
+AWS_SECRET_ACCESS_KEY=YOURSUPERSECRET
+SENDER_EMAIL_ADDRESS=email
+*/
 
-import { SES } from './aws';
+import { SES } from 'aws-sdk';
 import { SendEmailRequest } from 'aws-sdk/clients/ses';
+const config = require('../config.js');
 import magicLinkTemplate from './templates/magicLinkEmail';
 
 class EmailService {
-  FROM_EMAIL = config.emailService.senderEmailAddress;
+  FROM_EMAIL = process.env.SENDER_EMAIL_ADDRESS;
   ses = new SES();
 
   async sendMagicLinkEmail(recipient: string, fullName: string, magicLink: string) {

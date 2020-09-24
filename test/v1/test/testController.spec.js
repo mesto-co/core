@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const { get, post, put, del, getHost, getRqUid } = require('../../utils.js');
+const { get, post, put, del } = require('../../utils.js');
 
-const ENDPOINT = `${getHost()}/v1/test/`;
-const RqUid = getRqUid();
+const IS_CI = !!process.env.CI;
+const ENDPOINT = `http://${IS_CI ? 'core' : 'localhost'}:8080/v1/test/`;
+const RqUid = 'd5ab3356-f4b4-11ea-adc1-0242ac120002';
 
 test('/v1/test/:id', async () => {
   const testEntry = {

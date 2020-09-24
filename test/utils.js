@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 const http = require('http');
-const https = require('https');
 
 const debug = require('debug')('fetch');
 
@@ -22,7 +21,7 @@ function fetch(url, method, body) {
   debug('<', url, method, body);
   let requestFinished;
   const requestPromise = new Promise(resolve => requestFinished = resolve);
-  const req = (url.startsWith('https:') ? https : http).request(url, { method: method, headers: { 'Content-Type': 'application/json' } }, res => {
+  const req = http.request(url, { method: method, headers: { 'Content-Type': 'application/json' } }, res => {
     res.setEncoding('utf8');
     let data = '';
     res.on('data', chunk => data += chunk);
@@ -58,7 +57,8 @@ function getRqUid() {
 }
 
 function getHost() {
-  return process.env.TEST_API_HOST || 'http://localhost:8080';
+  const IS_CI = !!process.env.CI;
+  return `http://${IS_CI ? 'core' : 'localhost'}:8080`;
 }
 
 module.exports = { get, post, put, del, getRqUid, getHost };
