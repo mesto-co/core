@@ -28,6 +28,12 @@ npm test
 ```bash
 ./node_modules/.bin/knex migrate:make name
 ```
+2. Как запустить миграции на проде?
+```bash
+# username should be registered on AWS and has enough rights, machine IP should be whitelisted on AWS
+ssh  -L 5432:10.0.24.213:5432 <username>@18.158.111.228
+DATABASE=postgres://postgres:<database password>@localhost:5432/postgres ./node_modules/.bin/knex migrate:latest
+```
 
 ### Code reviews
 

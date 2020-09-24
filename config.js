@@ -59,7 +59,7 @@ const developmentConfig = {
   database: {
     ...lambdaConfig.database,
 
-    connection: 'postgres://postgres:testtesttest@postgres:5432/postgres',
+    connection: process.env.DATABASE || 'postgres://postgres:testtesttest@postgres:5432/postgres',
   },
 
   refreshToken: {
