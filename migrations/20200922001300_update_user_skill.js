@@ -16,7 +16,7 @@
 
 exports.up = function(knex) {
   return knex.schema.table('User', function(table) {
-    table.json('skills');
+    table.specificType('skills', 'TEXT[]');
   });
 };
 

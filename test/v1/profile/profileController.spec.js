@@ -28,7 +28,7 @@ test('/v1/search/ POST', async () => {
   const {data: getSearchData, code: searchCode} = await post(ENDPOINT, JSON.stringify(testEntry), header);
   expect(searchCode).toBe(200);
   expect(getSearchData.RqUid).toEqual(RqUid);
-  expect(getSearchData.entries.data[0].email).toEqual('iryabinin@gmail.com');
+  expect(getSearchData.entries.data[0].username).toEqual('iryabinin');
   expect(getSearchData.entries.data[0].status).toEqual('approved');
 });
 
@@ -38,7 +38,7 @@ test('/v1/search/ POST two correct words: firstName and lastName', async () => {
   const {data: getSearchData, code: searchCode} = await post(ENDPOINT, JSON.stringify(testEntry), header);
   expect(searchCode).toBe(200);
   expect(getSearchData.RqUid).toEqual(RqUid);
-  expect(getSearchData.entries.data[0].email).toEqual('iryabinin@gmail.com');
+  expect(getSearchData.entries.data[0].username).toEqual('iryabinin');
   expect(getSearchData.entries.data[0].status).toEqual('approved');
 });
 
@@ -93,6 +93,14 @@ test('/v1/search/ POST with sql injection attempt', async () => {
   expect(searchCode).toBe(200);
   expect(getSearchData.RqUid).toEqual(RqUid);
   expect(getSearchData.entries.data).toEqual([]);
+});
+
+test('/v1/search/ POST with skills', async () => {
+  const testEntry = {RqUid,'perPage': 100,'query': [{'skill': 'Offic'}]};
+  const {data: getSearchData, code: searchCode} = await post(ENDPOINT, JSON.stringify(testEntry),header);
+  expect(searchCode).toBe(200);
+  expect(getSearchData.RqUid).toEqual(RqUid);
+  expect(getSearchData.entries.data[0].skills[0]).toEqual('Improvements');
 });
 
 test('/v1/search/ POST with exceed the limit', async () => {

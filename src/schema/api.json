@@ -69,6 +69,10 @@
                         "role" : {
                             "type" : "string",
                             "maxLength":255
+                        },
+                        "skills" : {
+                            "type" : "string",
+                            "maxLength":255
                         }
                     }
                 }
