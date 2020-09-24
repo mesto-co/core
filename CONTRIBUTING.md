@@ -23,12 +23,6 @@ npm install
 npm test
 ```
 
-### Частые вопросы
-1. Как создать новую миграцию?
-```bash
-./node_modules/.bin/knex migrate:make name
-```
-
 ### Code reviews
 
 Code review необходимо для любого изменения. Мы используем GitHub pull requests для этого.
