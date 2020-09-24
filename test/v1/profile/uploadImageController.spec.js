@@ -73,10 +73,10 @@ test('/v1/profile/uploadImage POST with access token algorithm none', async () =
   const invalidHeader = getAuthHeader({
     id: '00000000-1111-2222-3333-000000000001',
     fullName: 'Иван Рябинин',
-  });
+  }, 'none');
 
-  const testEntry = {'perPage': 100,'query': [{'fullName': 'Иван','username': 'Иван','location': 'Иван'}], invalidHeader};
-  const {code} = await post(ENDPOINT, JSON.stringify(testEntry));
+  const testEntry = {'perPage': 100,'query': [{'fullName': 'Иван','username': 'Иван','location': 'Иван'}]};
+  const {code} = await post(ENDPOINT, JSON.stringify(testEntry), invalidHeader);
   expect(code).toBe(401);
 });
 
