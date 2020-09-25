@@ -33,8 +33,8 @@ app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 
 // all API endpoints are listed below this line.
-function register(app: express.Express, endpoint: string, router: express.Router) {
-  app.use(endpoint, validator(endpoint), router);
+function register(app: express.Express, endpoint: string, router: express.Router, authRequired?: boolean) {
+  app.use(endpoint, authRequired ? [accessTokenHandler, validator(endpoint)] : validator(endpoint), router);
 }
 
 register(app, '/v1/test/:id', TestEntryController);
@@ -44,11 +44,10 @@ register(app, '/v1/auth/refresh', RefreshTokenController);
 register(app, '/v1/email/sendMagicLink', EmailMagicLinkSenderController);
 
 // all endpoints closed by authentication below this line
-app.use(accessTokenHandler);
 
 // Profiles end-points
-register(app, '/v1/profile/uploadImage', UploadImageController);
-register(app, '/v1/profile/search/', ProfileController);
+register(app, '/v1/profile/uploadImage', UploadImageController, true);
+register(app, '/v1/profile/search/', ProfileController, true);
 
 
 // two handlers below should be last handlers and their order matters.
