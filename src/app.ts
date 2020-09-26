@@ -26,6 +26,7 @@ import {UploadImageController} from './controllers/uploadImageController';
 import { errorHandler, notFoundHandler } from './errorHandler';
 import {accessTokenHandler} from './accessTokenHandler';
 import cors from 'cors';
+import {UserController, UsersController} from './controllers/usersController';
 const app = express();
 
 app.use(cors());
@@ -46,6 +47,8 @@ register(app, '/v1/email/sendMagicLink', EmailMagicLinkSenderController);
 // all endpoints closed by authentication below this line
 
 // Profiles end-points
+register(app, '/v1/users/:id', UsersController, true);
+register(app, '/v1/user', UserController, true);
 register(app, '/v1/profile/uploadImage', UploadImageController, true);
 register(app, '/v1/profile/search/', ProfileController, true);
 
