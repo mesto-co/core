@@ -16,9 +16,9 @@
 
 
 exports.seed = async function(knex) {
-
-
   await knex('UserToken')
+      .del();
+  await knex('Friend')
       .del();
   await knex('Contact')
       .del();
@@ -97,7 +97,26 @@ exports.seed = async function(knex) {
             status: 'approved',
             skills: ['MVP', 'Мобильная разработка', 'NodeJS']
           },
-
+          {
+            id: knex.raw('\'00000000-1111-2222-3333-000000000006\'::uuid'),
+            fullName: 'Александр Александров',
+            username: 'alex',
+            email: 'alex@gmail.com',
+            passwordHash: 'HASH',
+            about: 'Привет всем!',
+            status: 'approved',
+            skills: ['Improvements']
+          },
+          {
+            id: knex.raw('\'00000000-1111-2222-3333-000000000007\'::uuid'),
+            fullName: 'Иван Иванов',
+            username: 'ivan',
+            email: 'ivan@gmail.com',
+            passwordHash: 'HASH',
+            about: 'Привет всем!',
+            status: 'approved',
+            skills: ['Improvements']
+          }
         ]);
       });
 };

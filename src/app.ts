@@ -22,6 +22,7 @@ import {ProfileController} from './controllers/profileController';
 import {AuthMagicLinkController, RefreshTokenController} from './controllers/authController';
 import {EmailMagicLinkSenderController} from './controllers/emailSenderController';
 import {UploadImageController} from './controllers/uploadImageController';
+import {FriendEntryController} from './controllers/friendController';
 
 import { errorHandler, notFoundHandler } from './errorHandler';
 import {accessTokenHandler} from './accessTokenHandler';
@@ -47,6 +48,7 @@ register(app, '/v1/email/sendMagicLink', EmailMagicLinkSenderController);
 // all endpoints closed by authentication below this line
 
 // Profiles end-points
+register(app, '/v1/user/friend/:friendId', FriendEntryController, true);
 register(app, '/v1/users/:id', UsersController, true);
 register(app, '/v1/user', UserController, true);
 register(app, '/v1/profile/uploadImage', UploadImageController, true);

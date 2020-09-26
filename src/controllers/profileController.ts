@@ -26,9 +26,10 @@ const UserEntries = () => knex('User');
 const router = express.Router();
 router.route('/')
     .post(async (request, response) => {
-      const {RqUid,query,currentPage,perPage} = getArgs(request);
+      const {RqUid, query, currentPage, perPage, onlyFriends} = getArgs(request);
+      const {id: userId} = request.user!;
       try {
-        const entries = await UserEntries().select(['id','fullName','username','location','about','role','skills','status']).where((builder: Knex.QueryBuilder) => {
+        let entriesBuilder = UserEntries().select(['User.id','fullName','username','location','about','role','skills','status']).where((builder: Knex.QueryBuilder) => {
           for (let index = 0; index < query.length; index++) {
             builder.where((innerBuilder: Knex.QueryBuilder) => {
               for (const [key, value] of Object.entries(query[index])) {
@@ -39,7 +40,17 @@ router.route('/')
               }
             });
           }
-        }).where({status: UserStatus.APPROVED}).orderBy('createdAt','asc').paginate({ perPage, currentPage });
+        }).where({status: UserStatus.APPROVED}).orderBy('createdAt','asc');
+
+        if (onlyFriends) {
+          entriesBuilder = entriesBuilder.join('Friend', function(joinClause: Knex.JoinClause) {
+            joinClause
+                .on('User.id', 'Friend.friendId')
+                .andOn('Friend.userId', knex.raw('?', [userId]));
+          });
+        }
+
+        const entries = await entriesBuilder.paginate({ perPage, currentPage });
 
         // TODO(ak239spb): nice way to handle database errors.
 
