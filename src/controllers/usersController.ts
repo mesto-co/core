@@ -39,7 +39,7 @@ const handleUserRequestById = async (id: string, selfInfo: boolean, request: any
           'id',
           'fullName',
           'username',
-          'email',
+          selfInfo ? 'email' : null,
           'imagePath',
           'location',
           'about',
@@ -49,8 +49,8 @@ const handleUserRequestById = async (id: string, selfInfo: boolean, request: any
         ].filter(t => !!t))
         .first()
         .where((builder: Knex.QueryBuilder) => {
-          if (!selfInfo)
-            builder.where('status', UserStatus.APPROVED);
+          // if (!selfInfo)
+          builder.where('status', UserStatus.APPROVED);
 
           builder.where('id', id);
         });
@@ -67,9 +67,6 @@ const handleUserRequestById = async (id: string, selfInfo: boolean, request: any
 
     response.status(200).json({RqUid, user: result}).end();
   } catch (e) {
-    if (e.code === '22P02' && e.routine === 'string_to_uuid') // invalid input syntax error from PostgreSQL
-      return response.status(400).end();
-
     console.debug('handleUserRequestById error', e);
     response.status(500).json({RqUid}).end();
   }

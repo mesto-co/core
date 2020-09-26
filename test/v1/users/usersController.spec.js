@@ -31,6 +31,7 @@ test('GET /v1/users/:id', async () => {
   const user = data.user;
   expect(user.id).toEqual('00000000-1111-2222-3333-000000000001');
   expect(user.fullName).toEqual('Иван Рябинин');
+  expect(user.email).toBeUndefined();
   expect(user.skills).toEqual(['Improvements']);
   expect(user.status).toEqual('approved');
 });
@@ -42,6 +43,7 @@ test('GET /v1/user', async () => {
   expect(data.RqUid).toEqual(RqUid);
   const user = data.user;
   expect(user.id).toEqual('00000000-1111-2222-3333-000000000001');
+  expect(user.email).toEqual('iryabinin@gmail.com');
   expect(user.fullName).toEqual('Иван Рябинин');
   expect(user.skills).toEqual(['Improvements']);
   expect(user.status).toEqual('approved');

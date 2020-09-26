@@ -86,7 +86,7 @@
       "$id": "#GET>/v1/users/:id",
       "allOf": [{ "$ref": "#RequestBase" }],
       "properties": {
-        "id": { "type": "string" }
+        "id": { "type": "string", "format": "uuid" }
       },
       "required": [ "id" ]
     },
