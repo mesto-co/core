@@ -20,6 +20,8 @@ exports.seed = async function(knex) {
 
   await knex('UserToken')
       .del();
+  await knex('Contact')
+      .del();
 
   return knex('User')
       .del()
