@@ -80,6 +80,22 @@ exports.seed = async function(knex) {
             role: null,
             status: 'awaiting',
             skills: ['Improvements']
-          }]);
+          },
+          {
+            id: knex.raw('\'00000000-1111-2222-3333-000000000005\'::uuid'),
+            fullName: 'Анастасия Кулибина',
+            username: 'akulibina',
+            email: 'akulibina@gmail.com',
+            passwordHash: 'HASH',
+            imagePath: 'https://lv.wikipedia.org/wiki/Att%C4%93ls:Kulibin_I_P.jpg',
+            location: '',
+            phone: '',
+            about: 'Привет всем! Я Кулибина Настя',
+            role: null,
+            status: 'approved',
+            skills: ['MVP', 'Мобильная разработка', 'NodeJS']
+          },
+
+        ]);
       });
 };

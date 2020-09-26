@@ -83,6 +83,19 @@
          "required": [ "query"]
     },
     {
+      "$id": "#GET>/v1/users/:id",
+      "allOf": [{ "$ref": "#RequestBase" }],
+      "properties": {
+        "id": { "type": "string" }
+      },
+      "required": [ "id" ]
+    },
+    {
+      "$id": "#GET>/v1/user",
+      "allOf": [{ "$ref": "#RequestBase" }],
+      "properties": {}
+    },
+    {
       "$id": "#POST>/v1/profile/uploadImage",
       "allOf": [{ "$ref": "#RequestBase" }],
       "properties": {}
