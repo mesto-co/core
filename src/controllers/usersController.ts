@@ -23,6 +23,7 @@ import {getArgs} from '../utils';
 
 const UserEntries = () => knex('User');
 const ContactEntries = () => knex('Contact');
+const FriendEntries = () => knex('Friend');
 
 const handleUserRequestById = async (id: string, selfInfo: boolean, request: any, response: any) => {
   const {RqUid} = getArgs(request);
@@ -55,12 +56,20 @@ const handleUserRequestById = async (id: string, selfInfo: boolean, request: any
           builder.where('id', id);
         });
 
-    const [contacts, user] = await Promise.all([contactsPromise, userPromise]);
+    const isFriendPromise = selfInfo ? null :
+      await FriendEntries()
+          .select('id')
+          .first()
+          .where('userId', request.user!.id!)
+          .andWhere('friendId', id);
+
+    const [contacts, user, isFriend] = await Promise.all([contactsPromise, userPromise, isFriendPromise].filter(t => t));
 
     if (!user)
       return response.status(404).json({RqUid}).end();
 
     const result = {
+      isFriend: !!isFriend,
       contacts,
       ...user
     };

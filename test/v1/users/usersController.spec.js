@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const { get, getHost, getRqUid, getAuthHeader } = require('../../utils.js');
+const { get, del, post, getHost, getRqUid, getAuthHeader } = require('../../utils.js');
 
 const USER_ENDPOINT = `${getHost()}/v1/user`;
 const USERS_ENDPOINT = `${getHost()}/v1/users/`;
+const FRIEND_ENDPOINT = `${getHost()}/v1/user/friend`;
+
 const RqUid = getRqUid();
 const RqUidQueryParam = '?RqUid=' + RqUid;
 const header = getAuthHeader({
@@ -32,10 +34,22 @@ test('GET /v1/users/:id', async () => {
   expect(user.id).toEqual('00000000-1111-2222-3333-000000000001');
   expect(user.fullName).toEqual('Иван Рябинин');
   expect(user.email).toBeUndefined();
+  expect(user.isFriend).toBeFalsy();
   expect(user.skills).toEqual(['Improvements']);
   expect(user.status).toEqual('approved');
 });
 
+test('GET /v1/users/:id has friend', async () => {
+  const friendId = '00000000-1111-2222-3333-000000000005';
+
+  await del(`${FRIEND_ENDPOINT}/${friendId}?RqUid=${RqUid}`, header);
+  await post(`${FRIEND_ENDPOINT}/${friendId}?RqUid=${RqUid}`, '', header);
+
+  const {data, code} = await get(USERS_ENDPOINT + friendId + RqUidQueryParam, header);
+  expect(code).toBe(200);
+  const user = data.user;
+  expect(user.isFriend).toBeTruthy();
+});
 
 test('GET /v1/user', async () => {
   const {data, code} = await get(USER_ENDPOINT + RqUidQueryParam, header);
