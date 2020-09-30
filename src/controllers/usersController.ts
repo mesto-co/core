@@ -63,7 +63,7 @@ const handleUserRequestById = async (id: string, selfInfo: boolean, request: any
           .where('userId', request.user!.id!)
           .andWhere('friendId', id);
 
-    const [contacts, user, isFriend] = await Promise.all([contactsPromise, userPromise, isFriendPromise].filter(t => t));
+    const [contacts, user, isFriend] = await Promise.allSettled([contactsPromise, userPromise, isFriendPromise].filter(t => t));
 
     if (!user)
       return response.status(404).json({RqUid}).end();
