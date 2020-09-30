@@ -114,8 +114,20 @@ exports.seed = async function(knex) {
             email: 'ivan@gmail.com',
             passwordHash: 'HASH',
             about: 'Привет всем!',
+            location: 'Бали',
             status: 'approved',
             skills: ['Improvements']
+          },
+          {
+            id: knex.raw('\'00000000-1111-2222-3333-000000000008\'::uuid'),
+            fullName: 'Volodymyr',
+            username: 'volodya',
+            email: 'volodya@gmail.com',
+            passwordHash: 'HASH',
+            about: 'тестируюсь на сохранение!',
+            location: 'Бали',
+            status: 'approved',
+            skills: ['навык 0']
           }
         ]);
       });

@@ -13,7 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/**
+ * @typedef {Object} UserEntries
+ * @property {string} location
+ * @property {string} userName
+ * @property {string} role
+ * @property {string} about
+ * @property {string} fullName
+ * @property {Array} skills
+ *
+ * @returns {Knex.QueryBuilder<UserTable, {}>}
+ */
 import express from 'express';
 import Knex from 'knex';
 import { UserStatus } from '../enums/UserStatus';
@@ -94,6 +104,27 @@ const userController = express.Router();
 userController.route('/')
     .get(async (request, response) => {
       await handleUserRequestById(request.user!.id!, true, request, response);
+    })
+    .put(async (request, response) => {
+      const { RqUid, location, role = null, about, fullName, skills = null } = getArgs(request);
+      if (request.user) {
+        try {
+          const id = request.user.id;
+          await UserEntries().where('id', id).update({
+            about: about,
+            location: location,
+            role: role,
+            fullName: fullName,
+            skills: skills,
+          });
+          response.status(200).send({ RqUid }).end();
+        } catch (error) {
+          console.log(error);
+          response.status(500).send(RqUid).end();
+        }
+      } else {
+        response.status(401).send(RqUid).end();
+      }
     });
 
 export {
