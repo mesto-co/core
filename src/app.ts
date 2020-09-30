@@ -23,6 +23,7 @@ import {AuthMagicLinkController, RefreshTokenController} from './controllers/aut
 import {EmailMagicLinkSenderController} from './controllers/emailSenderController';
 import {UploadImageController} from './controllers/uploadImageController';
 import {FriendEntryController} from './controllers/friendController';
+import {LocationsController} from './controllers/locationController';
 import {SingleContactController, AllContactsController} from './controllers/contactController';
 
 import { errorHandler, notFoundHandler } from './errorHandler';
@@ -54,6 +55,7 @@ register(app, '/v1/users/:id', UsersController, true);
 register(app, '/v1/user', UserController, true);
 register(app, '/v1/profile/uploadImage', UploadImageController, true);
 register(app, '/v1/profile/search/', ProfileController, true);
+register(app, '/v1/location/', LocationsController, true);
 register(app, '/v1/contact/:contactId', SingleContactController, true);
 register(app, '/v1/contact', AllContactsController, true);
 

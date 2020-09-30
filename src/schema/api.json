@@ -143,6 +143,67 @@
       "required": [ "friendId" ]
     },
     {
+        "$id": "#POST>/v1/location/",
+        "allOf": [{ "$ref": "#RequestBase" }],
+        "properties": {
+            "userInput": { 
+              "type": "string",
+              "maxLength": 255}
+        },
+        "required": ["userInput"]
+    },
+    {
+      "$id": "#PUT>/v1/user",
+      "allOf": [{ "$ref": "#RequestBase" }],
+      "properties": {
+          "location": { 
+            "type": "string",
+            "maxLength":255 },
+          "about": { 
+            "type": "string",
+            "maxLength":6000 },
+          "fullName":{
+            "type":"string",
+            "maxLength":255},
+          "role":{
+            "type": "string",
+            "maxLength": 255},
+          "skills": {
+              "type": "array",
+              "items": { 
+                "type": "string",
+                "maxLength":255 }
+          }
+      },
+      "required":["about","location","fullName"]
+    },
+    {
+      "$id": "#PUT>/v1/profile/info/",
+      "allOf": [{ "$ref": "#RequestBase" }],
+      "properties": {
+      "location": {
+        "type": "string",
+        "maxLength":255
+      },
+      "about": {
+        "type": "string",
+        "maxLength":6000
+      },
+      "fullName":{
+        "type":"string",
+        "maxLength":255
+      },
+      "role":{"type": "string"},
+      "skills": {
+        "type": "array",
+        "items": { 
+          "type": "string",
+          "maxLength":255 }
+      }
+    },
+    "required":["about","location","fullName"]
+    },
+    {
       "$id": "#GET>/v1/contact",
       "allOf": [{ "$ref": "#RequestBase" }]
     },
