@@ -39,7 +39,10 @@ const lambdaConfig = {
   },
   emailService: {
     debug: false,
-    senderEmailAddress: process.env.SENDER_EMAIL_ADDRESS
+    senderEmailAddress: process.env.SENDER_EMAIL_ADDRESS,
+    smtpHost: process.env.SMTP_HOST,
+    smtpUser: process.env.SMTP_USER,
+    smtpPass: process.env.SMTP_PASS
   },
   aws: {
     region: process.env.AWS_REGION,
