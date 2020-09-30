@@ -16,14 +16,13 @@
 
 const config = require('../config.js');
 
-import { SES } from './aws';
 import { promises as fs } from 'fs';
-import { SendEmailRequest } from 'aws-sdk/clients/ses';
 import magicLinkTemplate from './templates/magicLinkEmail';
+import nodemailer from 'nodemailer';
+import Mail = require('nodemailer/lib/mailer');
 
 class EmailService {
-  FROM_EMAIL = config.emailService.senderEmailAddress;
-  ses = new SES();
+  _transport: Mail | undefined;
 
   async sendMagicLinkEmail(recipient: string, fullName: string, magicLink: string) {
     const content = magicLinkTemplate(fullName, magicLink);
@@ -35,30 +34,39 @@ class EmailService {
     await this.sendEmail(recipient, subject, content);
   }
 
-  async sendEmail(recipient: string, subject: string, content: string) {
+  sendEmail(recipient: string, subject: string, content: string) {
     if (config.emailService.debug) {
       console.log(`Email sent: ${recipient}, subject: ${subject}, body:\n${content}`);
       return;
     }
 
-    const params: SendEmailRequest = {
-      Destination: {
-        ToAddresses: [recipient],
-      },
-      Message: {
-        Body: {
-          Html: {Data: content},
+    return new Promise((resolve, reject) => this.transport().sendMail({
+      from: config.emailService.senderEmailAddress,
+      to: recipient,
+      subject: subject,
+      html: content
+    }, error => {
+      if (error)
+        reject(error);
+      else
+        resolve();
+    }));
+  }
+
+  private transport() {
+    if (!this._transport) {
+      const {smtpHost, smtpUser, smtpPass} = config.emailService;
+      this._transport = nodemailer.createTransport({
+        host: smtpHost,
+        port: 25,
+        secure: false,
+        auth: {
+          user: smtpUser,
+          pass: smtpPass,
         },
-
-        Subject: {Data: subject},
-      },
-      Source: this.FROM_EMAIL!,
-      ReplyToAddresses: [
-        this.FROM_EMAIL!
-      ]
-    };
-
-    return this.ses.sendEmail(params).promise();
+      });
+    }
+    return this._transport;
   }
 }
 
