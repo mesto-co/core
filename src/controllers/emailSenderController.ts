@@ -51,7 +51,7 @@ emailMagicLinkSenderRouter.route('/')
               if (err)
                 return response.status(404).json({RqUid}).end();
 
-              const magicLink = `${magicLinkUrl}?token=${userToken.token}`;
+              const magicLink = `${magicLinkUrl}token=${userToken.token}`;
               await emailService.sendMagicLinkEmail(email, fullName, magicLink);
               return response.status(200).json({RqUid}).end();
             });
