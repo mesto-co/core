@@ -52,26 +52,32 @@
                     "properties" : {
                         "fullName" :  {
                             "type" : "string",
+                            "minLength": 1,
                             "maxLength":255
                         },
                         "username" : {
                             "type" : "string",
+                            "minLength": 1,
                             "maxLength":30
                         },
                         "location" : {
                             "type" : "string",
+                            "minLength": 1,
                             "maxLength":255
                         },
                         "about" : {
                             "type" : "string",
+                            "minLength": 1,
                             "maxLength":6000
                         },
                         "role" : {
                             "type" : "string",
+                            "minLength": 1,
                             "maxLength":255
                         },
                         "skills" : {
                             "type" : "string",
+                            "minLength": 1,
                             "maxLength":255
                         }
                     }
@@ -148,6 +154,7 @@
         "properties": {
             "userInput": { 
               "type": "string",
+              "minLength": 1,
               "maxLength": 255}
         },
         "required": ["userInput"]
@@ -158,50 +165,38 @@
       "properties": {
           "location": { 
             "type": "string",
-            "maxLength":255 },
+            "maxLength":255,
+            "minLength": 1
+          },
           "about": { 
             "type": "string",
-            "maxLength":6000 },
+            "maxLength":6000,
+            "minLength": 1
+          },
           "fullName":{
             "type":"string",
-            "maxLength":255},
+            "maxLength":255,
+            "minLength": 1
+          },
           "role":{
             "type": "string",
-            "maxLength": 255},
+            "maxLength": 255,
+            "minLength": 1
+          },
           "skills": {
               "type": "array",
               "items": { 
                 "type": "string",
+                "minLength": 1,
                 "maxLength":255 }
+          },
+          "imagePath": {
+            "type": "string",
+            "format": "uri",
+            "minLength": 1
           }
       },
       "required":["about","location","fullName"]
-    },
-    {
-      "$id": "#PUT>/v1/profile/info/",
-      "allOf": [{ "$ref": "#RequestBase" }],
-      "properties": {
-      "location": {
-        "type": "string",
-        "maxLength":255
-      },
-      "about": {
-        "type": "string",
-        "maxLength":6000
-      },
-      "fullName":{
-        "type":"string",
-        "maxLength":255
-      },
-      "role":{"type": "string"},
-      "skills": {
-        "type": "array",
-        "items": { 
-          "type": "string",
-          "maxLength":255 }
-      }
-    },
-    "required":["about","location","fullName"]
     },
     {
       "$id": "#GET>/v1/contact",
@@ -211,8 +206,8 @@
       "$id": "#POST>/v1/contact",
       "allOf": [{ "$ref": "#RequestBase" }],
       "properties": {
-        "title": { "type": "string", "maxLength": 64 },
-        "url": { "type": "string", "format": "uri", "maxLength": 255 }
+        "title": { "type": "string", "maxLength": 64, "minLength": 1 },
+        "url": { "type": "string", "format": "uri", "maxLength": 255, "minLength": 1 }
       },
       "required": [ "title", "url" ]
     },
@@ -221,8 +216,8 @@
       "allOf": [{ "$ref": "#RequestBase" }],
       "properties": {
         "contactId": { "type": "string", "format": "uuid" },
-        "title": { "type": "string", "maxLength": 64 },
-        "url": { "type": "string", "format": "uri", "maxLength": 255 }
+        "title": { "type": "string", "maxLength": 64, "minLength": 1 },
+        "url": { "type": "string", "format": "uri", "maxLength": 255, "minLength": 1 }
       },
       "required": [ "contactId", "title", "url" ]
     },

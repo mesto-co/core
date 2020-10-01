@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const { put, getHost, getRqUid, getAuthHeader } = require('../../utils.js');
+const { put, get, getHost, getRqUid, getAuthHeader } = require('../../utils.js');
 const header = getAuthHeader({
   id: '00000000-1111-2222-3333-000000000008',
   fullName: 'Volodymyr',
@@ -26,11 +26,18 @@ const location = 'Киев, Украина';
 const skills = ['Improvements'];
 const role = 'Менеджер';
 const fullName = 'Volodymyr';
+const imagePath = 'https://a.png';
 
 test('/v1/user', async () => {
-  const {data, code} = await put(ENDPOINT, JSON.stringify({RqUid, location, about, skills, role, fullName }), header);
+  const {data, code} = await put(ENDPOINT, JSON.stringify({RqUid, location, about, skills, role, fullName, imagePath }), header);
   expect(code).toBe(200);
   expect(data.RqUid).toEqual(RqUid);
+
+  const {data: {user}} = await get(ENDPOINT + '?RqUid=' + RqUid, header);
+  expect(user.fullName).toBe(fullName);
+  expect(user.role).toBe(role);
+  expect(user.about).toBe(about);
+  expect(user.imagePath).toBe(imagePath);
 });
 
 test('/v1/user PUT without userInput', async () => {
@@ -61,4 +68,18 @@ test('/v1/user PUT skill item is not a string', async () => {
   const {data, code} = await put(ENDPOINT, JSON.stringify({RqUid, location, about, skills}), header);
   expect(code).toBe(400);
   expect(data.message).toBeDefined();
+});
+
+test('/v1/user empty string is 400', async () => {
+  await check({RqUid, location: ''});
+  await check({RqUid, about: ''});
+  await check({RqUid, fullName: ''});
+  await check({RqUid, role: ''});
+  await check({RqUid, skills: ['']});
+
+  async function check(updatedData) {
+    const {data, code} = await put(ENDPOINT, JSON.stringify(updatedData), header);
+    expect(code).toBe(400);
+    expect(data.RqUid).toEqual(RqUid);
+  }
 });
