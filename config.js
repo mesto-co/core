@@ -21,7 +21,7 @@ const lambdaConfig = {
   },
   magicLink: {
     jwtExpiresIn: process.env.MAGIC_LINK_JWT_EXPIRES_IN || '15m',
-    url: process.env.MAGIC_LINK_URL || 'https://mesto.co/',
+    url: process.env.MAGIC_LINK_URL || 'https://mesto.co/?',
   },
   refreshToken: {
     jwtExpiresIn: process.env.REFRESH_JWT_EXPIRES_IN || '60 days',
