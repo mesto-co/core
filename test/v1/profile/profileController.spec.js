@@ -167,4 +167,17 @@ test('/v1/search/ POST with access token algorithm none', async () => {
   expect(code).toBe(401);
 });
 
+test('/v1/search/ POST emtpy string is 400', async () => {
+  await check([{fullName: ''}]);
+  await check([{username: ''}]);
+  await check([{location: ''}]);
+  await check([{about: ''}]);
+  await check([{role: ''}]);
+  await check([{skills: ''}]);
 
+  async function check(query) {
+    const {code, data} = await post(ENDPOINT, JSON.stringify({RqUid, query: query}), header);
+    expect(code).toBe(400);
+    expect(data.RqUid).toBe(RqUid);
+  }
+});

@@ -60,3 +60,9 @@ test('/v1/location POST non-existent city', async () => {
   expect(data.RqUid).toEqual(RqUid);
   expect(data.location.length).toEqual(0);
 });
+
+test('/v1/location empty userInput is 400', async () => {
+  const {data, code} = await post(ENDPOINT, JSON.stringify({RqUid, userInput: ''}), header);
+  expect(code).toBe(400);
+  expect(data.RqUid).toEqual(RqUid);
+});

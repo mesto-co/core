@@ -106,7 +106,7 @@ userController.route('/')
       await handleUserRequestById(request.user!.id!, true, request, response);
     })
     .put(async (request, response) => {
-      const { RqUid, location, role = null, about, fullName, skills = null } = getArgs(request);
+      const { RqUid, location, role = null, about, fullName, skills = null, imagePath } = getArgs(request);
       if (request.user) {
         try {
           const id = request.user.id;
@@ -116,6 +116,7 @@ userController.route('/')
             role: role,
             fullName: fullName,
             skills: skills,
+            imagePath: imagePath
           });
           response.status(200).send({ RqUid }).end();
         } catch (error) {

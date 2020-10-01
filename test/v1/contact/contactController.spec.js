@@ -161,3 +161,11 @@ test('/v1/contact unauthorized', async () => {
   expect(putCode).toBe(401);
   expect(putData.RqUid).toBe(RqUid);
 });
+
+test('/v1/contact empty title is error', async () => {
+  await checkCurrentContacts(getAllExpected);
+  const testContact = {title: '', url: 'http://example.com'};
+  const {code, data} = await post(CONTACT_ENDPOINT + RqUidQueryParam, JSON.stringify(testContact), header);
+  expect(code).toBe(400);
+  expect(data.RqUid).toBe(RqUid);
+});
