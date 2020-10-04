@@ -38,6 +38,17 @@ test('/v1/user', async () => {
   expect(user.role).toBe(role);
   expect(user.about).toBe(about);
   expect(user.imagePath).toBe(imagePath);
+
+
+  const {data: saveUserWithoutRoleData, code: saveUserWithoutRoleCode} = await put(ENDPOINT, JSON.stringify({RqUid, location, about, skills, fullName, imagePath }), header);
+  expect(saveUserWithoutRoleCode).toBe(200);
+  expect(saveUserWithoutRoleData.RqUid).toEqual(RqUid);
+
+  const {data: {user: userWithoutRole}} = await get(ENDPOINT + '?RqUid=' + RqUid, header);
+  expect(userWithoutRole.fullName).toBe(fullName);
+  expect(userWithoutRole.role).toBe(null);
+  expect(userWithoutRole.about).toBe(about);
+  expect(userWithoutRole.imagePath).toBe(imagePath);
 });
 
 test('/v1/user PUT without userInput', async () => {

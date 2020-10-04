@@ -26,7 +26,17 @@ const ajv = new Ajv({
   useDefaults: true,
   removeAdditional: true,
   coerceTypes: true
-}).addSchema(apiSchemas).addSchema(baseSchemas);
+});
+
+ajv.addKeyword('isStringNotEmpty', {
+  type: 'string',
+  validate: function(schema: any, data: any) {
+    return typeof data === 'string' && data.trim() !== '';
+  },
+  errors: false
+});
+
+ajv.addSchema(apiSchemas).addSchema(baseSchemas);
 
 class ValidationError extends Error {
     validationError: Ajv.ErrorObject|null;
