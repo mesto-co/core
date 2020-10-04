@@ -39,6 +39,9 @@ test('/v1/search/ POST two correct words: firstName and lastName', async () => {
   expect(searchCode).toBe(200);
   expect(getSearchData.RqUid).toEqual(RqUid);
   expect(getSearchData.entries.data[0].username).toEqual('iryabinin');
+  expect(getSearchData.entries.data[0].fullName).toEqual('Иван Рябинин');
+  expect(getSearchData.entries.data[0].imagePath).toEqual('https://store.playstation.com/store/api/chihiro/00_09_000/container/IN/en/999/EP1257-CUSA07617_00-AV00000000000004/1586170996000/image?w=240&h=240&bg_color=000000&opacity=100&_version=00_09_000');
+  expect(getSearchData.entries.data[0].id).toEqual('00000000-1111-2222-3333-000000000001');
   expect(getSearchData.entries.data[0].status).toEqual('approved');
 });
 

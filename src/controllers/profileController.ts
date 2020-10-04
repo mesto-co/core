@@ -29,7 +29,8 @@ router.route('/')
       const {RqUid, query, currentPage, perPage, onlyFriends} = getArgs(request);
       const {id: userId} = request.user!;
       try {
-        let entriesBuilder = UserEntries().select(['User.id','fullName','username','location','about','role','skills','status']).where((builder: Knex.QueryBuilder) => {
+        const fields = [ 'User.id', 'fullName', 'username', 'imagePath', 'location', 'about', 'role', 'skills', 'status'];
+        let entriesBuilder = UserEntries().select(fields).where((builder: Knex.QueryBuilder) => {
           for (let index = 0; index < query.length; index++) {
             builder.where((innerBuilder: Knex.QueryBuilder) => {
               for (const [key, value] of Object.entries(query[index])) {
