@@ -39,6 +39,11 @@ DATABASE=postgres://postgres:<database password>@localhost:5432/postgres ./node_
 
 Code review необходимо для любого изменения. Мы используем GitHub pull requests для этого.
 
+Частые запросы в code review:
+- 99% изменений требуют как минимум один тест - лучше добавьте его сразу,
+- идеальный PR делает что-то одно, старайтесь объединить ваши комиты в один перед созданием PR - [how to](https://stackoverflow.com/questions/5189560/squash-my-last-x-commits-together-using-git) - этот комит потом попадет в мастер, хорошая история комитов помогает использовать git по полной, например, git blame, либо git bisect,
+- для хорошей истории комитов - старайтесь не трогать код, который уже есть, без особой необходимости - чинить баг - окей, рефакторить - часто окей, переформатировать лишний раз не стоит - пострадает git blame.
+
 ### Code Style
 
 - Coding style определен в [.eslintrc](https://github.com/mesto.co/core/blob/master/.eslintrc.js)
@@ -52,12 +57,8 @@ npm run eslint
 .. и исправить часть проблем:
 
 ```bash
-npm run eslint -- --fix
+npm run eslint:fix
 ```
-
-### API указания
-
-Тут нам нужно написать о лучших практиках.
 
 ### Commit Messages
 
