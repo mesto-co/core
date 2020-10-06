@@ -62,7 +62,7 @@ const developmentConfig = {
   magicLink: {
     ...lambdaConfig.magicLink,
 
-    url: process.env.MAGIC_LINK_URL || 'http://localhost:2000/auth/magic-link?'
+    url: process.env.MAGIC_LINK_URL || 'http://localhost:2000/auth/magic-link/?'
   },
 
   database: {
