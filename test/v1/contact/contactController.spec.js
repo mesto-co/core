@@ -29,6 +29,9 @@ async function checkCurrentContacts(expected) {
   expect(getAllCode).toBe(200);
   expect(getAllData.RqUid).toBe(RqUid);
   expect(getAllData.contacts.length).toBe(expected.length);
+  const compareContacts = (a,b) => a.title === b.title ? 0 : a.title > b.title ? 1 : -1;
+  getAllData.contacts.sort(compareContacts);
+  expected.sort(compareContacts);
   for (let i = 0; i < expected.length; ++i) {
     expect(getAllData.contacts[i].title).toBe(expected[i].title);
     expect(getAllData.contacts[i].url).toBe(expected[i].url);
@@ -114,6 +117,8 @@ test('/v1/contact bad updated contact', async () => {
   await check(contactId, {title: 'test'}, 400);
   // no title
   await check(contactId, {url: 'http://example.com'}, 400);
+  // existing title + url
+  await check(contactId, getAllExpected[0], 422);
 
   await del(CONTACT_ENDPOINT + contactId + RqUidQueryParam, header);
   await checkCurrentContacts(getAllExpected);

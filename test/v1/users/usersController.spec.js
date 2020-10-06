@@ -61,7 +61,12 @@ test('GET /v1/user', async () => {
   expect(user.fullName).toEqual('Иван Рябинин');
   expect(user.skills).toEqual(['Improvements']);
   expect(user.status).toEqual('approved');
-  expect(user.contacts).toEqual([{'title': 'Telegram', 'url': 'http://t.me/iryabinin'}, {'title': 'LinkedIn', 'url': 'https://www.linkedin.com/in/iryabinin'}]);
+
+  const compareContacts = (a,b) => a.title === b.title ? 0 : a.title > b.title ? 1 : -1;
+  user.contacts.sort(compareContacts);
+  const expectedContacts = [{'title': 'Telegram', 'url': 'http://t.me/iryabinin'}, {'title': 'LinkedIn', 'url': 'https://www.linkedin.com/in/iryabinin'}];
+  expectedContacts.sort(compareContacts);
+  expect(user.contacts).toEqual(expectedContacts);
 });
 
 test('GET /v1/users/:id with invalid id', async () => {
