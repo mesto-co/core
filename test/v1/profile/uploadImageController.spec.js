@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const { post, getHost, getRqUid, getAuthHeader } = require('../../utils.js');
+const { post, getHost, getAuthHeader } = require('../../utils.js');
 const http = require('http');
 
 const fs = require('fs');
@@ -25,12 +25,6 @@ const TEST_FILE = './test/v1/profile/data/test-avatar.jpg';
 const authHeader = getAuthHeader({
   id: '00000000-1111-2222-3333-000000000001',
   fullName: 'Иван Рябинин',
-});
-
-test('/v1/profile/uploadImage POST without RqUid', async () => {
-  const {data, code} = await post(ENDPOINT, JSON.stringify({}), authHeader);
-  expect(code).toBe(400);
-  expect(data.message).toBeDefined();
 });
 
 test('/v1/profile/uploadImage POST with invalid MIME type', async () => {
@@ -86,7 +80,7 @@ function uploadImage(file, mimeType) {
 
   let requestFinished;
   const requestPromise = new Promise(resolve => requestFinished = resolve);
-  const req = http.request(ENDPOINT + '?RqUid=' + getRqUid(), { method: 'POST', headers: { ...form.getHeaders(), ...authHeader } }, res => {
+  const req = http.request(ENDPOINT, { method: 'POST', headers: { ...form.getHeaders(), ...authHeader, 'X-Request-Id': 'd5ab3356-f4b4-11ea-adc1-0242ac120002' } }, res => {
     let data = '';
     res.on('data', chunk => data += chunk);
     res.on('end', () => {

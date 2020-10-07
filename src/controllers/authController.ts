@@ -34,7 +34,7 @@ const UserTokenEntries = () => knex('UserToken');
 const authMagicLinkRouter = express.Router();
 authMagicLinkRouter.route('/')
     .post(async (request, response) => {
-      const {email, RqUid} = getArgs(request);
+      const {email} = getArgs(request);
       try {
         const user = await UserEntries().where('email', email).andWhere('status', UserStatus.APPROVED).first();
         if (user) {
@@ -46,15 +46,15 @@ authMagicLinkRouter.route('/')
           const [tokenId] = await UserTokenEntries().returning('id').insert({token: jwt, userId: id});
 
           if (tokenId)
-            return response.status(200).json({RqUid, tokenId}).end();
+            return response.status(200).json({tokenId}).end();
 
-          return response.status(500).json({RqUid}).end();
+          return response.status(500).json({}).end();
         }
 
-        response.status(404).json({RqUid}).end();
+        response.status(404).json({}).end();
       } catch (e) {
         console.debug('auth/magicLink error', e);
-        response.status(500).json({RqUid}).end();
+        response.status(500).json({}).end();
       }
     });
 
@@ -62,14 +62,14 @@ const refreshTokenRouter = express.Router();
 refreshTokenRouter.route('/')
     .post(
         async (request: express.Request, response: express.Response) => {
-          const {RqUid, refreshToken} = getArgs(request);
+          const {refreshToken} = getArgs(request);
 
           if (!refreshToken)
-            return response.status(401).json({RqUid}).end();
+            return response.status(401).json({}).end();
 
           jsonwebtoken.verify(refreshToken, refreshJwtSecret, {algorithms: ['HS256']}, async (err: VerifyErrors | null, decoded: any) => {
             if (err)
-              return response.status(401).json({RqUid}).end();
+              return response.status(401).json({}).end();
 
             try {
               const user = await UserEntries()
@@ -80,7 +80,7 @@ refreshTokenRouter.route('/')
                   .first('User.id', 'User.fullName', 'User.role');
 
               if (!user)
-                return response.status(401).json({RqUid}).end();
+                return response.status(401).json({}).end();
 
               const newRefreshToken = TokenHelper.signRefreshToken({userId: user.id});
               const [tokenId] = await UserTokenEntries().returning('id').insert({
@@ -92,13 +92,13 @@ refreshTokenRouter.route('/')
                 await UserTokenEntries().where('token', refreshToken).del();
 
                 const accessToken = TokenHelper.signAccessToken(user);
-                return response.status(200).json({RqUid, accessToken, refreshToken: newRefreshToken}).end();
+                return response.status(200).json({accessToken, refreshToken: newRefreshToken}).end();
               }
 
-              return response.status(500).json({RqUid}).end();
+              return response.status(500).json({}).end();
             } catch (e) {
               console.debug(`${request.url} error`, e);
-              return response.status(500).json({RqUid}).end();
+              return response.status(500).json({}).end();
             }
           });
         }

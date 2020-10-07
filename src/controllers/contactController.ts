@@ -28,43 +28,41 @@ interface ContactValue {
 const singleContactRouter = express.Router();
 singleContactRouter.route('/')
     .put(async (request, response) => {
-      const {RqUid, contactId, title, url} = getArgs(request);
+      const {contactId, title, url} = getArgs(request);
       const {id: currentUserId} = request.user!;
       try {
         const count = await Contact().where('ownerId', currentUserId).andWhere('id', contactId).update({title, url}).count();
         if (count > 0)
-          return response.status(200).json({RqUid}).end();
+          return response.status(200).json({}).end();
         else
-          return response.status(404).json({RqUid}).end();
+          return response.status(404).json({}).end();
       } catch (e) {
         const UNIQUE_VIOLATION_CODE = '23505';
         if (e.code === UNIQUE_VIOLATION_CODE)
-          return response.status(422).json({RqUid}).end();
+          return response.status(422).json({}).end();
         console.debug('PUT contact/:id', e);
-        response.status(500).json({RqUid}).end();
+        response.status(500).json({}).end();
       }
     })
     .delete(async (request, response) => {
-      const {RqUid, contactId} = getArgs(request);
+      const {contactId} = getArgs(request);
       const {id: currentUserId} = request.user!;
       try {
         await Contact().where('id', contactId).andWhere('ownerId', currentUserId).del();
-        return response.status(200).json({RqUid}).end();
+        return response.status(200).json({}).end();
       } catch (e) {
         console.debug('DELETE contact/:id', e);
-        response.status(500).json({RqUid}).end();
+        response.status(500).json({}).end();
       }
     });
 
 const allContactsRouter = express.Router();
 allContactsRouter.route('/')
     .get(async (request, response) => {
-      const {RqUid} = getArgs(request);
       const {id: currentUserId} = request.user!;
       try {
         const contacts = await Contact().where('ownerId', currentUserId).orderBy('title', 'asc').select();
         response.status(200).json({
-          RqUid,
           contacts: contacts.map((entry: ContactValue) => ({
             id: entry.id,
             title: entry.title,
@@ -73,20 +71,20 @@ allContactsRouter.route('/')
         });
       } catch (e) {
         console.debug('GET contact/', e);
-        response.status(500).json({RqUid}).end();
+        response.status(500).json({}).end();
       }
     })
     .post(async (request, response) => {
-      const {RqUid, title, url} = getArgs(request);
+      const {title, url} = getArgs(request);
       const {id: currentUserId} = request.user!;
       try {
         const [contactId] = await Contact().returning('id').insert({title, url, ownerId: currentUserId});
         if (contactId)
-          return response.status(200).json({RqUid, contactId}).end();
-        return response.status(500).json({RqUid}).end();
+          return response.status(200).json({contactId}).end();
+        return response.status(500).json({}).end();
       } catch (e) {
         console.debug('POST contact/', e);
-        response.status(500).json({RqUid}).end();
+        response.status(500).json({}).end();
       }
     });
 

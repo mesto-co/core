@@ -13,60 +13,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const { post, getHost, getRqUid } = require('../../utils.js');
+const { post, getHost } = require('../../utils.js');
 
 const GENERATE_TOKEN_ENDPOINT = `${getHost()}/v1/auth/magicLink`;
 const SEND_MAGIC_LINK_ENDPOINT = `${getHost()}/v1/email/sendMagicLink`;
-const RqUid = getRqUid();
 
 test('/v1/email/sendMagicLink/', async () => {
   const email = 'iryabinin@gmail.com';
-  const {data: { tokenId }} = await post(GENERATE_TOKEN_ENDPOINT, JSON.stringify({RqUid, email}));
-  const {data, code} = await post(SEND_MAGIC_LINK_ENDPOINT, JSON.stringify({RqUid, email, tokenId}));
+  const {data: { tokenId }} = await post(GENERATE_TOKEN_ENDPOINT, JSON.stringify({email}));
+  const {code} = await post(SEND_MAGIC_LINK_ENDPOINT, JSON.stringify({email, tokenId}));
   expect(code).toBe(200);
-  expect(data.RqUid).toEqual(RqUid);
 });
 
 test('/v1/email/sendMagicLink/ POST without tokenId', async () => {
   const email = 'iryabinin@gmail.com';
-  const {data, code} = await post(SEND_MAGIC_LINK_ENDPOINT, JSON.stringify({RqUid, email}));
+  const {data, code} = await post(SEND_MAGIC_LINK_ENDPOINT, JSON.stringify({email}));
   expect(code).toBe(400);
-  expect(data.RqUid).toEqual(RqUid);
   expect(data.message).toBeDefined();
 });
 
 test('/v1/email/sendMagicLink/ POST incorrect format tokenId', async () => {
   const email = 'iryabinin@gmail.com';
   const tokenId = 'incorrect token';
-  const {data, code} = await post(SEND_MAGIC_LINK_ENDPOINT, JSON.stringify({RqUid, email, tokenId}));
+  const {data, code} = await post(SEND_MAGIC_LINK_ENDPOINT, JSON.stringify({email, tokenId}));
   expect(code).toBe(400);
-  expect(data.RqUid).toEqual(RqUid);
   expect(data.message).toBeDefined();
 });
 
 test('/v1/email/sendMagicLink/ POST without email', async () => {
   const email = 'iryabinin@gmail.com';
-  const {data: { tokenId }} = await post(GENERATE_TOKEN_ENDPOINT, JSON.stringify({RqUid, email}));
-  const {data, code} = await post(SEND_MAGIC_LINK_ENDPOINT, JSON.stringify({RqUid, tokenId}));
+  const {data: { tokenId }} = await post(GENERATE_TOKEN_ENDPOINT, JSON.stringify({email}));
+  const {data, code} = await post(SEND_MAGIC_LINK_ENDPOINT, JSON.stringify({tokenId}));
   expect(code).toBe(400);
-  expect(data.RqUid).toEqual(RqUid);
   expect(data.message).toBeDefined();
 });
 
 test('/v1/email/sendMagicLink/ POST incorrect format email', async () => {
   const email = 'iryabinin@gmail.com';
   const incorrectEmail = 'incorrect format';
-  const {data: { tokenId }} = await post(GENERATE_TOKEN_ENDPOINT, JSON.stringify({RqUid, email}));
-  const {data, code} = await post(SEND_MAGIC_LINK_ENDPOINT, JSON.stringify({RqUid, email: incorrectEmail, tokenId}));
-  expect(code).toBe(400);
-  expect(data.RqUid).toEqual(RqUid);
-  expect(data.message).toBeDefined();
-});
-
-test('/v1/email/sendMagicLink/ POST without RqUid', async () => {
-  const email = 'iryabinin@gmail.com';
-  const {data: { tokenId }} = await post(GENERATE_TOKEN_ENDPOINT, JSON.stringify({RqUid, email}));
-  const {data, code} = await post(SEND_MAGIC_LINK_ENDPOINT, JSON.stringify({email, tokenId}));
+  const {data: { tokenId }} = await post(GENERATE_TOKEN_ENDPOINT, JSON.stringify({email}));
+  const {data, code} = await post(SEND_MAGIC_LINK_ENDPOINT, JSON.stringify({email: incorrectEmail, tokenId}));
   expect(code).toBe(400);
   expect(data.message).toBeDefined();
 });
@@ -74,6 +60,6 @@ test('/v1/email/sendMagicLink/ POST without RqUid', async () => {
 test('/v1/email/sendMagicLink/ POST non-existed token', async () => {
   const email = 'iryabinin@gmail.com';
   const nonExistedToken = '00000000-0000-0000-0000-000000000000';
-  const {code} = await post(SEND_MAGIC_LINK_ENDPOINT, JSON.stringify({RqUid, email, tokenId: nonExistedToken}));
+  const {code} = await post(SEND_MAGIC_LINK_ENDPOINT, JSON.stringify({email, tokenId: nonExistedToken}));
   expect(code).toBe(404);
 });

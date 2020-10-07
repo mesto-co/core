@@ -16,7 +16,6 @@
 
 import express from 'express';
 import { S3 } from 'aws-sdk';
-import {getArgs} from '../utils';
 import Busboy from 'busboy';
 const config = require('../../config.js');
 
@@ -46,8 +45,6 @@ async function uploadFileToS3(content: Buffer, mimeType: string) {
 const uploadRouter = express.Router();
 uploadRouter.route('/')
     .post(async (request, response) => {
-      const {RqUid} = getArgs(request);
-
       const busboy = new Busboy({
         headers: request.headers,
         limits: {
@@ -80,16 +77,16 @@ uploadRouter.route('/')
         file.on('end', async () => {
           try {
             if (errorCode > 0)
-              return response.status(500).json({RqUid, errorMessage, errorCode}).end();
+              return response.status(500).json({errorMessage, errorCode}).end();
 
             const content = Buffer.concat(temp);
             const path = await uploadFileToS3(content, mimetype);
 
             const url = `https://${config.imageUpload.bucketName}.s3.amazonaws.com/` + path;
-            return response.status(200).json({RqUid, path: path, url: url }).end();
+            return response.status(200).json({path: path, url: url }).end();
           } catch (e) {
             console.error('uploadImage error', e);
-            return response.status(500).json({RqUid}).end();
+            return response.status(500).json({}).end();
           }
         });
       });

@@ -36,8 +36,6 @@ const ContactEntries = () => knex('Contact');
 const FriendEntries = () => knex('Friend');
 
 const handleUserRequestById = async (id: string, selfInfo: boolean, request: any, response: any) => {
-  const {RqUid} = getArgs(request);
-
   try {
     const contactsPromise = ContactEntries()
         .select([
@@ -76,9 +74,9 @@ const handleUserRequestById = async (id: string, selfInfo: boolean, request: any
     const [contacts, user, isFriend] = (await Promise.allSettled([contactsPromise, userPromise, isFriendPromise])).map(result => result.status === 'fulfilled' ? result.value : null);
 
     if (!user)
-      return response.status(404).json({RqUid}).end();
+      return response.status(404).json({}).end();
     if (!contacts)
-      return response.status(500).json({RqUid}).end();
+      return response.status(500).json({}).end();
 
     const result = {
       isFriend: !!isFriend,
@@ -86,10 +84,10 @@ const handleUserRequestById = async (id: string, selfInfo: boolean, request: any
       ...user
     };
 
-    response.status(200).json({RqUid, user: result}).end();
+    response.status(200).json({user: result}).end();
   } catch (e) {
     console.debug('handleUserRequestById error', e);
-    response.status(500).json({RqUid}).end();
+    response.status(500).json({}).end();
   }
 };
 
@@ -106,7 +104,7 @@ userController.route('/')
       await handleUserRequestById(request.user!.id!, true, request, response);
     })
     .put(async (request, response) => {
-      const { RqUid, location, role = null, about, fullName, skills = null, imagePath } = getArgs(request);
+      const { location, role = null, about, fullName, skills = null, imagePath } = getArgs(request);
       if (request.user) {
         try {
           const id = request.user.id;
@@ -118,13 +116,13 @@ userController.route('/')
             skills: skills,
             imagePath: imagePath
           });
-          response.status(200).send({ RqUid }).end();
+          response.status(200).json({}).end();
         } catch (error) {
           console.log(error);
-          response.status(500).send(RqUid).end();
+          response.status(500).json({}).end();
         }
       } else {
-        response.status(401).send(RqUid).end();
+        response.status(401).json({}).end();
       }
     });
 
