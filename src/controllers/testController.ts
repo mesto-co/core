@@ -31,38 +31,37 @@ const TestEntries = () => knex('test_entries');
 const entryRouter = express.Router();
 entryRouter.route('/')
     .get(async (request, response) => {
-      const {id, RqUid} = getArgs(request);
+      const {id} = getArgs(request);
       const entry = await TestEntries().where('id', id).first();
       if (entry)
-        response.status(200).json({...entry, RqUid}).end();
+        response.status(200).json({...entry}).end();
       else
-        response.status(404).json({RqUid}).end();
+        response.status(404).json({}).end();
     })
     .put(async (request, response) => {
-      const {id, RqUid, fieldA, fieldB} = getArgs(request);
+      const {id, fieldA, fieldB} = getArgs(request);
       await TestEntries().where('id', id).update({fieldA, fieldB});
-      response.status(200).send({RqUid}).end();
+      response.status(200).send({}).end();
     })
     .delete(async (request, response) => {
-      const {id, RqUid} = getArgs(request);
+      const {id} = getArgs(request);
       await TestEntries().where('id', id).del();
-      response.status(200).send({RqUid}).end();
+      response.status(200).send({}).end();
     });
 
 const router = express.Router();
 router.route('/')
     .get(async (request, response) => {
-      const {RqUid} = getArgs(request);
       // TODO(ak239spb): how will we do pagination.
       // TODO(ak239spb): nice way to handle database errors.
-      response.status(200).json({RqUid, entries: await TestEntries().select()}).end();
+      response.status(200).json({entries: await TestEntries().select()}).end();
     })
     .post(async (request, response, next) => {
-      const {RqUid, fieldA, fieldB} = getArgs(request);
+      const {fieldA, fieldB} = getArgs(request);
       try {
         const [id] = await TestEntries().returning('id').insert({fieldA, fieldB});
         if (id)
-          response.status(200).json({id, RqUid}).end();
+          response.status(200).json({id}).end();
         else
           response.status(500).json({}).end();
       } catch (e) {
@@ -70,4 +69,11 @@ router.route('/')
       }
     });
 
-export { entryRouter as TestEntryController, router as TestController };
+const successRouter = express.Router();
+successRouter.route('/')
+    .get(async (request, response) => response.status(200).json({}).end())
+    .post(async (request, response) => response.status(200).json({}).end())
+    .put(async (request, response) => response.status(200).json({}).end())
+    .delete(async (request, response) => response.status(200).json({}).end());
+
+export { entryRouter as TestEntryController, router as TestController, successRouter as TestSuccessRouter };

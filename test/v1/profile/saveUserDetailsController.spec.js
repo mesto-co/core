@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const { put, get, getHost, getRqUid, getAuthHeader } = require('../../utils.js');
+const { put, get, getHost, getAuthHeader } = require('../../utils.js');
 const header = getAuthHeader({
   id: '00000000-1111-2222-3333-000000000008',
   fullName: 'Volodymyr',
 });
 
 const ENDPOINT = `${getHost()}/v1/user`;
-const RqUid = getRqUid();
 const about = 'Я пишу о себе';
 const location = 'Киев, Украина';
 const skills = ['Improvements'];
@@ -29,22 +28,20 @@ const fullName = 'Volodymyr';
 const imagePath = 'https://a.png';
 
 test('/v1/user', async () => {
-  const {data, code} = await put(ENDPOINT, JSON.stringify({RqUid, location, about, skills, role, fullName, imagePath }), header);
+  const {code} = await put(ENDPOINT, JSON.stringify({location, about, skills, role, fullName, imagePath }), header);
   expect(code).toBe(200);
-  expect(data.RqUid).toEqual(RqUid);
 
-  const {data: {user}} = await get(ENDPOINT + '?RqUid=' + RqUid, header);
+  const {data: {user}} = await get(ENDPOINT, header);
   expect(user.fullName).toBe(fullName);
   expect(user.role).toBe(role);
   expect(user.about).toBe(about);
   expect(user.imagePath).toBe(imagePath);
 
 
-  const {data: saveUserWithoutRoleData, code: saveUserWithoutRoleCode} = await put(ENDPOINT, JSON.stringify({RqUid, location, about, skills, fullName, imagePath }), header);
+  const {code: saveUserWithoutRoleCode} = await put(ENDPOINT, JSON.stringify({location, about, skills, fullName, imagePath }), header);
   expect(saveUserWithoutRoleCode).toBe(200);
-  expect(saveUserWithoutRoleData.RqUid).toEqual(RqUid);
 
-  const {data: {user: userWithoutRole}} = await get(ENDPOINT + '?RqUid=' + RqUid, header);
+  const {data: {user: userWithoutRole}} = await get(ENDPOINT, header);
   expect(userWithoutRole.fullName).toBe(fullName);
   expect(userWithoutRole.role).toBe(null);
   expect(userWithoutRole.about).toBe(about);
@@ -52,13 +49,7 @@ test('/v1/user', async () => {
 });
 
 test('/v1/user PUT without userInput', async () => {
-  const {data, code} = await put(ENDPOINT, JSON.stringify({RqUid}), header);
-  expect(code).toBe(400);
-  expect(data.RqUid).toEqual(RqUid);
-});
-
-test('/v1/user PUT without RqUid', async () => {
-  const {code} = await put(ENDPOINT, JSON.stringify({location, about, skills, role, fullName}), header);
+  const {code} = await put(ENDPOINT, JSON.stringify({}), header);
   expect(code).toBe(400);
 });
 
@@ -66,7 +57,7 @@ test('/v1/user PUT skills are not an array', async () => {
   const about = 'Я пишу о себе';
   const location =  'Киев, Украина';
   const skills = 'not an array';
-  const {data, code} = await put(ENDPOINT, JSON.stringify({RqUid, location, about, skills}), header);
+  const {data, code} = await put(ENDPOINT, JSON.stringify({location, about, skills}), header);
   expect(code).toBe(400);
   expect(data.message).toBeDefined();
 });
@@ -76,21 +67,20 @@ test('/v1/user PUT skill item is not a string', async () => {
   const about = 'Я пишу о себе';
   const location =  'Киев, Украина';
   const skills = [1, 2, 3];
-  const {data, code} = await put(ENDPOINT, JSON.stringify({RqUid, location, about, skills}), header);
+  const {data, code} = await put(ENDPOINT, JSON.stringify({location, about, skills}), header);
   expect(code).toBe(400);
   expect(data.message).toBeDefined();
 });
 
 test('/v1/user empty string is 400', async () => {
-  await check({RqUid, location: ''});
-  await check({RqUid, about: ''});
-  await check({RqUid, fullName: ''});
-  await check({RqUid, role: ''});
-  await check({RqUid, skills: ['']});
+  await check({location: ''});
+  await check({about: ''});
+  await check({fullName: ''});
+  await check({role: ''});
+  await check({skills: ['']});
 
   async function check(updatedData) {
-    const {data, code} = await put(ENDPOINT, JSON.stringify(updatedData), header);
+    const {code} = await put(ENDPOINT, JSON.stringify(updatedData), header);
     expect(code).toBe(400);
-    expect(data.RqUid).toEqual(RqUid);
   }
 });

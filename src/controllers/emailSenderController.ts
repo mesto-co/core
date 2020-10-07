@@ -37,7 +37,7 @@ const UserTokenEntries = () => knex('UserToken');
 const emailMagicLinkSenderRouter = express.Router();
 emailMagicLinkSenderRouter.route('/')
     .post(async (request, response) => {
-      const {email, tokenId, RqUid} = getArgs(request);
+      const {email, tokenId} = getArgs(request);
 
       try {
         const user = await UserEntries().where('email', email).andWhere('status', UserStatus.APPROVED).first();
@@ -49,21 +49,21 @@ emailMagicLinkSenderRouter.route('/')
           if (userToken) {
             return jsonwebtoken.verify(userToken.token, refreshJwtSecret,{algorithms: ['HS256']}, async (err: VerifyErrors | null) => {
               if (err)
-                return response.status(404).json({RqUid}).end();
+                return response.status(404).json({}).end();
 
               const magicLink = `${magicLinkUrl}token=${userToken.token}`;
               await emailService.sendMagicLinkEmail(email, fullName, magicLink);
-              return response.status(200).json({RqUid}).end();
+              return response.status(200).json({}).end();
             });
           }
 
-          return response.status(404).json({RqUid}).end();
+          return response.status(404).json({}).end();
         }
 
-        response.status(404).json({RqUid}).end();
+        response.status(404).json({}).end();
       } catch (e) {
         console.debug('email/sendMagicLink error', e);
-        response.status(500).json({RqUid}).end();
+        response.status(500).json({}).end();
       }
     });
 

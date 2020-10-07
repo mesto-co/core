@@ -26,7 +26,7 @@ const UserEntries = () => knex('User');
 const router = express.Router();
 router.route('/')
     .post(async (request, response) => {
-      const {RqUid, query, currentPage, perPage, onlyFriends} = getArgs(request);
+      const {query, currentPage, perPage, onlyFriends} = getArgs(request);
       const {id: userId} = request.user!;
       try {
         const fields = [ 'User.id', 'fullName', 'username', 'imagePath', 'location', 'about', 'role', 'skills', 'status'];
@@ -55,10 +55,10 @@ router.route('/')
 
         // TODO(ak239spb): nice way to handle database errors.
 
-        response.status(200).json({RqUid, entries}).end();
+        response.status(200).json({entries}).end();
       } catch (e) {
         console.debug('POST profile/search error', e);
-        response.status(500).json({RqUid}).end();
+        response.status(500).json({}).end();
       }
     });
 

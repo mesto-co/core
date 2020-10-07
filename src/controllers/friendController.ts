@@ -25,46 +25,46 @@ const FriendEntries = () => knex('Friend');
 const friendEntryRouter = express.Router();
 friendEntryRouter.route('/')
     .post(async (request, response) => {
-      const {friendId, RqUid} = getArgs(request);
+      const {friendId} = getArgs(request);
       const {id: userId} = request.user!;
 
       if (friendId === userId)
-        return response.status(400).json({RqUid, message: 'You cannot add yourself as a friend'}).end();
+        return response.status(400).json({message: 'You cannot add yourself as a friend'}).end();
 
       try {
         const friend = await UserEntries().where('id', friendId).first('status');
 
         if (!friend || friend.status !== UserStatus.APPROVED)
-          return response.status(404).json({RqUid}).end();
+          return response.status(404).json({}).end();
 
         const [id] = await FriendEntries().returning('id').insert({friendId, userId});
 
         if (id)
-          return response.status(201).json({RqUid}).end();
+          return response.status(201).json({}).end();
 
-        return response.status(500).json({RqUid}).end();
+        return response.status(500).json({}).end();
       } catch (e) {
         console.debug('POST user/friend/:friendId error', e);
 
         if (e.code === '23505')
-          return response.status(209).json({RqUid}).end();
+          return response.status(209).json({}).end();
 
-        response.status(500).json({RqUid}).end();
+        response.status(500).json({}).end();
       }
     })
     .delete(async (request, response) => {
-      const {friendId, RqUid} = getArgs(request);
+      const {friendId} = getArgs(request);
       const {id: userId} = request.user!;
       try {
         const count = await FriendEntries().where('userId', userId).andWhere('friendId', friendId).del();
 
         if (count)
-          return response.status(200).json({RqUid}).end();
+          return response.status(200).json({}).end();
 
-        return response.status(209).json({RqUid}).end();
+        return response.status(209).json({}).end();
       } catch (e) {
         console.debug('DELETE user/friend/:friendId error', e);
-        response.status(500).json({RqUid}).end();
+        response.status(500).json({}).end();
       }
     });
 

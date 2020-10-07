@@ -25,17 +25,17 @@ const {
   }
 } = require('../config.js');
 
-function fetch(url, method, body, header = {}) {
+function fetch(url, method, body, header = {'X-Request-Id': 'd5ab3356-f4b4-11ea-adc1-0242ac120002'}) {
   debug('<', url, method, body, header);
   let requestFinished;
   const requestPromise = new Promise(resolve => requestFinished = resolve);
-  const req = (url.startsWith('https:') ? https : http).request(url, { method: method, headers: { 'Content-Type': 'application/json', ...header } }, res => {
+  const req = (url.startsWith('https:') ? https : http).request(url, { method: method, headers: { 'Content-Type': 'application/json', ...header} }, res => {
     res.setEncoding('utf8');
     let data = '';
     res.on('data', chunk => data += chunk);
     res.on('end', () => {
       debug('>', data, res.statusCode);
-      requestFinished({data: data ? JSON.parse(data) : {}, code: res.statusCode});
+      requestFinished({data: data ? JSON.parse(data) : {}, code: res.statusCode, headers: res.headers});
     });
   });
   if (body)
@@ -60,18 +60,15 @@ function del(url, header) {
   return fetch(url, 'DELETE', null, header);
 }
 
-function getRqUid() {
-  return 'd5ab3356-f4b4-11ea-adc1-0242ac120002';
-}
-
 function getHost() {
   return process.env.TEST_API_HOST || 'http://localhost:8080';
 }
 
 function getAuthHeader(user, jwtAlgorithm = 'HS256') {
   return {
-    Authorization: `Bearer ${jsonwebtoken.sign(user, accessJwtSecret, {expiresIn: accessJwtExpiresIn, algorithm: jwtAlgorithm})}`
+    Authorization: `Bearer ${jsonwebtoken.sign(user, accessJwtSecret, {expiresIn: accessJwtExpiresIn, algorithm: jwtAlgorithm})}`,
+    ['X-Request-Id']: 'd5ab3356-f4b4-11ea-adc1-0242ac120002'
   };
 }
 
-module.exports = { get, post, put, del, getRqUid, getHost, getAuthHeader };
+module.exports = { get, post, put, del, getHost, getAuthHeader };

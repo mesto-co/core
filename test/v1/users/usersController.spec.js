@@ -13,23 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const { get, del, post, getHost, getRqUid, getAuthHeader } = require('../../utils.js');
+const { get, del, post, getHost, getAuthHeader } = require('../../utils.js');
 
 const USER_ENDPOINT = `${getHost()}/v1/user`;
 const USERS_ENDPOINT = `${getHost()}/v1/users/`;
 const FRIEND_ENDPOINT = `${getHost()}/v1/user/friend`;
 
-const RqUid = getRqUid();
-const RqUidQueryParam = '?RqUid=' + RqUid;
 const header = getAuthHeader({
   id: '00000000-1111-2222-3333-000000000001',
   fullName: 'Иван Рябинин',
 });
 
 test('GET /v1/users/:id', async () => {
-  const {data, code} = await get(USERS_ENDPOINT + '00000000-1111-2222-3333-000000000001' + RqUidQueryParam, header);
+  const {data, code} = await get(USERS_ENDPOINT + '00000000-1111-2222-3333-000000000001', header);
   expect(code).toBe(200);
-  expect(data.RqUid).toEqual(RqUid);
   const user = data.user;
   expect(user.id).toEqual('00000000-1111-2222-3333-000000000001');
   expect(user.fullName).toEqual('Иван Рябинин');
@@ -42,19 +39,18 @@ test('GET /v1/users/:id', async () => {
 test('GET /v1/users/:id has friend', async () => {
   const friendId = '00000000-1111-2222-3333-000000000005';
 
-  await del(`${FRIEND_ENDPOINT}/${friendId}?RqUid=${RqUid}`, header);
-  await post(`${FRIEND_ENDPOINT}/${friendId}?RqUid=${RqUid}`, '', header);
+  await del(`${FRIEND_ENDPOINT}/${friendId}`, header);
+  await post(`${FRIEND_ENDPOINT}/${friendId}`, '', header);
 
-  const {data, code} = await get(USERS_ENDPOINT + friendId + RqUidQueryParam, header);
+  const {data, code} = await get(USERS_ENDPOINT + friendId, header);
   expect(code).toBe(200);
   const user = data.user;
   expect(user.isFriend).toBeTruthy();
 });
 
 test('GET /v1/user', async () => {
-  const {data, code} = await get(USER_ENDPOINT + RqUidQueryParam, header);
+  const {data, code} = await get(USER_ENDPOINT, header);
   expect(code).toBe(200);
-  expect(data.RqUid).toEqual(RqUid);
   const user = data.user;
   expect(user.id).toEqual('00000000-1111-2222-3333-000000000001');
   expect(user.email).toEqual('iryabinin@gmail.com');
@@ -70,23 +66,23 @@ test('GET /v1/user', async () => {
 });
 
 test('GET /v1/users/:id with invalid id', async () => {
-  const {code} = await get(USERS_ENDPOINT + '100' + RqUidQueryParam, header);
+  const {code} = await get(USERS_ENDPOINT + '100', header);
   expect(code).toBe(400);
 });
 
 test('GET /v1/users/:id without contact', async () => {
-  const {code, data} = await get(USERS_ENDPOINT + '00000000-1111-2222-3333-000000000005' + RqUidQueryParam, header);
+  const {code, data} = await get(USERS_ENDPOINT + '00000000-1111-2222-3333-000000000005', header);
   expect(code).toBe(200);
   const user = data.user;
   expect(user.contacts).toEqual([]);
 });
 
 test('GET /v1/users/:id with rejected id', async () => {
-  const {code} = await get(USERS_ENDPOINT + '00000000-1111-2222-3333-000000000003' + RqUidQueryParam, header);
+  const {code} = await get(USERS_ENDPOINT + '00000000-1111-2222-3333-000000000003', header);
   expect(code).toBe(404);
 });
 
 test('GET /v1/users/:id with unknown id', async () => {
-  const {code} = await get(USERS_ENDPOINT + '99000000-1111-2222-3333-000000000001' + RqUidQueryParam, header);
+  const {code} = await get(USERS_ENDPOINT + '99000000-1111-2222-3333-000000000001', header);
   expect(code).toBe(404);
 });

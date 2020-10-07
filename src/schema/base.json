@@ -3,8 +3,8 @@
         "$id": "#RequestBase",
         "type": "object",
         "properties": {
-            "RqUid": { "type": "string", "format": "uuid" }
+            "X-Request-Id": { "type": "string", "format": "uuid" }
         },
-        "required": [ "RqUid" ]
+        "required": [ "X-Request-Id" ]
     }
 ]

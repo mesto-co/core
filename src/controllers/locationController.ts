@@ -30,7 +30,7 @@ const router = express.Router();
 
 router.route('/')
     .post(async (request, response) => {
-      const { RqUid, userInput } = getArgs(request);
+      const { userInput } = getArgs(request);
       try {
         const location = await knex.select('c.name as cityName','co.name as countryName')
             .from('City AS c')
@@ -38,9 +38,9 @@ router.route('/')
             .leftJoin('Country AS co', 'r.country_id', 'co.id')
             .where('c.name', 'like', `%${userInput}%`)
             .limit(5);
-        response.status(200).json({ location: location.map((e: any) => ({city: e.cityName, country: e.countryName})), RqUid }).end();
+        response.status(200).json({ location: location.map((e: any) => ({city: e.cityName, country: e.countryName})) }).end();
       } catch (error) {
-        response.status(500).json({RqUid}).end();
+        response.status(500).json({}).end();
       }
     });
 export { router as LocationsController };

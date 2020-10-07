@@ -17,7 +17,7 @@
 import express from 'express';
 
 import validator from './validator';
-import {TestController, TestEntryController} from './controllers/testController';
+import {TestController, TestEntryController, TestSuccessRouter} from './controllers/testController';
 import {ProfileController} from './controllers/profileController';
 import {AuthMagicLinkController, RefreshTokenController} from './controllers/authController';
 import {EmailMagicLinkSenderController} from './controllers/emailSenderController';
@@ -28,6 +28,7 @@ import {SingleContactController, AllContactsController} from './controllers/cont
 
 import { errorHandler, notFoundHandler } from './errorHandler';
 import {accessTokenHandler} from './accessTokenHandler';
+import requestIdHandler from './requestId';
 import cors from 'cors';
 import {UserController, UsersController} from './controllers/usersController';
 const app = express();
@@ -35,6 +36,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
+app.use(requestIdHandler);
 
 // all API endpoints are listed below this line.
 function register(app: express.Express, endpoint: string, router: express.Router, authRequired?: boolean) {
@@ -43,6 +45,8 @@ function register(app: express.Express, endpoint: string, router: express.Router
 
 register(app, '/v1/test/:id', TestEntryController);
 register(app, '/v1/test/', TestController);
+register(app, '/test/success', TestSuccessRouter);
+
 register(app, '/v1/auth/magicLink', AuthMagicLinkController);
 register(app, '/v1/auth/refresh', RefreshTokenController);
 register(app, '/v1/email/sendMagicLink', EmailMagicLinkSenderController);

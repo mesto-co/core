@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 import express from 'express';
+import {HEADER_NAME} from './requestId';
 
 const argsSymbol = Symbol('args');
 function getArgs(request: express.Request): any {
   if (typeof request === 'object') {
     const requestObject = request as any;
-    if (!requestObject[argsSymbol])
-      requestObject[argsSymbol] = Object.assign({}, request.body, request.params, request.query);
+    if (!requestObject[argsSymbol]) {
+      const args = Object.assign({}, request.body, request.params, request.query, {[HEADER_NAME]: request.header(HEADER_NAME)});
+      // TODO(ak239spb): code below is for compatibility only, remove it as soon as frontend ready for X-Request-Id header
+      if (!args[HEADER_NAME])
+        args[HEADER_NAME] = args.RqUid || args[HEADER_NAME];
+
+      requestObject[argsSymbol] = args;
+    }
     return requestObject[argsSymbol];
   }
   return {};

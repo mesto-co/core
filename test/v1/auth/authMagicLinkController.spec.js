@@ -13,35 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const { post, getHost, getRqUid } = require('../../utils.js');
+const { post, getHost } = require('../../utils.js');
 
 const ENDPOINT = `${getHost()}/v1/auth/magicLink`;
-const RqUid = getRqUid();
 
 test('/v1/auth/magicLink', async () => {
   const email = 'iryabinin@gmail.com';
-  const {data, code} = await post(ENDPOINT, JSON.stringify({RqUid, email}));
+  const {code} = await post(ENDPOINT, JSON.stringify({email}));
   expect(code).toBe(200);
-  expect(data.RqUid).toEqual(RqUid);
 });
 
 test('/v1/auth/magicLink POST without email', async () => {
-  const {data, code} = await post(ENDPOINT, JSON.stringify({RqUid}));
+  const {data, code} = await post(ENDPOINT, JSON.stringify({}));
   expect(code).toBe(400);
-  expect(data.RqUid).toEqual(RqUid);
   expect(data.message).toBeDefined();
 });
 
 test('/v1/auth/magicLink POST incorrect format email', async () => {
   const email = 'incorrect format';
-  const {data, code} = await post(ENDPOINT, JSON.stringify({RqUid, email}));
-  expect(code).toBe(400);
-  expect(data.RqUid).toEqual(RqUid);
-  expect(data.message).toBeDefined();
-});
-
-test('/v1/auth/magicLink POST without RqUid', async () => {
-  const email = 'iryabinin@gmail.com';
   const {data, code} = await post(ENDPOINT, JSON.stringify({email}));
   expect(code).toBe(400);
   expect(data.message).toBeDefined();
@@ -49,9 +38,8 @@ test('/v1/auth/magicLink POST without RqUid', async () => {
 
 test('/v1/auth/magicLink POST non-existent email', async () => {
   const email = 'non.existent@gmail.com';
-  const {data, code} = await post(ENDPOINT, JSON.stringify({RqUid, email}));
+  const {code} = await post(ENDPOINT, JSON.stringify({email}));
   expect(code).toBe(404);
-  expect(data.RqUid).toEqual(RqUid);
 });
 
 test('/v1/auth/magicLink POST non-approved users', async () => {
@@ -62,8 +50,7 @@ test('/v1/auth/magicLink POST non-approved users', async () => {
   ];
 
   await Promise.all(emails.map(async email => {
-    const {data, code} = await post(ENDPOINT, JSON.stringify({RqUid, email}));
+    const {code} = await post(ENDPOINT, JSON.stringify({email}));
     expect(code).toBe(404);
-    expect(data.RqUid).toEqual(RqUid);
   }));
 });
