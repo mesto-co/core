@@ -62,7 +62,7 @@ test('/v1/contact', async () => {
   await checkCurrentContacts([...getAllExpected, newContactDataExpected]);
 
   // check that we can edit contact
-  const updatedNewContactExpected = {title: 'Zmytitle', url: 'http://myurl'};
+  const updatedNewContactExpected = {title: 'Zmytitle', url: 'myurl'};
   const {code: updateContactCode} = await put(CONTACT_ENDPOINT + newContactData.contactId, JSON.stringify(updatedNewContactExpected), header);
   expect(updateContactCode).toBe(200);
 
@@ -82,9 +82,6 @@ test('/v1/contact bad new contact', async () => {
   await check({title: 'mytitle'});
   // no title
   await check({url: 'http://myurl'});
-  // url is not url
-  await check({title: 'abc', url: 'url'});
-  await check({title: 'abc', url: '@handle'});
   // long title
   await check({title: 'x'.repeat(1024), url: 'http://myurl'});
   // long url

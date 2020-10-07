@@ -225,7 +225,7 @@
       "allOf": [{ "$ref": "#RequestBase" }],
       "properties": {
         "title": { "type": "string", "maxLength": 64, "minLength": 1 },
-        "url": { "type": "string", "format": "uri", "maxLength": 255, "minLength": 1 }
+        "url": { "type": "string", "maxLength": 255, "minLength": 1 }
       },
       "required": [ "title", "url" ]
     },
@@ -235,7 +235,7 @@
       "properties": {
         "contactId": { "type": "string", "format": "uuid" },
         "title": { "type": "string", "maxLength": 64, "minLength": 1 },
-        "url": { "type": "string", "format": "uri", "maxLength": 255, "minLength": 1 }
+        "url": { "type": "string", "maxLength": 255, "minLength": 1 }
       },
       "required": [ "contactId", "title", "url" ]
     },
