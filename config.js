@@ -23,6 +23,9 @@ const lambdaConfig = {
     jwtExpiresIn: process.env.MAGIC_LINK_JWT_EXPIRES_IN || '15m',
     url: process.env.MAGIC_LINK_URL,
   },
+  inviteLink: {
+    jwtExpiresIn: process.env.INVITE_JWT_EXPIRES_IN || '3 days'
+  },
   refreshToken: {
     jwtExpiresIn: process.env.REFRESH_JWT_EXPIRES_IN || '60 days',
 
@@ -42,7 +45,8 @@ const lambdaConfig = {
     senderEmailAddress: process.env.SENDER_EMAIL_ADDRESS,
     smtpHost: process.env.SMTP_HOST,
     smtpUser: process.env.SMTP_USER,
-    smtpPass: process.env.SMTP_PASS
+    smtpPass: process.env.SMTP_PASS,
+    adminUuid: process.env.EMAIL_ADMIN_UUID
   },
   aws: {
     region: process.env.AWS_REGION,

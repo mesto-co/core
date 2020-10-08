@@ -20,7 +20,7 @@ import validator from './validator';
 import {TestController, TestEntryController, TestSuccessRouter} from './controllers/testController';
 import {ProfileController} from './controllers/profileController';
 import {AuthMagicLinkController, RefreshTokenController} from './controllers/authController';
-import {EmailMagicLinkSenderController} from './controllers/emailSenderController';
+import {EmailMagicLinkSenderController, EmailInviteLinkSenderController, EmailBetaSenderController} from './controllers/emailSenderController';
 import {UploadImageController} from './controllers/uploadImageController';
 import {FriendEntryController} from './controllers/friendController';
 import {LocationsController} from './controllers/locationController';
@@ -71,6 +71,10 @@ if (config.enableMethodsForTest) {
 
 // all endpoints closed by authentication below this line
 
+register(app, '/v1/email/sendInviteLink', EmailInviteLinkSenderController, true);
+register(app, '/v1/email/sendBetaLink', EmailBetaSenderController, true);
+
+// Profiles end-points
 register(app, '/v1/user/friend/:friendId', FriendEntryController, true);
 register(app, '/v1/users/:id', UsersController, true);
 register(app, '/v1/user', UserController, true);

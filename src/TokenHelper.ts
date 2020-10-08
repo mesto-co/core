@@ -29,12 +29,19 @@ const {
   refreshToken: {
     jwtExpiresIn: refreshJwtExpiresIn,
     jwtSecret: refreshJwtSecret
+  },
+  inviteLink: {
+    jwtExpiresIn: signJwtExpiresIn
   }
 } = require('../config.js');
 
 class TokenHelper {
   static signMagicLinkToken(payload: RefreshJwtPayloadModel) {
     return jsonwebtoken.sign(payload, refreshJwtSecret, {expiresIn: magicLinkJwtExpiresIn, algorithm: 'HS256'});
+  }
+
+  static signInviteLinkToken(payload: RefreshJwtPayloadModel) {
+    return jsonwebtoken.sign(payload, refreshJwtSecret, {expiresIn: signJwtExpiresIn, algorithm: 'HS256'});
   }
 
   static signAccessToken(payload: UserModel) {
