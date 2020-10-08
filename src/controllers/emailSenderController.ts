@@ -21,6 +21,9 @@ import {getArgs, getEmail} from '../utils';
 import {UserStatus} from '../enums/UserStatus';
 import {emailService} from '../emailService';
 
+import {TokenHelper} from '../TokenHelper';
+import {RefreshJwtPayloadModel} from '../models/RefreshJwtPayloadModel';
+
 const {
   magicLink: {
     url: magicLinkUrl
@@ -29,6 +32,7 @@ const {
     jwtSecret: refreshJwtSecret,
   }
 } = require('../../config.js');
+const config = require('../../config.js');
 
 const UserEntries = () => knex('User');
 
@@ -67,4 +71,39 @@ emailMagicLinkSenderRouter.route('/')
       }
     });
 
-export { emailMagicLinkSenderRouter as EmailMagicLinkSenderController };
+const emailInviteLinkSenderRouter = express.Router();
+emailInviteLinkSenderRouter.route('/')
+    .post(async (request, response) => {
+      const {email} = getArgs(request);
+      const {id: userId} = request.user!;
+      if (userId !== config.emailService.adminUuid)
+        return response.status(403).json({}).end();
+      try {
+        const user = await UserEntries().where('email', email).andWhere('status', UserStatus.APPROVED).first();
+        if (user) {
+          const {id} = user;
+          const payload: RefreshJwtPayloadModel = { userId: id };
+          const jwt = TokenHelper.signInviteLinkToken(payload);
+          await UserTokenEntries().returning('id').insert({token: jwt, userId: id});
+          const magicLink = `${magicLinkUrl}token=${jwt}&redirect=/profile/edit/`;
+          await emailService.sendInviteEmail(email, magicLink);
+          return response.status(200).json({}).end();
+        }
+        response.status(404).json({}).end();
+      } catch (e) {
+        console.debug('email/sendMagicLink error', e);
+        response.status(500).json({}).end();
+      }
+    });
+
+const emailBetaSenderRouter = express.Router();
+emailBetaSenderRouter.route('/')
+    .post(async (request, response) => {
+      const {email} = getArgs(request);
+      const {id: userId} = request.user!;
+      if (userId !== config.emailService.adminUuid)
+        return response.status(403).json({}).end();
+      await emailService.sendBetaEmail(email);
+      return response.status(200).json({}).end();
+    });
+export { emailMagicLinkSenderRouter as EmailMagicLinkSenderController, emailInviteLinkSenderRouter as EmailInviteLinkSenderController, emailBetaSenderRouter as EmailBetaSenderController };
