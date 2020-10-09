@@ -52,7 +52,8 @@ const lambdaConfig = {
   imageUpload: {
     maxSize: process.env.IMAGE_UPLOAD_MAX_SIZE || 50 * 1024,
     bucketName: process.env.IMAGE_UPLOAD_S3_BUCKET_NAME || '',
-    skipUploadToS3: false
+    skipUploadToS3: false,
+    url: process.env.IMAGE_URL
   },
   googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY
 };

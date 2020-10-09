@@ -82,7 +82,7 @@ uploadRouter.route('/')
             const content = Buffer.concat(temp);
             const path = await uploadFileToS3(content, mimetype);
 
-            const url = `https://${config.imageUpload.bucketName}.s3.amazonaws.com/` + path;
+            const url = config.imageUpload.url + path;
             return response.status(200).json({path: path, url: url }).end();
           } catch (e) {
             console.error('uploadImage error', e);
