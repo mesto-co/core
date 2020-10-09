@@ -43,7 +43,7 @@ emailMagicLinkSenderRouter.route('/')
         const user = await UserEntries().where('email', email).andWhere('status', UserStatus.APPROVED).first();
 
         if (user) {
-          const {id, fullName} = user;
+          const {id} = user;
           const userToken = await UserTokenEntries().where('id', tokenId).andWhere('userId', id).first();
 
           if (userToken) {
@@ -52,7 +52,7 @@ emailMagicLinkSenderRouter.route('/')
                 return response.status(404).json({}).end();
 
               const magicLink = `${magicLinkUrl}token=${userToken.token}`;
-              await emailService.sendMagicLinkEmail(email, fullName, magicLink);
+              await emailService.sendMagicLinkEmail(email, magicLink);
               return response.status(200).json({}).end();
             });
           }
