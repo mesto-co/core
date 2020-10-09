@@ -23,6 +23,12 @@ test('/v1/auth/magicLink', async () => {
   expect(code).toBe(200);
 });
 
+test('/v1/auth/magicLink case insensitive', async () => {
+  const email = 'iRyAbInIn@gMaIl.CoM';
+  const {code} = await post(ENDPOINT, JSON.stringify({email}));
+  expect(code).toBe(200);
+});
+
 test('/v1/auth/magicLink POST without email', async () => {
   const {data, code} = await post(ENDPOINT, JSON.stringify({}));
   expect(code).toBe(400);

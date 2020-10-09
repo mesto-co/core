@@ -16,7 +16,7 @@
 
 import express from 'express';
 import knex from '../knex';
-import {getArgs} from '../utils';
+import {getArgs, getEmail} from '../utils';
 import {UserStatus} from '../enums/UserStatus';
 import {TokenHelper} from '../TokenHelper';
 import {RefreshJwtPayloadModel} from '../models/RefreshJwtPayloadModel';
@@ -34,7 +34,7 @@ const UserTokenEntries = () => knex('UserToken');
 const authMagicLinkRouter = express.Router();
 authMagicLinkRouter.route('/')
     .post(async (request, response) => {
-      const {email} = getArgs(request);
+      const email = getEmail(request);
       try {
         const user = await UserEntries().where('email', email).andWhere('status', UserStatus.APPROVED).first();
         if (user) {
