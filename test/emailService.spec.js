@@ -24,7 +24,7 @@ test('should sendMagicLinkEmail', async () => {
 
   spyOn(fs, 'writeFile');
 
-  await emailService.sendMagicLinkEmail('sergey@songtive.com', 'NAME', 'http://link');
+  await emailService.sendMagicLinkEmail('sergey@songtive.com', 'http://link');
 
   // the last parameter is checked in fake function
   expect(emailService.sendEmail).toHaveBeenCalledWith('sergey@songtive.com', 'Линк для входа в mesto.', jasmine.any(String));
@@ -37,6 +37,6 @@ if (!!process.env.AWS_ACCESS_KEY_ID && !process.env.CI) {
   });
 
   test('send sendMagicLinkEmail', async () => {
-    await emailService.sendMagicLinkEmail('sergey@songtive.com', 'NAME', 'http://link');
+    await emailService.sendMagicLinkEmail('sergey@songtive.com', 'http://link');
   });
 }

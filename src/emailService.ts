@@ -24,8 +24,8 @@ import Mail = require('nodemailer/lib/mailer');
 class EmailService {
   _transport: Mail | undefined;
 
-  async sendMagicLinkEmail(recipient: string, fullName: string, magicLink: string) {
-    const content = magicLinkTemplate(fullName, magicLink);
+  async sendMagicLinkEmail(recipient: string, magicLink: string) {
+    const content = magicLinkTemplate(magicLink);
     const subject = 'Линк для входа в mesto.';
 
     if (config.emailService.debug && config.emailService.saveFilePath)
