@@ -33,4 +33,12 @@ function getArgs(request: express.Request): any {
   return {};
 }
 
-export {getArgs};
+function getEmail(request: express.Request): any {
+  const args = getArgs(request);
+  const email = args.email;
+  if (typeof email === 'string')
+    return email.toLowerCase();
+  return email;
+}
+
+export {getArgs, getEmail};
