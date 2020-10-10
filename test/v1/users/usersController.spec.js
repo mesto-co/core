@@ -60,7 +60,7 @@ test('GET /v1/user', async () => {
 
   const compareContacts = (a,b) => a.title === b.title ? 0 : a.title > b.title ? 1 : -1;
   user.contacts.sort(compareContacts);
-  const expectedContacts = [{'title': 'Telegram', 'url': 'http://t.me/iryabinin'}, {'title': 'LinkedIn', 'url': 'https://www.linkedin.com/in/iryabinin'}];
+  const expectedContacts = [{'title': 'telegram', 'url': 'http://t.me/iryabinin'}, {'title': 'linkedin', 'url': 'https://www.linkedin.com/in/iryabinin'}];
   expectedContacts.sort(compareContacts);
   expect(user.contacts).toEqual(expectedContacts);
 });
