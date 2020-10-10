@@ -37,11 +37,11 @@ async function checkCurrentContacts(expected) {
 
 const getAllExpected = [
   {
-    title: 'LinkedIn',
+    title: 'linkedin',
     url: 'https://www.linkedin.com/in/iryabinin'
   },
   {
-    title: 'Telegram',
+    title: 'telegram',
     url: 'http://t.me/iryabinin'
   }
 ];
@@ -52,7 +52,7 @@ test('/v1/contact', async () => {
 
   // check that we can add a contact to current user
   const newContactDataExpected = {
-    title: 'ZNetwork',
+    title: 'znetwork',
     url: 'http://mynextbigsocialnetwork/abc'
   };
   const {code: newContactCode, data: newContactData} = await post(CONTACT_ENDPOINT, JSON.stringify(newContactDataExpected), header);
@@ -62,7 +62,7 @@ test('/v1/contact', async () => {
   await checkCurrentContacts([...getAllExpected, newContactDataExpected]);
 
   // check that we can edit contact
-  const updatedNewContactExpected = {title: 'Zmytitle', url: 'myurl'};
+  const updatedNewContactExpected = {title: 'zmytitle', url: 'myurl'};
   const {code: updateContactCode} = await put(CONTACT_ENDPOINT + newContactData.contactId, JSON.stringify(updatedNewContactExpected), header);
   expect(updateContactCode).toBe(200);
 
@@ -96,7 +96,7 @@ test('/v1/contact bad new contact', async () => {
 
 test('/v1/contact bad updated contact', async () => {
   await checkCurrentContacts(getAllExpected);
-  const testContact = {title: 'Ztest', url: 'http://example.com'};
+  const testContact = {title: 'ztest', url: 'http://example.com'};
   const {data: {contactId}} = await post(CONTACT_ENDPOINT, JSON.stringify(testContact), header);
 
   // contactId is not uuid
@@ -122,7 +122,7 @@ test('/v1/contact bad updated contact', async () => {
 
 test('/v1/contact bad deleted contact', async () => {
   await checkCurrentContacts(getAllExpected);
-  const testContact = {title: 'Ztest', url: 'http://example.com'};
+  const testContact = {title: 'ztest', url: 'http://example.com'};
   const {data: {contactId}} = await post(CONTACT_ENDPOINT, JSON.stringify(testContact), header);
 
   // contactId is not uuid
@@ -156,4 +156,13 @@ test('/v1/contact empty title is error', async () => {
   const testContact = {title: '', url: 'http://example.com'};
   const {code} = await post(CONTACT_ENDPOINT, JSON.stringify(testContact), header);
   expect(code).toBe(400);
+});
+
+test('/v1/contact title is always lower case', async () => {
+  await checkCurrentContacts(getAllExpected);
+  const testContact = {title: 'AbCdEf', url: 'http://example.com'};
+  const {code, data} = await post(CONTACT_ENDPOINT, JSON.stringify(testContact), header);
+  expect(code).toBe(200);
+  await checkCurrentContacts([...getAllExpected, {title: testContact.title.toLowerCase(), url: 'http://example.com'}]);
+  await del(CONTACT_ENDPOINT + data.contactId, header);
 });

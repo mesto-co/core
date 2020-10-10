@@ -25,10 +25,18 @@ interface ContactValue {
     url: string
 }
 
+function getTitle(request: express.Request) {
+  const {title} = getArgs(request);
+  if (typeof title === 'string')
+    return title.toLowerCase();
+  return title;
+}
+
 const singleContactRouter = express.Router();
 singleContactRouter.route('/')
     .put(async (request, response) => {
-      const {contactId, title, url} = getArgs(request);
+      const {contactId, url} = getArgs(request);
+      const title = getTitle(request);
       const {id: currentUserId} = request.user!;
       try {
         const count = await Contact().where('ownerId', currentUserId).andWhere('id', contactId).update({title, url}).count();
@@ -75,7 +83,8 @@ allContactsRouter.route('/')
       }
     })
     .post(async (request, response) => {
-      const {title, url} = getArgs(request);
+      const {url} = getArgs(request);
+      const title = getTitle(request);
       const {id: currentUserId} = request.user!;
       try {
         const [contactId] = await Contact().returning('id').insert({title, url, ownerId: currentUserId});

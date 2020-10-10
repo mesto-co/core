@@ -24,13 +24,13 @@ exports.seed = async function(knex) {
           {
             id: knex.raw('\'00000000-1111-2222-3333-000000000001\'::uuid'),
             ownerId: knex.raw('\'00000000-1111-2222-3333-000000000001\'::uuid'),
-            title: 'Telegram',
+            title: 'telegram',
             url: 'http://t.me/iryabinin'
           },
           {
             id: knex.raw('\'00000000-1111-2222-3333-000000000002\'::uuid'),
             ownerId: knex.raw('\'00000000-1111-2222-3333-000000000001\'::uuid'),
-            title: 'LinkedIn',
+            title: 'linkedin',
             url: 'https://www.linkedin.com/in/iryabinin'
           }]);
       });
