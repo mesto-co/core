@@ -55,7 +55,8 @@ const lambdaConfig = {
     skipUploadToS3: false,
     url: process.env.IMAGE_URL
   },
-  googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY
+  googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
+  corsOrigin: process.env.CORS_ORIGIN || 'https://app.mesto.co/'
 };
 
 const developmentConfig = {
@@ -96,7 +97,9 @@ const developmentConfig = {
     ...lambdaConfig.imageUpload,
 
     skipUploadToS3: true
-  }
+  },
+
+  corsOrigin: '*'
 };
 
 const config = {

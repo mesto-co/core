@@ -31,12 +31,19 @@ import {accessTokenHandler} from './accessTokenHandler';
 import requestIdHandler from './requestId';
 import cors from 'cors';
 import {UserController, UsersController} from './controllers/usersController';
+
+const config = require('../config.js');
+
 const app = express();
 
-app.use(cors());
+app.use(cors({origin: config.corsOrigin}));
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(requestIdHandler);
+app.use((_, res, next) => {
+  res.setHeader('Cache-Control', 'no-store');
+  next();
+});
 
 // all API endpoints are listed below this line.
 function register(app: express.Express, endpoint: string, router: express.Router, authRequired?: boolean) {
