@@ -31,6 +31,7 @@ import {accessTokenHandler} from './accessTokenHandler';
 import requestIdHandler from './requestId';
 import cors from 'cors';
 import {UserController, UsersController} from './controllers/usersController';
+import {InvalidateSearchIndexController} from './search';
 
 const config = require('../config.js');
 
@@ -69,6 +70,9 @@ register(app, '/v1/profile/search/', ProfileController, true);
 register(app, '/v1/location/', LocationsController, true);
 register(app, '/v1/contact/:contactId', SingleContactController, true);
 register(app, '/v1/contact', AllContactsController, true);
+
+// endpoints below are available only for admin account
+register(app, '/v1/admin/invalidateSearchIndex', InvalidateSearchIndexController, true);
 
 
 // two handlers below should be last handlers and their order matters.

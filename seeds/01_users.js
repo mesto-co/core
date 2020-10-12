@@ -16,6 +16,7 @@
 
 
 exports.seed = async function(knex) {
+  await knex('search_word_user').del();
   await knex('UserToken')
       .del();
   await knex('Friend')
@@ -128,6 +129,94 @@ exports.seed = async function(knex) {
             location: 'Бали',
             status: 'approved',
             skills: ['навык 0']
+          },
+          {
+            id: knex.raw('\'00000000-1111-2222-3333-000000000009\'::uuid'),
+            fullName: 'admin',
+            username: 'admin',
+            email: 'admin@gmail.com',
+            passwordHash: 'HASH',
+            about: 'admin',
+            location: 'admin',
+            status: 'approved',
+            skills: []
+          },
+          {
+            id: knex.raw('\'00000000-1111-2222-3333-000000000010\'::uuid'),
+            fullName: 'Сергей',
+            username: 'user10',
+            email: 'user10@gmail.com',
+            passwordHash: 'HASH',
+            about: 'Привет',
+            location: 'admin',
+            status: 'approved',
+            skills: ['startup']
+          },
+          {
+            id: knex.raw('\'00000000-1111-2222-3333-000000000011\'::uuid'),
+            fullName: 'Sergey',
+            username: 'user11',
+            email: 'user11@gmail.com',
+            passwordHash: 'HASH',
+            about: 'Местный',
+            location: 'admin',
+            status: 'approved',
+            skills: ['startup']
+          },
+          {
+            id: knex.raw('\'00000000-1111-2222-3333-000000000012\'::uuid'),
+            fullName: 'Sergei',
+            username: 'user12',
+            email: 'user12@gmail.com',
+            passwordHash: 'HASH',
+            about: 'Привет',
+            location: 'admin',
+            status: 'approved',
+            skills: []
+          },
+          {
+            id: knex.raw('\'00000000-1111-2222-3333-000000000013\'::uuid'),
+            fullName: 'Игорь',
+            username: 'user13',
+            email: 'user13@gmail.com',
+            passwordHash: 'HASH',
+            about: 'Привет',
+            location: 'Сергеев',
+            status: 'approved',
+            skills: []
+          },
+          {
+            id: knex.raw('\'00000000-1111-2222-3333-000000000014\'::uuid'),
+            fullName: 'Никита',
+            username: 'user14',
+            email: 'user14@gmail.com',
+            passwordHash: 'HASH',
+            about: 'Привет',
+            location: '',
+            status: 'approved',
+            skills: ['сергей']
+          },
+          {
+            id: knex.raw('\'00000000-1111-2222-3333-000000000015\'::uuid'),
+            fullName: 'Игорь',
+            username: 'user15',
+            email: 'user15@gmail.com',
+            passwordHash: 'HASH',
+            about: 'Помогаю только Сергеям',
+            location: '',
+            status: 'approved',
+            skills: []
+          },
+          {
+            id: knex.raw('\'00000000-1111-2222-3333-000000000016\'::uuid'),
+            fullName: 'Безликий',
+            username: 'user16',
+            email: 'user16@gmail.com',
+            passwordHash: 'HASH',
+            about: 'Нет about',
+            location: '',
+            status: 'approved',
+            skills: []
           }
         ]);
       });

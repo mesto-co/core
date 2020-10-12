@@ -71,11 +71,6 @@
                             "minLength": 1,
                             "maxLength":255
                         },
-                        "username" : {
-                            "type" : "string",
-                            "minLength": 1,
-                            "maxLength":30
-                        },
                         "location" : {
                             "type" : "string",
                             "minLength": 1,
@@ -85,11 +80,6 @@
                             "type" : "string",
                             "minLength": 1,
                             "maxLength":6000
-                        },
-                        "role" : {
-                            "type" : "string",
-                            "minLength": 1,
-                            "maxLength":255
                         },
                         "skills" : {
                             "type" : "string",
@@ -250,5 +240,9 @@
         "contactId": { "type": "string", "format": "uuid" }
       },
       "required": [ "contactId" ]
+    },
+    {
+      "$id": "#GET>/v1/admin/invalidateSearchIndex",
+      "allOf": [{ "$ref": "#RequestBase" }]
     }
 ]

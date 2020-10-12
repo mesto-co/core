@@ -56,7 +56,8 @@ const lambdaConfig = {
     url: process.env.IMAGE_URL
   },
   googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
-  corsOrigin: process.env.CORS_ORIGIN || 'https://app.mesto.co/'
+  corsOrigin: process.env.CORS_ORIGIN || 'https://app.mesto.co/',
+  adminUserId: process.env.ADMIN_USER_ID
 };
 
 const developmentConfig = {
@@ -99,7 +100,8 @@ const developmentConfig = {
     skipUploadToS3: true
   },
 
-  corsOrigin: '*'
+  corsOrigin: '*',
+  adminUserId: '00000000-1111-2222-3333-000000000009'
 };
 
 const config = {
