@@ -28,6 +28,7 @@ import express from 'express';
 import Knex from 'knex';
 import { UserStatus } from '../enums/UserStatus';
 import knex from '../knex';
+import {invalidateSearchIndex} from '../search';
 
 import {getArgs} from '../utils';
 
@@ -116,6 +117,7 @@ userController.route('/')
             skills: skills,
             imagePath: imagePath
           });
+          await invalidateSearchIndex(id);
           response.status(200).json({}).end();
         } catch (error) {
           console.log(error);

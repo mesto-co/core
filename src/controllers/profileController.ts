@@ -15,47 +15,30 @@
  */
 
 import express from 'express';
-import Knex from 'knex';
-import { UserStatus } from '../enums/UserStatus';
-import knex from '../knex';
 
 import {getArgs} from '../utils';
+import { performSearch } from '../search';
 
-const UserEntries = () => knex('User');
+interface SearchQuery {
+  fullName: string | undefined,
+  location: string | undefined,
+  about: string | undefined,
+  skills: string | undefined
+}
 
 const router = express.Router();
 router.route('/')
     .post(async (request, response) => {
-      const {query, currentPage, perPage, onlyFriends} = getArgs(request);
+      const {query, currentPage, perPage, onlyFriends}: {query: SearchQuery[], currentPage: number, perPage: number, onlyFriends: boolean} = getArgs(request);
       const {id: userId} = request.user!;
       try {
-        const fields = [ 'User.id', 'fullName', 'username', 'imagePath', 'location', 'about', 'role', 'skills', 'status'];
-        let entriesBuilder = UserEntries().select(fields).where((builder: Knex.QueryBuilder) => {
-          for (let index = 0; index < query.length; index++) {
-            builder.where((innerBuilder: Knex.QueryBuilder) => {
-              for (const [key, value] of Object.entries(query[index])) {
-                if (key !== 'skills')
-                  innerBuilder.orWhere(key,'ilike', `%${value}%`);
-                else if (key === 'skills')
-                  innerBuilder.orWhereRaw("array_to_string(skills, ',') ilike ?",[`%${value}%`]);
-              }
-            });
-          }
-        }).where({status: UserStatus.APPROVED}).orderBy('createdAt','asc');
-
-        if (onlyFriends) {
-          entriesBuilder = entriesBuilder.join('Friend', function(joinClause: Knex.JoinClause) {
-            joinClause
-                .on('User.id', 'Friend.friendId')
-                .andOn('Friend.userId', knex.raw('?', [userId]));
-          });
-        }
-
-        const entries = await entriesBuilder.paginate({ perPage, currentPage });
-
-        // TODO(ak239spb): nice way to handle database errors.
-
-        response.status(200).json({entries}).end();
+        const entries = await performSearch(
+            query.map(obj => [obj.fullName, obj.location, obj.about, obj.skills].filter(v => !!v).join(' ')).join(' '),
+            perPage,
+            perPage * (currentPage - 1),
+            userId,
+            onlyFriends);
+        response.status(200).json({entries: {data: entries}}).end();
       } catch (e) {
         console.debug('POST profile/search error', e);
         response.status(500).json({}).end();
