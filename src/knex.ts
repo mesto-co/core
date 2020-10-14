@@ -15,7 +15,4 @@
  */
 
 const knex = require('knex')(require('../knexfile.js'));
-const { attachPaginate } = require('knex-paginate');
-attachPaginate();
-
 export default knex;

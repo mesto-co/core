@@ -32,8 +32,14 @@ router.route('/')
       const {query, currentPage, perPage, onlyFriends}: {query: SearchQuery[], currentPage: number, perPage: number, onlyFriends: boolean} = getArgs(request);
       const {id: userId} = request.user!;
       try {
+        // TODO(ak239): introduce a new search method that will take a string.
+        let words = query.map(obj => [obj.fullName, obj.location, obj.about, obj.skills].filter(v => !!v)).flat();
+        const lastWord = words[words.length - 1];
+        words = Array.from(new Set(words));
+        if (lastWord && words[words.length - 1] !== lastWord)
+          words.push(lastWord);
         const entries = await performSearch(
-            query.map(obj => [obj.fullName, obj.location, obj.about, obj.skills].filter(v => !!v).join(' ')).join(' '),
+            words.join(' '),
             perPage,
             perPage * (currentPage - 1),
             userId,

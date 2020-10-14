@@ -205,7 +205,7 @@ exports.seed = async function(knex) {
             about: 'Помогаю только Сергеям',
             location: '',
             status: 'approved',
-            skills: []
+            skills: ['микроконтроллеры']
           },
           {
             id: knex.raw('\'00000000-1111-2222-3333-000000000016\'::uuid'),

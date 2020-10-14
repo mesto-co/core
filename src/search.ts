@@ -171,11 +171,11 @@ async function performSearch(query: string, limit: number, offset: number, userI
     INNER JOIN search_word_user swu ON swu.base = sw.base
     INNER JOIN "User" u ON swu.user_id = u.id AND u.status = ?
     ${onlyFriends ? 'INNER' : 'LEFT'} JOIN "Friend" f ON u.id = f."friendId" AND f."userId" = ?
-    ${queries.length ? `WHERE ${Array(queries.length).fill('sw.word % ?').join(' OR ')}` : ''}
+    ${queries.length ? `WHERE ${[...Array(queries.length).fill('sw.word % ?'), 'sw.word like CONCAT(?::text, \'%\')'].join(' OR ')}` : ''}
     GROUP BY u.id
     ORDER BY SUM(swu.weight) DESC
     LIMIT ?
-    OFFSET ?`, [UserStatus.APPROVED, userId, ...queries, limit, offset]);
+    OFFSET ?`, queries.length  ? [UserStatus.APPROVED, userId, ...queries, queries[queries.length - 1], limit, offset] : [UserStatus.APPROVED, userId, limit, offset]);
   return result.rows.map((entry: { [x: string]: any; }) => {
     const fields = [ 'rank', 'fullName', 'id', 'username', 'imagePath', 'location', 'about', 'skills', 'isFriend'];
     const out: {[key: string]: string;} = {};
