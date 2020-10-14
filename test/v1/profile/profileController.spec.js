@@ -214,6 +214,16 @@ test('/v1/search/ POST Сергей startup местный', async () => {
   expect(serg3.skills.length).toBe(0);
 });
 
+test('/v1/search/ POST микр', async () => {
+  const testEntry = {'perPage': 100,'query': [{'skills': 'микр'}]};
+  testEntry.currentPage = 1;
+  const {data: getSearchData, code: searchCode} = await post(ENDPOINT, JSON.stringify(testEntry), header);
+  expect(searchCode).toBe(200);
+  const [igor] = getSearchData.entries.data;
+  expect(igor.fullName).toBe('Игорь');
+  expect(igor.skills[0]).toBe('микроконтроллеры');
+});
+
 test('/v1/search/ POST cache is invalidated', async () => {
   const userData = {
     id: '00000000-1111-2222-3333-000000000016',
