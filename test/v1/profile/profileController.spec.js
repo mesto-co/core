@@ -176,6 +176,7 @@ test('/v1/search/ POST Сергей', async () => {
   expect(getSearchData.entries.data.length).toBe(6);
   const [serg1, serg2, serg3, nik, igor1, igor2] = getSearchData.entries.data;
   const sergs = [serg1,serg2,serg3].sort((a,b) => a.fullName.localeCompare(b.fullName));
+  expect(getSearchData.entries.total).toBe(6);
   expect(sergs[0].fullName).toBe('Sergei');
   expect(sergs[1].fullName).toBe('Sergey');
   expect(sergs[2].fullName).toBe('Сергей');
@@ -219,6 +220,7 @@ test('/v1/search/ POST микр', async () => {
   testEntry.currentPage = 1;
   const {data: getSearchData, code: searchCode} = await post(ENDPOINT, JSON.stringify(testEntry), header);
   expect(searchCode).toBe(200);
+  expect(getSearchData.entries.total).toBe(1);
   const [igor] = getSearchData.entries.data;
   expect(igor.fullName).toBe('Игорь');
   expect(igor.skills[0]).toBe('микроконтроллеры');

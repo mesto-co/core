@@ -166,7 +166,7 @@ async function performSearch(query: string, limit: number, offset: number, userI
   const queries = query ? query.toLowerCase().split(/\s+/) : [];
   // We use raw here due... After previous three comments in this file Aleksei is going to migrate us to raw postgres client.
   const result = await knex.raw(`
-    SELECT SUM(swu.weight) as rank, u."fullName", u.id, u.username, u."imagePath", u.location, u.about, u.skills, EVERY(f.id IS NOT NULL) as "isFriend"
+    SELECT SUM(swu.weight) as rank, u."fullName", u.id, u.username, u."imagePath", u.location, u.about, u.skills, EVERY(f.id IS NOT NULL) as "isFriend", count(*) OVER() AS total
     FROM search_word sw
     INNER JOIN search_word_user swu ON swu.base = sw.base
     INNER JOIN "User" u ON swu.user_id = u.id AND u.status = ?
@@ -176,16 +176,19 @@ async function performSearch(query: string, limit: number, offset: number, userI
     ORDER BY SUM(swu.weight) DESC
     LIMIT ?
     OFFSET ?`, queries.length  ? [UserStatus.APPROVED, userId, ...queries, queries[queries.length - 1], limit, offset] : [UserStatus.APPROVED, userId, limit, offset]);
-  return result.rows.map((entry: { [x: string]: any; }) => {
-    const fields = [ 'rank', 'fullName', 'id', 'username', 'imagePath', 'location', 'about', 'skills', 'isFriend'];
-    const out: {[key: string]: string;} = {};
-    for (const field of fields) {
-      const value = entry[field];
-      if  (value !== undefined && value !== null)
-        out[field] = value;
-    }
-    return out;
-  });
+  return {
+    data: result.rows.map((entry: { [x: string]: any; }) => {
+      const fields = [ 'rank', 'fullName', 'id', 'username', 'imagePath', 'location', 'about', 'skills', 'isFriend'];
+      const out: {[key: string]: string;} = {};
+      for (const field of fields) {
+        const value = entry[field];
+        if  (value !== undefined && value !== null)
+          out[field] = value;
+      }
+      return out;
+    }),
+    total: result.rows.length > 0 && (result.rows[0].total * 1) || 0
+  };
 }
 
 const router = express.Router();
