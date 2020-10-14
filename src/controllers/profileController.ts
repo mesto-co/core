@@ -44,7 +44,7 @@ router.route('/')
             perPage * (currentPage - 1),
             userId,
             onlyFriends);
-        response.status(200).json({entries: {data: entries}}).end();
+        response.status(200).json({entries}).end();
       } catch (e) {
         console.debug('POST profile/search error', e);
         response.status(500).json({}).end();
