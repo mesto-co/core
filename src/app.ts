@@ -25,6 +25,7 @@ import {UploadImageController} from './controllers/uploadImageController';
 import {FriendEntryController} from './controllers/friendController';
 import {LocationsController} from './controllers/locationController';
 import {SingleContactController, AllContactsController} from './controllers/contactController';
+import {GetSkillsController} from './controllers/databaseController';
 
 import { errorHandler, notFoundHandler } from './errorHandler';
 import {accessTokenHandler} from './accessTokenHandler';
@@ -61,7 +62,6 @@ register(app, '/v1/email/sendMagicLink', EmailMagicLinkSenderController);
 
 // all endpoints closed by authentication below this line
 
-// Profiles end-points
 register(app, '/v1/user/friend/:friendId', FriendEntryController, true);
 register(app, '/v1/users/:id', UsersController, true);
 register(app, '/v1/user', UserController, true);
@@ -70,6 +70,8 @@ register(app, '/v1/profile/search/', ProfileController, true);
 register(app, '/v1/location/', LocationsController, true);
 register(app, '/v1/contact/:contactId', SingleContactController, true);
 register(app, '/v1/contact', AllContactsController, true);
+
+register(app, '/v1/database/getSkills', GetSkillsController, true);
 
 // endpoints below are available only for admin account
 register(app, '/v1/admin/invalidateSearchIndex', InvalidateSearchIndexController, true);

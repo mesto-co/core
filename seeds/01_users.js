@@ -247,6 +247,20 @@ exports.seed = async function(knex) {
             busy: true,
             status: 'approved',
             skills: []
+          },
+          {
+            id: knex.raw('\'00000000-1111-2222-3333-000000000018\'::uuid'),
+            fullName: 'Навык Навык',
+            username: 'user18',
+            role: 'skill_role',
+            email: 'user18@gmail.com',
+            passwordHash: 'HASH',
+            imagePath: 'https://example.com/a.png',
+            about: 'Все в навыках',
+            location: 'Magadan',
+            busy: true,
+            status: 'approved',
+            skills: ['test_skillA', 'test_skillB', 'test_skillC', 'test_skillAb', 'test_skillМощь']
           }
         ]);
       });
