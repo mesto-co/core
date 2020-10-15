@@ -39,6 +39,7 @@ exports.seed = async function(knex) {
             phone: '',
             about: 'Привет всем! Я Иван Рябинин',
             role: null,
+            busy: true,
             status: 'approved',
             skills: ['Improvements']
           },
@@ -53,6 +54,7 @@ exports.seed = async function(knex) {
             phone: '',
             about: 'Привет всем! Я Заблокирован',
             role: null,
+            busy: false,
             status: 'closed',
             skills: ['Improvements']
           },
@@ -67,6 +69,7 @@ exports.seed = async function(knex) {
             phone: '',
             about: 'Привет всем! Я Отклонен',
             role: null,
+            busy: true,
             status: 'rejected',
             skills: ['Improvements']
           },
@@ -81,6 +84,7 @@ exports.seed = async function(knex) {
             phone: '',
             about: 'Привет всем! Я Жду подтверждения',
             role: null,
+            busy: false,
             status: 'awaiting',
             skills: ['Improvements']
           },
@@ -94,6 +98,7 @@ exports.seed = async function(knex) {
             location: '',
             phone: '',
             about: 'Привет всем! Я Кулибина Настя',
+            busy: true,
             role: null,
             status: 'approved',
             skills: ['MVP', 'Мобильная разработка', 'NodeJS']
@@ -105,6 +110,7 @@ exports.seed = async function(knex) {
             email: 'alex@gmail.com',
             passwordHash: 'HASH',
             about: 'Привет всем!',
+            busy: false,
             status: 'approved',
             skills: ['Improvements']
           },
@@ -116,6 +122,7 @@ exports.seed = async function(knex) {
             passwordHash: 'HASH',
             about: 'Привет всем!',
             location: 'Бали',
+            busy: true,
             status: 'approved',
             skills: ['Improvements']
           },
@@ -127,6 +134,7 @@ exports.seed = async function(knex) {
             passwordHash: 'HASH',
             about: 'тестируюсь на сохранение!',
             location: 'Бали',
+            busy: false,
             status: 'approved',
             skills: ['навык 0']
           },
@@ -138,6 +146,7 @@ exports.seed = async function(knex) {
             passwordHash: 'HASH',
             about: 'admin',
             location: 'admin',
+            busy: true,
             status: 'approved',
             skills: []
           },
@@ -149,6 +158,7 @@ exports.seed = async function(knex) {
             passwordHash: 'HASH',
             about: 'Привет',
             location: 'admin',
+            busy: false,
             status: 'approved',
             skills: ['startup']
           },
@@ -160,6 +170,7 @@ exports.seed = async function(knex) {
             passwordHash: 'HASH',
             about: 'Местный',
             location: 'admin',
+            busy: true,
             status: 'approved',
             skills: ['startup']
           },
@@ -171,6 +182,7 @@ exports.seed = async function(knex) {
             passwordHash: 'HASH',
             about: 'Привет',
             location: 'admin',
+            busy: false,
             status: 'approved',
             skills: []
           },
@@ -182,6 +194,7 @@ exports.seed = async function(knex) {
             passwordHash: 'HASH',
             about: 'Привет',
             location: 'Сергеев',
+            busy: true,
             status: 'approved',
             skills: []
           },
@@ -193,6 +206,7 @@ exports.seed = async function(knex) {
             passwordHash: 'HASH',
             about: 'Привет',
             location: '',
+            busy: false,
             status: 'approved',
             skills: ['сергей']
           },
@@ -204,6 +218,7 @@ exports.seed = async function(knex) {
             passwordHash: 'HASH',
             about: 'Помогаю только Сергеям',
             location: '',
+            busy: true,
             status: 'approved',
             skills: ['микроконтроллеры']
           },
@@ -215,6 +230,21 @@ exports.seed = async function(knex) {
             passwordHash: 'HASH',
             about: 'Нет about',
             location: '',
+            busy: false,
+            status: 'approved',
+            skills: []
+          },
+          {
+            id: knex.raw('\'00000000-1111-2222-3333-000000000017\'::uuid'),
+            fullName: 'Busy Not Busy',
+            username: 'user17',
+            role: 'role',
+            email: 'user17@gmail.com',
+            passwordHash: 'HASH',
+            imagePath: 'https://example.com/a.png',
+            about: 'Очень занят чтобы писать about',
+            location: 'Magadan',
+            busy: true,
             status: 'approved',
             skills: []
           }

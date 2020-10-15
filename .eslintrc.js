@@ -96,6 +96,7 @@ module.exports = {
         }],
         "@typescript-eslint/func-call-spacing": 2,
         "@typescript-eslint/type-annotation-spacing": 2,
+        "eol-last": 2,
 
         // file whitespace
         "no-multiple-empty-lines": [2, {"max": 2}],

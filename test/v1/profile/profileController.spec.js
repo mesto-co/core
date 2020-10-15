@@ -35,6 +35,7 @@ test('/v1/search/ POST', async () => {
   const {data: getSearchData, code: searchCode} = await post(ENDPOINT, JSON.stringify(testEntry), header);
   expect(searchCode).toBe(200);
   expect(getSearchData.entries.data[0].username).toEqual('ivan');
+  expect(getSearchData.entries.data[0].busy).toEqual(true);
 });
 
 test('/v1/search/ POST two correct words: firstName and lastName', async () => {
@@ -46,6 +47,7 @@ test('/v1/search/ POST two correct words: firstName and lastName', async () => {
   expect(getSearchData.entries.data[0].fullName).toEqual('Иван Рябинин');
   expect(getSearchData.entries.data[0].imagePath).toEqual('https://store.playstation.com/store/api/chihiro/00_09_000/container/IN/en/999/EP1257-CUSA07617_00-AV00000000000004/1586170996000/image?w=240&h=240&bg_color=000000&opacity=100&_version=00_09_000');
   expect(getSearchData.entries.data[0].id).toEqual('00000000-1111-2222-3333-000000000001');
+  expect(getSearchData.entries.data[0].busy).toEqual(true);
 });
 
 test('/v1/search/ POST two words: firstName and wrong lastName', async () => {
@@ -54,6 +56,7 @@ test('/v1/search/ POST two words: firstName and wrong lastName', async () => {
   const {data: getSearchData, code: searchCode} = await post(ENDPOINT, JSON.stringify(testEntry), header);
   expect(searchCode).toBe(200);
   expect(getSearchData.entries.data[0].fullName).toEqual('Иван Рябинин');
+  expect(getSearchData.entries.data[0].busy).toEqual(true);
 });
 
 test('/v1/search/ POST param that does not exists', async () => {
@@ -178,8 +181,11 @@ test('/v1/search/ POST Сергей', async () => {
   const sergs = [serg1,serg2,serg3].sort((a,b) => a.fullName.localeCompare(b.fullName));
   expect(getSearchData.entries.total).toBe(6);
   expect(sergs[0].fullName).toBe('Sergei');
+  expect(sergs[0].busy).toEqual(false);
   expect(sergs[1].fullName).toBe('Sergey');
+  expect(sergs[1].busy).toEqual(true);
   expect(sergs[2].fullName).toBe('Сергей');
+  expect(sergs[2].busy).toEqual(false);
   expect(nik.skills[0]).toBe('сергей');
   expect(igor1.location).toBe('Сергеев');
   expect(igor2.about).toBe('Помогаю только Сергеям');
