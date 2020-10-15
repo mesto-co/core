@@ -206,6 +206,10 @@
             "type": "string",
             "format": "uri",
             "minLength": 1
+          },
+          "busy": {
+            "type": "boolean",
+            "defaul": false
           }
       },
       "required":["about","location","fullName"]

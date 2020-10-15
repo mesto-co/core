@@ -84,3 +84,19 @@ test('/v1/user empty string is 400', async () => {
     expect(code).toBe(400);
   }
 });
+
+test('/v1/user update busy', async () => {
+  const header = getAuthHeader({id: '00000000-1111-2222-3333-000000000017', fullName: 'Busy Not Busy'});
+  let {data: {user}} = await get(ENDPOINT, header);
+  user = await flipBusy(user);
+  await flipBusy(user);
+
+  async function flipBusy(user) {
+    user.busy = !user.busy;
+    const {code} = await put(ENDPOINT, JSON.stringify(user), header);
+    expect(code).toEqual(200);
+    const {data: {user: current}} = await get(ENDPOINT, header);
+    expect(current.busy).toEqual(user.busy);
+    return current;
+  }
+});

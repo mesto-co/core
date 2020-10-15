@@ -34,6 +34,7 @@ test('GET /v1/users/:id', async () => {
   expect(user.isFriend).toBeFalsy();
   expect(user.skills).toEqual(['Improvements']);
   expect(user.status).toEqual('approved');
+  expect(user.busy).toEqual(true);
 });
 
 test('GET /v1/users/:id has friend', async () => {
@@ -57,6 +58,7 @@ test('GET /v1/user', async () => {
   expect(user.fullName).toEqual('Иван Рябинин');
   expect(user.skills).toEqual(['Improvements']);
   expect(user.status).toEqual('approved');
+  expect(user.busy).toEqual(true);
 
   const compareContacts = (a,b) => a.title === b.title ? 0 : a.title > b.title ? 1 : -1;
   user.contacts.sort(compareContacts);
@@ -85,4 +87,10 @@ test('GET /v1/users/:id with rejected id', async () => {
 test('GET /v1/users/:id with unknown id', async () => {
   const {code} = await get(USERS_ENDPOINT + '99000000-1111-2222-3333-000000000001', header);
   expect(code).toBe(404);
+});
+
+test('GET /v1/user busy=false', async () => {
+  const {data, code} = await get(USERS_ENDPOINT + '00000000-1111-2222-3333-000000000006', header);
+  expect(code).toBe(200);
+  expect(data.user.busy).toEqual(false);
 });

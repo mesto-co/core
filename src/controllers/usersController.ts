@@ -55,7 +55,8 @@ const handleUserRequestById = async (id: string, selfInfo: boolean, request: any
           'about',
           'role',
           'skills',
-          'status'
+          'status',
+          'busy'
         ].filter(t => !!t))
         .first()
         .where((builder: Knex.QueryBuilder) => {
@@ -105,17 +106,18 @@ userController.route('/')
       await handleUserRequestById(request.user!.id!, true, request, response);
     })
     .put(async (request, response) => {
-      const { location, role = null, about, fullName, skills = null, imagePath } = getArgs(request);
+      const { location, role = null, about, fullName, skills = null, imagePath, busy } = getArgs(request);
       if (request.user) {
         try {
           const id = request.user.id;
           await UserEntries().where('id', id).update({
-            about: about,
-            location: location,
-            role: role,
-            fullName: fullName,
-            skills: skills,
-            imagePath: imagePath
+            about,
+            location,
+            role,
+            fullName,
+            skills,
+            imagePath,
+            busy
           });
           await invalidateSearchIndex(id);
           response.status(200).json({}).end();
