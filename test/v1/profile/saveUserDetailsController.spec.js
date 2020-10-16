@@ -43,7 +43,7 @@ test('/v1/user', async () => {
 
   const {data: {user: userWithoutRole}} = await get(ENDPOINT, header);
   expect(userWithoutRole.fullName).toBe(fullName);
-  expect(userWithoutRole.role).toBe(null);
+  expect(userWithoutRole.role).toBeUndefined();
   expect(userWithoutRole.about).toBe(about);
   expect(userWithoutRole.imagePath).toBe(imagePath);
 });
@@ -97,6 +97,23 @@ test('/v1/user update busy', async () => {
     expect(code).toEqual(200);
     const {data: {user: current}} = await get(ENDPOINT, header);
     expect(current.busy).toEqual(user.busy);
+    return current;
+  }
+});
+
+test('/v1/user update placeId', async () => {
+  const header = getAuthHeader({id: '00000000-1111-2222-3333-000000000019', fullName: 'placeIdTest'});
+  let {data: {user}} = await get(ENDPOINT, header);
+  user = await updatePlaceId(user, 'anotherId');
+  user = await updatePlaceId(user, undefined);
+  await updatePlaceId(user, 'placeid');
+
+  async function updatePlaceId(user, value) {
+    user.placeId = value;
+    const {code} = await put(ENDPOINT, JSON.stringify(user), header);
+    expect(code).toEqual(200);
+    const {data: {user: current}} = await get(ENDPOINT, header);
+    expect(current.placeId).toEqual(value);
     return current;
   }
 });

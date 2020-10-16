@@ -55,11 +55,11 @@ test('/v1/location empty userInput is 400', async () => {
 });
 
 // TODO(ak239spb): it should be a way to mock google places API in some nice way.
-// test('/v1/location POST with sessionToken', async() => {
+// test('/v1/location POST with sessionToken', async () => {
 //   const userInput = 'Ки';
 //   const {data, code} = await post(ENDPOINT, JSON.stringify({userInput, sessionToken: '00000000-1111-2222-3333-000000000001'}), header);
 //   console.log(data, code);
-// })
+// });
 
 test('/v1/location POST invalid sessionToken', async () => {
   const userInput = 'Ки';

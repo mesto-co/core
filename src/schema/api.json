@@ -179,6 +179,10 @@
             "maxLength":255,
             "minLength": 1
           },
+          "placeId": {
+            "type": "string",
+            "isStringNotEmpty": true
+          },
           "about": {
             "type": "string",
             "maxLength":6000,
