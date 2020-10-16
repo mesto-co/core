@@ -261,6 +261,21 @@ exports.seed = async function(knex) {
             busy: true,
             status: 'approved',
             skills: ['test_skillA', 'test_skillB', 'test_skillC', 'test_skillAb', 'test_skillМощь']
+          },
+          {
+            id: knex.raw('\'00000000-1111-2222-3333-000000000019\'::uuid'),
+            fullName: 'placeIdTest',
+            username: 'user19',
+            role: null,
+            email: 'user19@gmail.com',
+            passwordHash: null,
+            imagePath: 'https://example.com/a.png',
+            about: 'Местный',
+            location: 'Magadan',
+            place_id: 'placeid',
+            busy: true,
+            status: 'approved',
+            skills: []
           }
         ]);
       });

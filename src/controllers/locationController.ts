@@ -49,7 +49,10 @@ router.route('/')
               }
             });
           }));
-          const location = result.predictions.map((prediction: any) => prediction.description);
+          const location = result.predictions.map((prediction: {description: string, place_id: string}) => ({
+            description: prediction.description,
+            placeId: prediction.place_id
+          }));
           response.status(200).json({location}).end();
         } catch (error) {
           console.debug('POST /v1/location', error);
