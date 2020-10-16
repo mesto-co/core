@@ -255,7 +255,7 @@
       "properties": {
         "q": { "type": "string", "default": "", "maxLength": 15 },
         "offset": { "type": "integer", "default": 0, "minimum": 0 },
-        "count": { "type": "integer", "default": 10, "minimum": 0 }
+        "count": { "type": "integer", "default": 10, "minimum": 0, "maximum": 1000 }
       }
     }
 ]
