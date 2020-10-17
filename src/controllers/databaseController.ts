@@ -23,8 +23,8 @@ getSkills.route('/')
     .get(async (request, response) => {
       try {
         const {q, offset, count} = getArgs(request);
-        const {rows}: {rows: {skill: string, total: string}[]} = await knex.raw(`
-          SELECT s.skill as skill FROM 
+        const {rows}: {rows: {skill: string}[]} = await knex.raw(`
+          SELECT s.skill as skill FROM
           (SELECT lower(unnest(skills)) as skill FROM "User") s
           GROUP BY s.skill HAVING s.skill like concat(?::text, '%')
           LIMIT ? OFFSET ?`, [q, count, offset]);
@@ -42,6 +42,27 @@ getSkills.route('/')
       }
     });
 
+const getLocations = express.Router();
+getLocations.route('/')
+    .get(async (request, response) => {
+      try {
+        const {q, count} = getArgs(request);
+        // TODO(ak239): add btree index as soon as we get rid of nulls in the place_id and location.
+        const {rows}: {rows: {location: string, place_id: string}[]} = await knex.raw(`
+          SELECT u.location as location, u.place_id as place_id FROM "User" u
+          GROUP BY u.location, u.place_id
+          HAVING u.location IS NOT NULL AND u.place_id IS NOT NULL AND u.location like concat(?::text, '%')
+          LIMIT ?`, [q, count]);
+        response.status(200).send({
+          items: rows.map(row => ({ location: row.location, placeId: row.place_id }))
+        });
+      } catch (e) {
+        console.debug('/v1/database/getLocations error', e);
+        response.status(500).json({}).end();
+      }
+    });
+
 export {
-  getSkills as GetSkillsController
+  getSkills as GetSkillsController,
+  getLocations as GetLocationsController
 };

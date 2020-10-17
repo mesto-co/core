@@ -18,6 +18,7 @@ import express from 'express';
 import { UserStatus } from '../enums/UserStatus';
 import knex from '../knex';
 import {invalidateSearchIndex} from '../search';
+const {enableMethodsForTest} = require('../../config.js');
 
 import {getArgs} from '../utils';
 
@@ -121,7 +122,69 @@ userController.route('/')
       }
     });
 
+const addUsersForTest = express.Router();
+const delUsersForTest = express.Router();
+if (enableMethodsForTest) {
+  const faker = require('faker');
+  faker.locale = 'ru';
+
+  interface TestUser
+  {
+    id: string | undefined;
+    fullName: string | undefined;
+    username: string | undefined;
+    email: string | undefined;
+    passwordHash: string | undefined;
+    imagePath: string | undefined;
+    location: string | undefined;
+    place_id: string | undefined;
+    phone: string | undefined;
+    about: string | undefined;
+    role: string | undefined;
+    busy: boolean | undefined;
+    status: string | undefined;
+    skills: string[] | undefined;
+  }
+
+  addUsersForTest.route('/')
+      .post(async (request, response) => {
+        const {users}: {users: TestUser[]} = getArgs(request);
+        const genUser = (override: TestUser): TestUser => {
+          return Object.assign({
+            id: faker.random.uuid(),
+            fullName: faker.name.findName(),
+            username: faker.internet.userName(),
+            email: faker.internet.email(),
+            passwordHash: null,
+            imagePath: faker.image.imageUrl(),
+            location: faker.address.city(),
+            place_id: faker.random.uuid(),
+            phone: faker.phone.phoneNumber(),
+            about: 'Привет!',
+            role: null,
+            busy: faker.random.boolean(),
+            status: 'approved',
+            skills: []
+          }, override);
+        };
+        const newUsers = users.map(genUser);
+        const columns = Object.keys(newUsers[0]);
+        await knex.raw(`INSERT INTO "User"(${Array(columns.length).fill('??').join(',')}) VALUES ${Array(newUsers.length).fill('(' + (Array(columns.length).fill('?').join(',') + ')')).join(',')}`,
+            [...columns, ...newUsers.map(user => Object.values(user)).flat()]);
+        response.status(200).json(newUsers.map(user => user.id)).end();
+      });
+
+  delUsersForTest.route('/')
+      .post(async (request, response) => {
+        const {userIds}: {userIds: string[]} = getArgs(request);
+        await knex.raw(`DELETE FROM "User" WHERE id IN (${Array(userIds.length).fill('?').join(',')})`, userIds);
+        response.status(200).json({}).end();
+      });
+}
+
 export {
   userController as UserController,
-  usersController as UsersController
+  usersController as UsersController,
+  addUsersForTest as AddUsersForTest,
+  delUsersForTest as DelUsersForTest
 };

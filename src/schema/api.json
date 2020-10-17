@@ -261,5 +261,23 @@
         "offset": { "type": "integer", "default": 0, "minimum": 0 },
         "count": { "type": "integer", "default": 10, "minimum": 0, "maximum": 1000 }
       }
+    },
+    {
+      "$id": "#GET>/v1/database/getLocations",
+      "allOf": [{ "$ref": "#RequestBase" }],
+      "properties": {
+        "q": { "type": "string", "default": "", "maxLength": 15 },
+        "count": { "type": "integer", "default": 10, "minimum": 1, "maximum": 1000 }
+      }
+    },
+    {
+      "$id": "#POST>/v1/admin/addUsersForTest",
+      "allOf": [{ "$ref": "#RequestBase" }],
+      "type": "object"
+    },
+    {
+      "$id": "#POST>/v1/admin/delUsersForTest",
+      "allOf": [{ "$ref": "#RequestBase" }],
+      "type": "object"
     }
 ]

@@ -57,7 +57,8 @@ const lambdaConfig = {
   },
   googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
   corsOrigin: process.env.CORS_ORIGIN || 'https://app.mesto.co/',
-  adminUserId: process.env.ADMIN_USER_ID
+  adminUserId: process.env.ADMIN_USER_ID,
+  enableMethodsForTest: false
 };
 
 const developmentConfig = {
@@ -101,7 +102,8 @@ const developmentConfig = {
   },
 
   corsOrigin: '*',
-  adminUserId: '00000000-1111-2222-3333-000000000009'
+  adminUserId: '00000000-1111-2222-3333-000000000009',
+  enableMethodsForTest: true
 };
 
 const config = {
