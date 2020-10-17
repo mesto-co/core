@@ -13,19 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const { post, getHost } = require('../../utils.js');
+
+const { post, getHost, genUsers } = require('../../utils.js');
 
 const ENDPOINT = `${getHost()}/v1/auth/magicLink`;
 
+let [email, awaitingEmail, closedEmail, rejectedEmail] = [null, null, null, null];
+
+beforeEach(async () => {
+  const users = await genUsers(4, [{
+  },{
+    status: 'awaiting'
+  },{
+    status: 'closed'
+  },{
+    status: 'rejected'
+  }]);
+  ([email, awaitingEmail, closedEmail, rejectedEmail] = users.map(user => user.email));
+});
+
 test('/v1/auth/magicLink', async () => {
-  const email = 'iryabinin@gmail.com';
   const {code} = await post(ENDPOINT, JSON.stringify({email}));
   expect(code).toBe(200);
 });
 
 test('/v1/auth/magicLink case insensitive', async () => {
-  const email = 'iRyAbInIn@gMaIl.CoM';
-  const {code} = await post(ENDPOINT, JSON.stringify({email}));
+  const {code} = await post(ENDPOINT, JSON.stringify({email: email.toUpperCase()}));
   expect(code).toBe(200);
 });
 
@@ -49,11 +62,7 @@ test('/v1/auth/magicLink POST non-existent email', async () => {
 });
 
 test('/v1/auth/magicLink POST non-approved users', async () => {
-  const emails = [
-    'awaiting@gmail.com',
-    'closed@gmail.com',
-    'rejected@gmail.com'
-  ];
+  const emails = [awaitingEmail, closedEmail, rejectedEmail];
 
   await Promise.all(emails.map(async email => {
     const {code} = await post(ENDPOINT, JSON.stringify({email}));

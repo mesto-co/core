@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const { post, getHost } = require('../../utils.js');
+const { post, getHost, genUsers } = require('../../utils.js');
 
 const ENDPOINT = `${getHost()}/v1/auth/refresh`;
 const fs = require('fs').promises;
@@ -27,8 +27,12 @@ const {
   }
 } = require('../../../config.js');
 
+let email = null;
+beforeEach(async () => {
+  ([{email}] = await genUsers(1602996153726, [{}]));
+});
+
 test('/v1/auth/refresh', async () => {
-  const email = 'iryabinin@gmail.com';
   const {data: { tokenId }} = await post(GENERATE_TOKEN_ENDPOINT, JSON.stringify({email}));
   await post(SEND_MAGIC_LINK_ENDPOINT, JSON.stringify({email, tokenId}));
 

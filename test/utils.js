@@ -71,13 +71,19 @@ function getAuthHeader(user, jwtAlgorithm = 'HS256') {
   };
 }
 
-let users = [];
-async function genUsers(overrides) {
-  const {code, data: userIds} = await post(`${getHost()}/v1/admin/addUsersForTest`, JSON.stringify({users: overrides}));
+let userIds = [];
+async function genUsers(seed, overrides) {
+  if (!seed) {
+    seed = Date.now();
+    console.log('Possible seed value: ', seed);
+  }
+  const {code, data: users} = await post(`${getHost()}/v1/admin/addUsersForTest`, JSON.stringify({users: overrides, seed}));
   expect(code).toBe(200);
-  expect(userIds.length).toBe(overrides.length);
-  users.push(...userIds);
-  return userIds;
+  userIds.push(...users.map(user => user.id));
+  expect(users.length).toBe(overrides.length);
+  const {code: invalidateCode} = await post(`${getHost()}/v1/admin/invalidateSearchIndexForTest`, JSON.stringify({userIds}));
+  expect(invalidateCode).toBe(200);
+  return users;
 }
 
 async function delUsers(userIds) {
@@ -86,9 +92,9 @@ async function delUsers(userIds) {
 }
 
 afterEach(async () => {
-  if (users.length) {
-    await delUsers(users);
-    users = [];
+  if (userIds.length) {
+    await delUsers(userIds);
+    userIds = [];
   }
 });
 

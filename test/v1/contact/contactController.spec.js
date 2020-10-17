@@ -14,12 +14,27 @@
  * limitations under the License.
  */
 
-const { get, post, put, del, getHost, getAuthHeader } = require('../../utils.js');
+const { get, post, put, del, getHost, getAuthHeader, genUsers } = require('../../utils.js');
 
 const CONTACT_ENDPOINT = `${getHost()}/v1/contact/`;
-const header = getAuthHeader({
-  id: '00000000-1111-2222-3333-000000000001',
-  fullName: 'Иван Рябинин',
+
+const getAllExpected = [
+  {
+    title: 'linkedin',
+    url: 'https://www.linkedin.com/in/username'
+  },
+  {
+    title: 'telegram',
+    url: 'http://t.me/username'
+  }
+];
+
+let header = null;
+beforeEach(async () => {
+  const [{id, fullName}] = await genUsers(6, [{}]);
+  header = getAuthHeader({id, fullName});
+  for (const contact of getAllExpected)
+    await post(CONTACT_ENDPOINT, JSON.stringify(contact), header);
 });
 
 async function checkCurrentContacts(expected) {
@@ -34,17 +49,6 @@ async function checkCurrentContacts(expected) {
     expect(getAllData.contacts[i].url).toBe(expected[i].url);
   }
 }
-
-const getAllExpected = [
-  {
-    title: 'linkedin',
-    url: 'https://www.linkedin.com/in/iryabinin'
-  },
-  {
-    title: 'telegram',
-    url: 'http://t.me/iryabinin'
-  }
-];
 
 test('/v1/contact', async () => {
   // check that we can fetch contacts for current user

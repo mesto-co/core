@@ -13,19 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const { put, get, getHost, getAuthHeader } = require('../../utils.js');
-const header = getAuthHeader({
-  id: '00000000-1111-2222-3333-000000000008',
-  fullName: 'Volodymyr',
-});
+const { put, get, getHost, getAuthHeader, genUsers } = require('../../utils.js');
 
 const ENDPOINT = `${getHost()}/v1/user`;
-const about = 'Я пишу о себе';
-const location = 'Киев, Украина';
-const skills = ['Improvements'];
-const role = 'Менеджер';
-const fullName = 'Volodymyr';
-const imagePath = 'https://a.png';
+let about = null;
+let location = null;
+let role = null;
+let fullName = null;
+let imagePath = null;
+
+let header = null;
+beforeEach(async () => {
+  const [user] = await genUsers(10, [{busy: false}]);
+  about = user.about;
+  location = user.location;
+  skills = user.skills;
+  role = user.role;
+  fullName = user.fullName;
+  imagePath = user.imagePath;
+  header = getAuthHeader({id: user.id, fullName});
+});
 
 test('/v1/user', async () => {
   const {code} = await put(ENDPOINT, JSON.stringify({location, about, skills, role, fullName, imagePath }), header);
@@ -36,7 +43,6 @@ test('/v1/user', async () => {
   expect(user.role).toBe(role);
   expect(user.about).toBe(about);
   expect(user.imagePath).toBe(imagePath);
-
 
   const {code: saveUserWithoutRoleCode} = await put(ENDPOINT, JSON.stringify({location, about, skills, fullName, imagePath }), header);
   expect(saveUserWithoutRoleCode).toBe(200);
@@ -86,7 +92,6 @@ test('/v1/user empty string is 400', async () => {
 });
 
 test('/v1/user update busy', async () => {
-  const header = getAuthHeader({id: '00000000-1111-2222-3333-000000000017', fullName: 'Busy Not Busy'});
   let {data: {user}} = await get(ENDPOINT, header);
   user = await flipBusy(user);
   await flipBusy(user);
@@ -102,7 +107,6 @@ test('/v1/user update busy', async () => {
 });
 
 test('/v1/user update placeId', async () => {
-  const header = getAuthHeader({id: '00000000-1111-2222-3333-000000000019', fullName: 'placeIdTest'});
   let {data: {user}} = await get(ENDPOINT, header);
   user = await updatePlaceId(user, 'anotherId');
   user = await updatePlaceId(user, undefined);

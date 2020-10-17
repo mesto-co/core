@@ -22,6 +22,11 @@ const authHeader = getAuthHeader({
 });
 
 test('GET /v1/database/getSkills', async () => {
+  await genUsers(2, [{
+    skills: ['test_skillA', 'test_skillB', 'test_skillC', 'test_skillAb', 'test_skillМощь']
+  }, {
+    skills: ['a', 'b', 'c', 'd', 'e', 'f'] // ensure at least 11 unique skills in the database
+  }]);
   await check('test_skill', 0, 100, 200, 5, ['test_skilla', 'test_skillab', 'test_skillb', 'test_skillc', 'test_skillмощь']);
   await check('test_skill', 0, 1000, 200, 5, ['test_skilla', 'test_skillab', 'test_skillb', 'test_skillc', 'test_skillмощь']);
   await check('test_skill', 0, 1, 200, 5, ['test_skilla']);
@@ -103,7 +108,7 @@ test('GET /v1/database/getLocations', async () => {
     location: 'Казань',
     place_id: 'kazan_id'
   }];
-  await genUsers(locations);
+  await genUsers(3, locations);
 
   // if we have two cities with different placeId - we return both.
   await check('Петер', 5, 200, [{
