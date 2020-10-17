@@ -45,6 +45,7 @@
     "aws-sdk": "2.712.0",
     "eslint": "^7.8.1",
     "eslint-plugin-notice": "^0.9.10",
+    "faker": "^5.1.0",
     "form-data": "^3.0.0",
     "jest": "^26.4.2",
     "nodemon": "^2.0.4",

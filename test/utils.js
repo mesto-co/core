@@ -71,4 +71,25 @@ function getAuthHeader(user, jwtAlgorithm = 'HS256') {
   };
 }
 
-module.exports = { get, post, put, del, getHost, getAuthHeader };
+let users = [];
+async function genUsers(overrides) {
+  const {code, data: userIds} = await post(`${getHost()}/v1/admin/addUsersForTest`, JSON.stringify({users: overrides}));
+  expect(code).toBe(200);
+  expect(userIds.length).toBe(overrides.length);
+  users.push(...userIds);
+  return userIds;
+}
+
+async function delUsers(userIds) {
+  const {code: delCode} = await post(`${getHost()}/v1/admin/delUsersForTest`, JSON.stringify({userIds}));
+  expect(delCode).toBe(200);
+}
+
+afterEach(async () => {
+  if (users.length) {
+    await delUsers(users);
+    users = [];
+  }
+});
+
+module.exports = { get, post, put, del, getHost, getAuthHeader, genUsers, delUsers };

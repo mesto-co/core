@@ -25,13 +25,13 @@ import {UploadImageController} from './controllers/uploadImageController';
 import {FriendEntryController} from './controllers/friendController';
 import {LocationsController} from './controllers/locationController';
 import {SingleContactController, AllContactsController} from './controllers/contactController';
-import {GetSkillsController} from './controllers/databaseController';
+import {GetSkillsController, GetLocationsController} from './controllers/databaseController';
 
 import { errorHandler, notFoundHandler } from './errorHandler';
 import {accessTokenHandler} from './accessTokenHandler';
 import requestIdHandler from './requestId';
 import cors from 'cors';
-import {UserController, UsersController} from './controllers/usersController';
+import {UserController, UsersController, AddUsersForTest, DelUsersForTest} from './controllers/usersController';
 import {InvalidateSearchIndexController} from './search';
 
 const config = require('../config.js');
@@ -60,6 +60,11 @@ register(app, '/v1/auth/magicLink', AuthMagicLinkController);
 register(app, '/v1/auth/refresh', RefreshTokenController);
 register(app, '/v1/email/sendMagicLink', EmailMagicLinkSenderController);
 
+if (config.enableMethodsForTest) {
+  register(app, '/v1/admin/addUsersForTest', AddUsersForTest, false);
+  register(app, '/v1/admin/delUsersForTest', DelUsersForTest, false);
+}
+
 // all endpoints closed by authentication below this line
 
 register(app, '/v1/user/friend/:friendId', FriendEntryController, true);
@@ -72,10 +77,10 @@ register(app, '/v1/contact/:contactId', SingleContactController, true);
 register(app, '/v1/contact', AllContactsController, true);
 
 register(app, '/v1/database/getSkills', GetSkillsController, true);
+register(app, '/v1/database/getLocations', GetLocationsController, true);
 
 // endpoints below are available only for admin account
 register(app, '/v1/admin/invalidateSearchIndex', InvalidateSearchIndexController, true);
-
 
 // two handlers below should be last handlers and their order matters.
 app.use(notFoundHandler);
