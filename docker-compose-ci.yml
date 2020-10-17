@@ -23,6 +23,8 @@ services:
     ports:
      - "8080:8080"
     command: "npm run start:in-docker:ci"
+    environment:
+     - NODE_ENV=test
 
   postgres:
     image: postgres

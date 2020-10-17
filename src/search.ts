@@ -17,7 +17,8 @@ import express from 'express';
 
 import knex from './knex';
 import { UserStatus } from './enums/UserStatus';
-const {adminUserId} = require('../config.js');
+import {getArgs} from './utils';
+const {adminUserId, enableMethodsForTest} = require('../config.js');
 
 interface UserEntryForSearch {
     fullName: string,
@@ -201,8 +202,19 @@ router.route('/')
       response.status(200).json({}).end();
     });
 
+const invalidateSearchIndexForTestRouter = express.Router();
+if (enableMethodsForTest) {
+  invalidateSearchIndexForTestRouter.route('/')
+      .post(async (request, response) => {
+        const {userIds}: {userIds: string[]} = getArgs(request);
+        await Promise.allSettled(userIds.map(id => invalidateSearchIndex(id)));
+        response.status(200).json({}).end();
+      });
+}
+
 export {
   invalidateSearchIndex,
   performSearch,
-  router as InvalidateSearchIndexController
+  router as InvalidateSearchIndexController,
+  invalidateSearchIndexForTestRouter as InvalidateSearchIndexForTest
 };

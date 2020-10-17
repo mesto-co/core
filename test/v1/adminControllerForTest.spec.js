@@ -36,17 +36,17 @@ test('POST /v1/admin/(add|del)UsersForTest', async () => {
   const addUrl = `${getHost()}/v1/admin/addUsersForTest`;
   const delUrl = `${getHost()}/v1/admin/delUsersForTest`;
   {
-    const {code, data: userIds} = await post(addUrl, JSON.stringify({users: [{location: 'location'}]}));
+    const {code, data: users} = await post(addUrl, JSON.stringify({users: [{location: 'location'}]}));
     expect(code).toBe(200);
-    expect(userIds.length).toBe(1);
+    expect(users.length).toBe(1);
 
-    const {code: delCode} = await post(delUrl, JSON.stringify({userIds}));
+    const {code: delCode} = await post(delUrl, JSON.stringify({userIds: users.map(user => user.id)}));
     expect(delCode).toBe(200);
   }
   {
     // genUsers test utility works.
-    const ids = await genUsers([{location: 'location'}]);
-    expect(ids.length).toBe(1);
-    await delUsers(ids);
+    const users = await genUsers(1, [{location: 'location'}]);
+    expect(users.length).toBe(1);
+    await delUsers(users.map(user => user.id));
   }
 });

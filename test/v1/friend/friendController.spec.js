@@ -13,17 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const { post, del, getHost, getAuthHeader } = require('../../utils.js');
+const { post, del, getHost, getAuthHeader, genUsers } = require('../../utils.js');
 
 const ENDPOINT = `${getHost()}/v1/user/friend`;
-const header = getAuthHeader({
-  id: '00000000-1111-2222-3333-000000000001',
-  fullName: 'Иван Рябинин',
+
+let header = null;
+let userId = null;
+let friendId = null;
+let awaitingId = null;
+let closedId = null;
+let rejectedId = null;
+beforeEach(async () => {
+  let fullName = null;
+  ([{id: userId, fullName}, {id: friendId}, {id: awaitingId}, {id: closedId}, {id: rejectedId}] = await genUsers(8, [{
+  },{
+  },{
+    status: 'awaiting'
+  },{
+    status: 'closed'
+  },{
+    status: 'rejected'
+  }]));
+  header = getAuthHeader({id: userId, fullName});
 });
 
 test('/v1/user/friend/ POST', async () => {
-  const friendId = '00000000-1111-2222-3333-000000000005';
-
   await del(`${ENDPOINT}/${friendId}`, header);
 
   const {code: addCode} = await post(`${ENDPOINT}/${friendId}`, JSON.stringify({}), header);
@@ -34,13 +48,8 @@ test('/v1/user/friend/ POST', async () => {
 });
 
 test('/v1/user/friend/ POST friend is not approved', async () => {
-  const friendIds = [
-    '00000000-1111-2222-3333-000000000004', // Status: awaiting
-    '00000000-1111-2222-3333-000000000002', // Status: closed
-    '00000000-1111-2222-3333-000000000003' // Status: rejected
-  ];
-
-  await Promise.all(friendIds.map(async friendId => {
+  const friendIds = [ awaitingId, closedId, rejectedId ];
+  await Promise.allSettled(friendIds.map(async friendId => {
     const {code: addCode} = await post(`${ENDPOINT}/${friendId}`, JSON.stringify({}), header);
     expect(addCode).toBe(404);
   }));
@@ -62,16 +71,12 @@ test('/v1/user/friend/ POST friend is not uuid', async () => {
 });
 
 test('/v1/user/friend/ POST without accessToken', async () => {
-  const friendId = '00000000-1111-2222-3333-000000000005';
-
   const {code: addCode} = await post(`${ENDPOINT}/${friendId}`, JSON.stringify({}));
   expect(addCode).toBe(401);
 });
 
 
 test('/v1/user/friend/ DELETE', async () => {
-  const friendId = '00000000-1111-2222-3333-000000000005';
-
   await post(`${ENDPOINT}/${friendId}`, JSON.stringify({}), header);
 
   const {code: deleteCode} = await del(`${ENDPOINT}/${friendId}`, header);
@@ -90,8 +95,6 @@ test('/v1/user/friend/ DELETE friend is not uuid', async () => {
 });
 
 test('/v1/user/friend/ DELETE without accessToken', async () => {
-  const friendId = '00000000-1111-2222-3333-000000000005';
-
   const {code: deleteCode} = await del(`${ENDPOINT}/${friendId}`);
   expect(deleteCode).toBe(401);
 });

@@ -31,8 +31,8 @@ import { errorHandler, notFoundHandler } from './errorHandler';
 import {accessTokenHandler} from './accessTokenHandler';
 import requestIdHandler from './requestId';
 import cors from 'cors';
-import {UserController, UsersController, AddUsersForTest, DelUsersForTest} from './controllers/usersController';
-import {InvalidateSearchIndexController} from './search';
+import {UserController, UsersController, AddUsersForTest, DelUsersForTest, addFakeUsers, getUsersCount} from './controllers/usersController';
+import {InvalidateSearchIndexController, InvalidateSearchIndexForTest} from './search';
 
 const config = require('../config.js');
 
@@ -63,6 +63,7 @@ register(app, '/v1/email/sendMagicLink', EmailMagicLinkSenderController);
 if (config.enableMethodsForTest) {
   register(app, '/v1/admin/addUsersForTest', AddUsersForTest, false);
   register(app, '/v1/admin/delUsersForTest', DelUsersForTest, false);
+  register(app, '/v1/admin/invalidateSearchIndexForTest', InvalidateSearchIndexForTest, false);
 }
 
 // all endpoints closed by authentication below this line
@@ -86,5 +87,8 @@ register(app, '/v1/admin/invalidateSearchIndex', InvalidateSearchIndexController
 app.use(notFoundHandler);
 app.use(errorHandler);
 // do not add any handlers below this line, notFound one should be last!
+
+if ((!process.env.NODE_ENV || process.env.NODE_ENV === 'development') && addFakeUsers && getUsersCount)
+  getUsersCount().then(count => (count < 100 && addFakeUsers) ? addFakeUsers(Array(100 - count).fill({})) : void 0);
 
 export default app;
