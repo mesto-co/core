@@ -29,6 +29,8 @@ function fetch(url, method, body, header = {'X-Request-Id': 'd5ab3356-f4b4-11ea-
   debug('<', url, method, body, header);
   let requestFinished;
   const requestPromise = new Promise(resolve => requestFinished = resolve);
+  if (body && typeof body !== 'string')
+    body = JSON.stringify(body);
   const req = (url.startsWith('https:') ? https : http).request(url, { method: method, headers: { 'Content-Type': 'application/json', ...header} }, res => {
     res.setEncoding('utf8');
     let data = '';

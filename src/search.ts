@@ -120,32 +120,51 @@ async function invalidateSearchIndex(userId: string) {
   const generateRuEnSearchWord = (word: string) => {
     const ru = toRu(word).substr(0, 32);
     const en = toEn(word).substr(0, 32);
-    return [ru, ru, en, ru, word, ru];
+    return [[ru, ru], [en, ru], [word, ru]];
   };
 
-  const searchWords = [
+  const searchWordPairs = [
     ...wordsFromFullName.map(generateRuEnSearchWord),
     ...wordsFromLocation.map(generateRuEnSearchWord),
-    ...wordsFromSkills.map(word => [word, word]),
-    ...wordsFromAbout.map(word => [word, word]),
+    ...wordsFromSkills.map(word => [[word, word]]),
+    ...wordsFromAbout.map(word => [[word, word]]),
   ].flat();
+
+  // We should sort words to avoid deadlock in INSERT INTO below, the example of bad queries run in parallel:
+  // INSERT INTO ... (a, b), (c, d)
+  // INSERT INTO ... (c, d), (a, b)
+  searchWordPairs.sort((wordsA, wordsB) => {
+    for (let i = 0; i < wordsA.length; ++i) {
+      if (wordsA[i] < wordsB[i])
+        return -1;
+      if (wordsA[i] > wordsB[i])
+        return 1;
+    }
+    return 0;
+  });
+
+  const searchWords = searchWordPairs.flat();
 
   // We use raw here due to the lack of ON CONFLICT support in the knex.
   // https://github.com/knex/knex/issues/3186
-  await knex.raw(`
-    INSERT INTO search_word(word, base)
-    VALUES ${Array(searchWords.length / 2).fill('(?,?)').join(',')}
-    ON CONFLICT DO NOTHING`, searchWords);
+  for (let i = 0; i < 5; ++i) {
+    try {
+      await knex.raw(`
+        INSERT INTO search_word(word, base)
+        VALUES ${Array(searchWords.length / 2).fill('(?,?)').join(',')}
+        ON CONFLICT DO NOTHING`, searchWords);
+      break;
+    } catch (e) {
+    }
+  }
 
-  // We use raw here due to the lack of UPDATE ... FROM support in the knex.
-  // https://github.com/knex/knex/issues/1586
   await knex.raw(`
     UPDATE search_word sw
     SET base = base_sw.base
     FROM search_word base_sw
-    WHERE sw.base = base_sw.word AND base_sw.base IS NOT NULL AND sw.base != base_sw.base;`);
+    WHERE sw.base = base_sw.word AND base_sw.base IS NOT NULL AND sw.base != base_sw.base`);
 
-  await knex('search_word_user').where('user_id', userId).del();
+  await knex.raw('DELETE FROM search_word_user WHERE user_id = ?', [userId]);
 
   await knex('search_word_user').insert([
     ...wordsFromFullName.map(word => ({base: word, user_id: userId, weight: 1000})),
@@ -163,6 +182,17 @@ async function invalidateSearchIndex(userId: string) {
     WHERE user_id = ? AND swu.base = base_sw.word AND base_sw.base IS NOT NULL AND swu.base != base_sw.base;`, userId);
 }
 
+function sanitizeUser(entry: { [x: string]: any; }) {
+  const fields = [ 'rank', 'fullName', 'id', 'username', 'imagePath', 'location', 'about', 'skills', 'isFriend', 'busy', 'placeId'];
+  const out: {[key: string]: string;} = {};
+  for (const field of fields) {
+    const value = entry[field];
+    if  (value !== undefined && value !== null)
+      out[field] = value;
+  }
+  return out;
+}
+
 async function performSearch(query: string, limit: number, offset: number, userId: string, onlyFriends: boolean) {
   const queries = query ? query.toLowerCase().split(/\s+/) : [];
   // We use raw here due... After previous three comments in this file Aleksei is going to migrate us to raw postgres client.
@@ -178,16 +208,7 @@ async function performSearch(query: string, limit: number, offset: number, userI
     LIMIT ?
     OFFSET ?`, queries.length  ? [UserStatus.APPROVED, userId, ...queries, queries[queries.length - 1], limit, offset] : [UserStatus.APPROVED, userId, limit, offset]);
   return {
-    data: result.rows.map((entry: { [x: string]: any; }) => {
-      const fields = [ 'rank', 'fullName', 'id', 'username', 'imagePath', 'location', 'about', 'skills', 'isFriend', 'busy'];
-      const out: {[key: string]: string;} = {};
-      for (const field of fields) {
-        const value = entry[field];
-        if  (value !== undefined && value !== null)
-          out[field] = value;
-      }
-      return out;
-    }),
+    data: result.rows.map(sanitizeUser),
     total: result.rows.length > 0 && (result.rows[0].total * 1) || 0
   };
 }
@@ -212,9 +233,62 @@ if (enableMethodsForTest) {
       });
 }
 
+interface V1SearchArgs {
+  q: string;
+  placeId: string|undefined;
+  skills: string[];
+  busy: string|undefined;
+  offset: number;
+  count: number;
+  isFriend: boolean
+}
+
+const searchController = express.Router();
+searchController.route('/').post(async (request, response) => {
+  try {
+    const {id: userId} = request.user!;
+    const {q, placeId, skills, busy, offset, count, isFriend}: V1SearchArgs = getArgs(request);
+    const parts = q ? q.toLowerCase().split(/\s+/) : [];
+    const partEntries = parts.map((part, index) => ['part' + index, part]);
+    const queryClause = partEntries.map(([key]) => 'sw.word % :' + key).join(' OR ') + (partEntries.length ? ` OR sw.word LIKE CONCAT(:part${partEntries.length - 1}::text, '%')` : '');
+    const userWhereClause = ' u.status = :userStatus' +
+      (placeId ? ' AND u.place_id = :placeId' : '') +
+      (skills.length ? ' AND u.skills @> :skills' : '') +
+      (busy !== undefined ? ' AND u.busy = :busy' : '');
+
+    const result = await knex.raw(`
+      SELECT u."fullName", u.id, u.username, u."imagePath", u.location, u.about, u.skills, u.busy, u.place_id as "placeId", EVERY(f.id IS NOT NULL) as "isFriend"
+      FROM search_word sw
+      INNER JOIN search_word_user swu ON sw.base = swu.base ${queryClause ? 'AND (' + queryClause + ')' : ''}
+      INNER JOIN "User" u ON swu.user_id = u.id AND ${userWhereClause}
+      ${isFriend ? 'INNER' : 'LEFT'} JOIN "Friend" f ON u.id = f."friendId" AND f."userId" = :userId
+      GROUP BY u.id
+      ORDER BY sum(swu.weight) DESC
+      OFFSET :offset LIMIT :count`, {
+      ...Object.fromEntries(partEntries), userTable: 'User', busy, placeId, skills, offset, count, userStatus: UserStatus.APPROVED, userId
+    });
+    const total = await knex.raw(`
+      SELECT count(distinct u.id) as total
+      FROM search_word sw
+      INNER JOIN search_word_user swu ON sw.base = swu.base ${queryClause ? 'AND (' + queryClause + ')' : ''}
+      INNER JOIN "User" u ON swu.user_id = u.id AND ${userWhereClause}
+      ${isFriend ? 'INNER' : 'LEFT'} JOIN "Friend" f ON u.id = f."friendId" AND f."userId" = :userId`, {
+      ...Object.fromEntries(partEntries), userTable: 'User', busy, placeId, skills, offset, count, userStatus: UserStatus.APPROVED, userId
+    });
+    response.status(200).send({
+      data: result.rows.map(sanitizeUser),
+      total: total.rows.length ? parseInt(total.rows[0].total, 10) : 0
+    }).end();
+  } catch (e) {
+    console.debug('POST /v1/search: ' + e);
+    response.status(500).send({}).end();
+  }
+});
+
 export {
   invalidateSearchIndex,
   performSearch,
+  searchController as SearchController,
   router as InvalidateSearchIndexController,
   invalidateSearchIndexForTestRouter as InvalidateSearchIndexForTest
 };

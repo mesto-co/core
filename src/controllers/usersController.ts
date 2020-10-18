@@ -172,7 +172,7 @@ if (enableMethodsForTest) {
     const columns = Object.keys(newUsers[0]);
     await knex.raw(`INSERT INTO "User"(${Array(columns.length).fill('??').join(',')}) VALUES ${Array(newUsers.length).fill('(' + (Array(columns.length).fill('?').join(',') + ')')).join(',')} ON CONFLICT DO NOTHING`,
         [...columns, ...newUsers.map(user => Object.values(user)).flat()]);
-    await Promise.allSettled(newUsers.map(user => user.id ? invalidateSearchIndex(user.id) : void 0));
+    await Promise.allSettled(newUsers.map(user => (user.id ? invalidateSearchIndex(user.id) : void 0)));
     return newUsers;
   };
 

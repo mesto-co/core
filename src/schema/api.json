@@ -219,6 +219,19 @@
       "required":["about","location","fullName"]
     },
     {
+      "$id": "#POST>/v1/search",
+      "allOf": [{ "$ref": "#RequestBase" }],
+      "properties": {
+        "q": { "type": "string", "default": "", "maxLength": 32 },
+        "placeId": { "type": "string", "maxLength": 64 },
+        "skills": { "type": "array", "items": { "type": "string", "isStringNotEmpty": true, "maxLength": 32 }, "default": [] },
+        "busy": { "type": "boolean" },
+        "isFriend": { "type": "boolean" },
+        "offset": { "type": "integer", "minimum": 0, "default": 0 },
+        "count": { "type": "integer", "minimum": 1, "maximum": 1000, "default": 10 }
+      }
+    },
+    {
       "$id": "#GET>/v1/contact",
       "allOf": [{ "$ref": "#RequestBase" }]
     },
