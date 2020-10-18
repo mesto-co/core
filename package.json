@@ -1,6 +1,6 @@
 {
   "name": "@mesto/core",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Единый API для проектов, связанных с mesto.co",
   "repository": "github:mesto-co/core.git",
   "homepage": "https://github.com/mesto-co/core#readme",
