@@ -39,8 +39,8 @@ test('GET /v1/database/getSkills', async () => {
   await check('test_skill', 0, -10, 400, 0, []);
   await check('test_skill', 0, 5.5, 400, 0, []);
   await check('test_skill', 0, 1001, 400, 0, []);
-  await check('a'.repeat(15), 0, 10, 200, 0, []);
-  await check('a'.repeat(16), 0, 10, 400, 0, []);
+  await check('a'.repeat(32), 0, 10, 200, 0, []);
+  await check('a'.repeat(33), 0, 10, 400, 0, []);
 
   {
     const url = `${getHost()}/v1/database/getSkills`;
