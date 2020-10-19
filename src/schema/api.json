@@ -284,6 +284,10 @@
       }
     },
     {
+      "$id": "#GET>/v1/peerboard/auth",
+      "allOf": [{ "$ref": "#RequestBase" }]
+    },
+    {
       "$id": "#POST>/v1/admin/addUsersForTest",
       "allOf": [{ "$ref": "#RequestBase" }],
       "type": "object"
