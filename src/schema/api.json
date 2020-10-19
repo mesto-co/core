@@ -270,7 +270,7 @@
       "$id": "#GET>/v1/database/getSkills",
       "allOf": [{ "$ref": "#RequestBase" }],
       "properties": {
-        "q": { "type": "string", "default": "", "maxLength": 15 },
+        "q": { "type": "string", "default": "", "maxLength": 32 },
         "offset": { "type": "integer", "default": 0, "minimum": 0 },
         "count": { "type": "integer", "default": 10, "minimum": 0, "maximum": 1000 }
       }
