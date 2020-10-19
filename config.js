@@ -56,6 +56,7 @@ const lambdaConfig = {
     url: process.env.IMAGE_URL
   },
   googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
+  peerboardAuthToken: process.env.PEERBOARD_AUTH_TOKEN,
   corsOrigin: process.env.CORS_ORIGIN || 'https://app.mesto.co/',
   adminUserId: process.env.ADMIN_USER_ID,
   enableMethodsForTest: false,
@@ -104,6 +105,7 @@ const developmentConfig = {
     skipUploadToS3: true
   },
 
+  peerboardAuthToken: process.env.PEERBOARD_AUTH_TOKEN || 'peerboard-auth-token',
   corsOrigin: '*',
   adminUserId: '00000000-1111-2222-3333-000000000009',
   enableMethodsForTest: true,
