@@ -297,5 +297,35 @@
       "$id": "#POST>/v1/admin/invalidateSearchIndexForTest",
       "allOf": [{ "$ref": "#RequestBase" }],
       "type": "object"
+    },
+    {
+      "$id": "#POST>/v1/openland/sendCode",
+      "allOf": [{ "$ref": "#RequestBase" }],
+      "properties": {
+        "openland": { "type": "string", "maxLength": 64 }
+      },
+      "required": [ "openland" ]
+    },
+    {
+      "$id": "#POST>/v1/openland/getUser",
+      "allOf": [{ "$ref": "#RequestBase" }],
+      "properties": {
+        "openland": { "type": "string", "maxLength": 64 }
+      },
+      "required": [ "openland" ]
+    },
+    {
+      "$id": "#POST>/v1/openland/verifyCode",
+      "allOf": [{ "$ref": "#RequestBase" }],
+      "properties": {
+        "codeId": { "type": "string", "maxLength": 256 },
+        "code": { "type": "string", "minLength": 6, "maxLength": 6 }
+      },
+      "required": [ "codeId", "code" ]
+    },
+    {
+      "$id": "#POST>/v1/admin/setNextOpenlandCodeForTest",
+      "allOf": [{ "$ref": "#RequestBase" }],
+      "type": "object"
     }
 ]
