@@ -33,6 +33,7 @@ import requestIdHandler from './requestId';
 import cors from 'cors';
 import {UserController, UsersController, AddUsersForTest, DelUsersForTest, addFakeUsers, getUsersCount} from './controllers/usersController';
 import {InvalidateSearchIndexController, InvalidateSearchIndexForTest, SearchController} from './search';
+import { OpenlandGetCodeController, OpenlandGetUserController, OpenlandVerifyCodeController, OpenlandSetNextCodeForTest } from './controllers/openlandController';
 
 const config = require('../config.js');
 
@@ -64,6 +65,7 @@ if (config.enableMethodsForTest) {
   register(app, '/v1/admin/addUsersForTest', AddUsersForTest, false);
   register(app, '/v1/admin/delUsersForTest', DelUsersForTest, false);
   register(app, '/v1/admin/invalidateSearchIndexForTest', InvalidateSearchIndexForTest, false);
+  register(app, '/v1/admin/setNextOpenlandCodeForTest', OpenlandSetNextCodeForTest, false);
 }
 
 // all endpoints closed by authentication below this line
@@ -77,6 +79,9 @@ register(app, '/v1/search', SearchController, true);
 register(app, '/v1/location/', LocationsController, true);
 register(app, '/v1/contact/:contactId', SingleContactController, true);
 register(app, '/v1/contact', AllContactsController, true);
+register(app, '/v1/openland/sendCode', OpenlandGetCodeController, true);
+register(app, '/v1/openland/verifyCode', OpenlandVerifyCodeController, true);
+register(app, '/v1/openland/getUser', OpenlandGetUserController, true);
 
 register(app, '/v1/database/getSkills', GetSkillsController, true);
 register(app, '/v1/database/getLocations', GetLocationsController, true);

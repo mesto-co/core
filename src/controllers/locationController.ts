@@ -69,6 +69,7 @@ router.route('/')
               .limit(5);
           response.status(200).json({ location: location.map((e: any) => ({city: e.cityName, country: e.countryName})) }).end();
         } catch (error) {
+          console.debug('POST /v1/location', error);
           response.status(500).json({}).end();
         }
       }
