@@ -26,12 +26,12 @@ getSkills.route('/')
         const {rows}: {rows: {skill: string}[]} = await knex.raw(`
           SELECT s.skill as skill FROM
           (SELECT lower(unnest(skills)) as skill FROM "User") s
-          GROUP BY s.skill HAVING s.skill like concat(?::text, '%')
+          GROUP BY s.skill HAVING s.skill ilike concat(?::text, '%')
           LIMIT ? OFFSET ?`, [q, count, offset]);
         const {rows: [{count: total}]}: {rows: {count: string}[]} = await knex.raw(`
           SELECT COUNT(DISTINCT skill)
           FROM (SELECT LOWER(unnest(skills)) as skill FROM "User") s
-          WHERE skill like concat(?::text, '%')`, [q]);
+          WHERE skill ilike concat(?::text, '%')`, [q]);
         response.status(200).send({
           count: parseInt(total, 10),
           items: rows.map(row => row.skill)
@@ -51,7 +51,7 @@ getLocations.route('/')
         const {rows}: {rows: {location: string, place_id: string}[]} = await knex.raw(`
           SELECT u.location as location, u.place_id as place_id FROM "User" u
           GROUP BY u.location, u.place_id
-          HAVING u.location IS NOT NULL AND u.place_id IS NOT NULL AND u.location like concat(?::text, '%')
+          HAVING u.location IS NOT NULL AND u.place_id IS NOT NULL AND u.location ilike concat(?::text, '%')
           LIMIT ?`, [q, count]);
         response.status(200).send({
           items: rows.map(row => ({ location: row.location, placeId: row.place_id }))

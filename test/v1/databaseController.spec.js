@@ -28,6 +28,7 @@ test('GET /v1/database/getSkills', async () => {
     skills: ['a', 'b', 'c', 'd', 'e', 'f'] // ensure at least 11 unique skills in the database
   }]);
   await check('test_skill', 0, 100, 200, 5, ['test_skilla', 'test_skillab', 'test_skillb', 'test_skillc', 'test_skillмощь']);
+  await check('TeSt_SkIlL', 0, 100, 200, 5, ['test_skilla', 'test_skillab', 'test_skillb', 'test_skillc', 'test_skillмощь']);
   await check('test_skill', 0, 1000, 200, 5, ['test_skilla', 'test_skillab', 'test_skillb', 'test_skillc', 'test_skillмощь']);
   await check('test_skill', 0, 1, 200, 5, ['test_skilla']);
   await check('test_skill', 1, 1, 200, 5, ['test_skillab']);
@@ -112,6 +113,14 @@ test('GET /v1/database/getLocations', async () => {
 
   // if we have two cities with different placeId - we return both.
   await check('Петер', 5, 200, [{
+    location: 'Петербург',
+    placeId: 'peterburg_id'
+  }, {
+    location: 'Петербург',
+    placeId: 'florida_peterburg_id'
+  }]);
+
+  await check('пеТер', 5, 200, [{
     location: 'Петербург',
     placeId: 'peterburg_id'
   }, {
