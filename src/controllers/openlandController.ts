@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import crypto from 'crypto';
-
 import express from 'express';
 import WebSocket from 'ws';
 
 import { getArgs } from '../utils';
-const {openlandToken, openlandCodeSecret, enableMethodsForTest} = require('../../config.js');
+const {openlandToken, enableMethodsForTest} = require('../../config.js');
 
 class OpenlandClient {
   private _ws: WebSocket;
@@ -98,6 +96,16 @@ class OpenlandClient {
     }));
   }
 
+  getMessages(chatId: string, first: number): Promise<{date: string, message: string}[]> {
+    const id = this.sendQuery(
+        'query ChatInitFromUnread($chatId: ID!, $before: ID, $first: Int!) { gammaMessages(chatId: $chatId, first: $first, before: $before) { __typename messages { __typename ...FullMessage }}} fragment FullMessage on ModernMessage {__typename date message }',
+        { chatId, first }
+    );
+    return new Promise(resolve => this._callbacks.set(id, response => {
+      resolve(response && response.data && response.data.gammaMessages && response.data.gammaMessages.messages || []);
+    }));
+  }
+
   kill() {
     this._ws.close();
   }
@@ -122,6 +130,8 @@ class OpenlandClient {
     }
   }
 }
+
+const MESSAGE_PREFIX = 'Ваш код верификации:\n';
 
 let nextCodeOverride: string|null = null;
 let nextExpirationOverride: number|null = null;
@@ -157,24 +167,13 @@ openlandGetCodeRouter.route('/').post(async (request, response) => {
     const code = nextCodeOverride || String((Math.random() * 999999) >> 0).padStart(6, '0');
     nextCodeOverride = null;
 
-    const prefix = 'Ваш код верификации:\n';
-    const success = await client.sendMessage(chatId, prefix + code, [{ type: 'CodeBlock', offset: prefix.length, length: 6 }]);
+    const success = await client.sendMessage(chatId, MESSAGE_PREFIX + code, [{ type: 'CodeBlock', offset: MESSAGE_PREFIX.length, length: 6 }]);
     client.kill();
     if (!success) {
       client.kill();
       return response.status(500).send({}).end();
     }
-
-    const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(openlandCodeSecret, 'hex'), iv);
-    const {id: userId} = request.user!;
-    let encrypted = cipher.update(JSON.stringify({
-      code, userId, now: Date.now() + (nextExpirationOverride ? nextExpirationOverride : 120 * 100)
-    }));
-    nextExpirationOverride = null;
-    encrypted = Buffer.concat([encrypted, cipher.final()]);
-    const codeId = iv.toString('hex') + encrypted.toString('hex');
-    response.status(200).send({codeId}).end();
+    response.status(200).send({codeId: chatId}).end();
   } catch (e) {
     console.debug('POST /v1/openland/sendCode', e);
     response.status(500).send({}).end();
@@ -186,20 +185,26 @@ openlandGetCodeRouter.route('/').post(async (request, response) => {
 
 const openlandVerifyCodeController = express.Router();
 openlandVerifyCodeController.route('/').post(async (request, response) => {
+  let client;
   try {
-    const {code, codeId}: {code: string, codeId: string} = getArgs(request);
-    const iv = Buffer.from(codeId.substr(0, 32), 'hex');
-    const data = Buffer.from(codeId.substr(32), 'hex');
-    const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(openlandCodeSecret, 'hex'), iv);
-    let decrypted = decipher.update(data);
-    decrypted = Buffer.concat([decrypted, decipher.final()]);
-    const {code: target, userId, now} = JSON.parse(decrypted.toString());
-    if (userId !== request.user!.id || target !== code || Date.now() > now)
+    const {code, codeId: chatId}: {code: string, codeId: string} = getArgs(request);
+    client = new OpenlandClient();
+    if (!await client.waitForReady(2000))
+      return response.status(500).send({}).end();
+    const [lastMessage] = await client.getMessages(chatId, 1);
+    if (!lastMessage)
+      return response.status(401).send({}).end();
+    if ((Date.now() - parseInt(lastMessage.date, 10)) > (nextExpirationOverride || 120 * 1000))
+      return response.status(401).send({}).end();
+    if (lastMessage.message.substr(MESSAGE_PREFIX.length) !== code)
       return response.status(401).send({}).end();
     return response.status(200).send({}).end();
   } catch (e) {
     console.debug('POST /v1/openland/verifyCode', e);
     response.status(500).send({}).end();
+  } finally {
+    if (client)
+      client.kill();
   }
 });
 
