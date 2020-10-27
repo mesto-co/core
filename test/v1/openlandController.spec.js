@@ -37,6 +37,22 @@ describe('/v1/openland', () => {
           .toMatchObject({code: 200, data: {}});
     }
     {
+      // happy path
+      expect(await setNextCode('000000')).toMatchObject({ code: 200 });
+      const result = await postSendCode({openland: 'https://openland.com/LOaDEWDjrbt1Qq7EZwXQhY6j61' });
+      expect(result).toMatchObject({ code: 200, data: { codeId: expect.any(String) } });
+      expect(await verifyCode({ codeId: result.data.codeId, code: '000000' }))
+          .toMatchObject({code: 200, data: {}});
+    }
+    {
+      // happy path
+      expect(await setNextCode('000000')).toMatchObject({ code: 200 });
+      const result = await postSendCode({openland: '@LOaDEWDjrbt1Qq7EZwXQhY6j61' });
+      expect(result).toMatchObject({ code: 200, data: { codeId: expect.any(String) } });
+      expect(await verifyCode({ codeId: result.data.codeId, code: '000000' }))
+          .toMatchObject({code: 200, data: {}});
+    }
+    {
       // expired code
       expect(await setNextCode('000000', -1)).toMatchObject({ code: 200 });
       const result = await postSendCode({openland: 'LOaDEWDjrbt1Qq7EZwXQhY6j61' });
