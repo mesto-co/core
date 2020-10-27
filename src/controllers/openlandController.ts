@@ -133,7 +133,7 @@ openlandGetCodeRouter.route('/').post(async (request, response) => {
 
     const lastSlash = openland.lastIndexOf('/');
     if (lastSlash !== -1)
-      openland = openland.substr(lastSlash);
+      openland = openland.substr(lastSlash + 1);
     if (openland.startsWith('@'))
       openland = openland.substr(1);
 
