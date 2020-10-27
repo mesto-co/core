@@ -247,15 +247,18 @@ const searchController = express.Router();
 searchController.route('/').post(async (request, response) => {
   try {
     const {id: userId} = request.user!;
-    const {q, placeId, skills, busy, offset, count, isFriend}: V1SearchArgs = getArgs(request);
+    const {q, placeId, skills: skillsRaw, busy, offset, count, isFriend}: V1SearchArgs = getArgs(request);
+    const skills = skillsRaw.map(skill => skill.toLowerCase());
     const parts = q ? q.toLowerCase().split(/\s+/) : [];
     const partEntries = parts.map((part, index) => ['part' + index, part]);
-    const queryClause = partEntries.map(([key]) => 'sw.word % :' + key).join(' OR ') + (partEntries.length ? ` OR sw.word LIKE CONCAT(:part${partEntries.length - 1}::text, '%')` : '');
+    const queryClause = [
+      ...partEntries.map(([key]) => '(sw.word % :' + key + ')'),
+      (partEntries.length ? `(sw.word LIKE CONCAT(:part${partEntries.length - 1}::text, '%'))` : ''),
+      (skills.length ? '(sw.word = ANY(:skills::TEXT[]) AND swu.weight = 500)' : ''),
+    ].filter(v => v.length > 0).join(' OR ');
     const userWhereClause = ' u.status = :userStatus' +
       (placeId ? ' AND u.place_id = :placeId' : '') +
-      (skills.length ? ' AND u.skills @> :skills' : '') +
       (busy !== undefined ? ' AND u.busy = :busy' : '');
-
     const result = await knex.raw(`
       SELECT u."fullName", u.id, u.username, u."imagePath", u.location, u.about, u.skills, u.busy, u.place_id as "placeId", EVERY(f.id IS NOT NULL) as "isFriend"
       FROM search_word sw
