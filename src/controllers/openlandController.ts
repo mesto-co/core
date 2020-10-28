@@ -169,7 +169,7 @@ openlandGetCodeRouter.route('/').post(async (request, response) => {
     const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(openlandCodeSecret, 'hex'), iv);
     const {id: userId} = request.user!;
     let encrypted = cipher.update(JSON.stringify({
-      code, userId, now: Date.now() + (nextExpirationOverride ? nextExpirationOverride : 120 * 100)
+      code, userId, now: Date.now() + (nextExpirationOverride ? nextExpirationOverride : 120 * 1000)
     }));
     nextExpirationOverride = null;
     encrypted = Buffer.concat([encrypted, cipher.final()]);
