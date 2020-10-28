@@ -176,8 +176,7 @@
       "properties": {
           "location": {
             "type": "string",
-            "maxLength":255,
-            "minLength": 1
+            "isStringNotEmpty": true
           },
           "placeId": {
             "type": "string",
@@ -216,7 +215,7 @@
             "defaul": false
           }
       },
-      "required":["about","location","fullName"]
+      "required":["about","fullName"]
     },
     {
       "$id": "#POST>/v1/search",
