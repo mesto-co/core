@@ -103,7 +103,7 @@ userController.route('/')
       await handleUserRequestById(request.user!.id!, true, request, response);
     })
     .put(async (request, response) => {
-      const { location, role = null, about, fullName, skills = null, imagePath = null, busy = false, placeId = null } = getArgs(request);
+      const { location = null, role = null, about, fullName, skills = null, imagePath = null, busy = false, placeId = null } = getArgs(request);
       if (request.user) {
         try {
           const id = request.user.id;
