@@ -30,6 +30,7 @@ test('GET /v1/database/getSkills', async () => {
   await check('test_skill', 0, 100, 200, 5, ['test_skilla', 'test_skillab', 'test_skillb', 'test_skillc', 'test_skillмощь']);
   await check('TeSt_SkIlL', 0, 100, 200, 5, ['test_skilla', 'test_skillab', 'test_skillb', 'test_skillc', 'test_skillмощь']);
   await check('test_skill', 0, 1000, 200, 5, ['test_skilla', 'test_skillab', 'test_skillb', 'test_skillc', 'test_skillмощь']);
+  await check('est_skill', 0, 1000, 200, 5, ['test_skilla', 'test_skillab', 'test_skillb', 'test_skillc', 'test_skillмощь']);
   await check('test_skill', 0, 1, 200, 5, ['test_skilla']);
   await check('test_skill', 1, 1, 200, 5, ['test_skillab']);
   await check('test_skill', 2, 1, 200, 5, ['test_skillb']);

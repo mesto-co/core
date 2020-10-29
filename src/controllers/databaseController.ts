@@ -26,12 +26,12 @@ getSkills.route('/')
         const {rows}: {rows: {skill: string}[]} = await knex.raw(`
           SELECT s.skill as skill FROM
           (SELECT lower(unnest(skills)) as skill FROM "User") s
-          GROUP BY s.skill HAVING s.skill ilike concat(?::text, '%')
+          GROUP BY s.skill HAVING s.skill ilike concat('%', ?::text, '%')
           LIMIT ? OFFSET ?`, [q, count, offset]);
         const {rows: [{count: total}]}: {rows: {count: string}[]} = await knex.raw(`
           SELECT COUNT(DISTINCT skill)
           FROM (SELECT LOWER(unnest(skills)) as skill FROM "User") s
-          WHERE skill ilike concat(?::text, '%')`, [q]);
+          WHERE skill ilike concat('%', ?::text, '%')`, [q]);
         response.status(200).send({
           count: parseInt(total, 10),
           items: rows.map(row => row.skill)
