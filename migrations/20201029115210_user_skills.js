@@ -18,7 +18,7 @@ exports.up = function(knex) {
   return knex.raw(`
     ALTER TABLE "User" ADD COLUMN skills_lo TEXT[] NOT NULL DEFAULT '{}';
     CREATE INDEX user_skills_lo_index on "User" USING GIN (skills_lo);
-    UPDATE "User" SET skills_lo = LOWER(COASLECE(skills::text, '{}'))::text[];`);
+    UPDATE "User" SET skills_lo = LOWER(COALESCE(skills::text, '{}'))::text[];`);
 };
 
 exports.down = function(knex) {
