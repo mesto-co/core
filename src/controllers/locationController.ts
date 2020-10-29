@@ -30,6 +30,25 @@ const {googleMapsApiKey} = require('../../config.js');
  */
 const router = express.Router();
 
+interface Prediction {
+  address_components: {types: string[], short_name: string}[];
+  place_id: string;
+  description: string;
+}
+
+function countryId(result: Prediction) {
+  const country = result.address_components.find(component => component.types.includes('country'));
+  return country && country.short_name || '';
+}
+
+function placeId(result: Prediction) {
+  if (result.address_components.length !== 1)
+    return [countryId(result), result.place_id].join(',');
+  if (result.address_components[0].types.includes('country'))
+    return [countryId(result), ''].join(',');
+  return ['', result.place_id].join(',');
+}
+
 router.route('/')
     .post(async (request, response) => {
       const {userInput, sessionToken} = getArgs(request);
@@ -37,7 +56,7 @@ router.route('/')
         const mapsEndpoint = (userInput: string, sessionToken: string, key: string) => 'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=' + encodeURIComponent(userInput) + '&sessiontoken=' + sessionToken + '&key=' + key + '&language=ru&types=(cities)';
         const { userInput, sessionToken } = getArgs(request);
         try {
-          const result: any = await new Promise((resolve, reject) => https.get(mapsEndpoint(userInput, sessionToken, googleMapsApiKey), response => {
+          const result: {predictions: Prediction[]} = await new Promise((resolve, reject) => https.get(mapsEndpoint(userInput, sessionToken, googleMapsApiKey), response => {
             const chunks: Buffer[] = [];
             response.on('data', chunk => chunks.push(chunk));
             response.on('end', () => {
@@ -49,9 +68,9 @@ router.route('/')
               }
             });
           }));
-          const location = result.predictions.map((prediction: {description: string, place_id: string}) => ({
+          const location = result.predictions.map((prediction: Prediction) => ({
             description: prediction.description,
-            placeId: prediction.place_id
+            placeId: placeId(prediction)
           }));
           response.status(200).json({location}).end();
         } catch (error) {

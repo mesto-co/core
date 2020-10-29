@@ -256,7 +256,7 @@ searchController.route('/').post(async (request, response) => {
       (partEntries.length ? `(sw.word LIKE CONCAT(:part${partEntries.length - 1}::text, '%'))` : '')
     ].filter(v => v.length > 0).join(' OR ');
     const userWhereClause = ' u.status = :userStatus ' +
-      (placeId ? ' AND u.place_id = :placeId' : '') +
+      (placeId ? ' AND u.place_id LIKE CONCAT(:placeId::text, \'%\')' : '') +
       (skills.length ? ' AND u.skills_lo && :skills ' : '') +
       (busy !== undefined ? ' AND u.busy = :busy' : '');
     const result = await knex.raw(`
