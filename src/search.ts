@@ -253,11 +253,11 @@ searchController.route('/').post(async (request, response) => {
     const partEntries = parts.map((part, index) => ['part' + index, part]);
     const queryClause = [
       ...partEntries.map(([key]) => '(sw.word % :' + key + ')'),
-      (partEntries.length ? `(sw.word LIKE CONCAT(:part${partEntries.length - 1}::text, '%'))` : ''),
-      (skills.length ? '(sw.word = ANY(:skills::TEXT[]) AND swu.weight = 500)' : ''),
+      (partEntries.length ? `(sw.word LIKE CONCAT(:part${partEntries.length - 1}::text, '%'))` : '')
     ].filter(v => v.length > 0).join(' OR ');
-    const userWhereClause = ' u.status = :userStatus' +
+    const userWhereClause = ' u.status = :userStatus ' +
       (placeId ? ' AND u.place_id = :placeId' : '') +
+      (skills.length ? ' AND u.skills_lo && :skills ' : '') +
       (busy !== undefined ? ' AND u.busy = :busy' : '');
     const result = await knex.raw(`
       SELECT u."fullName", u.id, u.username, u."imagePath", u.location, u.about, u.skills, u.busy, u.place_id as "placeId", EVERY(f.id IS NOT NULL) as "isFriend"

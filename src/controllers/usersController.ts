@@ -109,8 +109,8 @@ userController.route('/')
           const id = request.user.id;
           await knex.raw(`
             UPDATE "User" SET about = :about, location = :location, place_id = :placeId, role = :role, "fullName" = :fullName,
-            skills = :skills, "imagePath" = :imagePath, busy = :busy WHERE id = :id`,
-          { about, location, placeId, role, fullName, skills, imagePath, busy, id });
+            skills = :skills, skills_lo = :skills_lo, "imagePath" = :imagePath, busy = :busy WHERE id = :id`,
+          { about, location, placeId, role, fullName, skills, skills_lo: skills.map((v: string) => v.toLowerCase()), imagePath, busy, id });
           await invalidateSearchIndex(id);
           response.status(200).json({}).end();
         } catch (error) {
@@ -140,6 +140,7 @@ interface TestUser {
   busy: boolean | undefined;
   status: string | undefined;
   skills: string[] | undefined;
+  skills_lo: string[] | undefined;
 }
 let addFakeUsers: ((user: TestUser[]) => Promise<TestUser[]>)|null = null;
 let getUsersCount: (() => Promise<number>)|null = null;
@@ -151,6 +152,9 @@ if (enableMethodsForTest) {
 
   addFakeUsers = async function(users: TestUser[]) {
     const genUser = (override: TestUser): TestUser => {
+      const skills = faker.random.words().split(' ');
+      if (override.skills)
+        override.skills_lo = override.skills.map(v => v.toLowerCase());
       return Object.assign({
         id: faker.random.uuid(),
         fullName: faker.name.firstName() + ' ' + faker.name.lastName(),
@@ -165,7 +169,8 @@ if (enableMethodsForTest) {
         role: faker.random.word(),
         busy: faker.random.boolean(),
         status: 'approved',
-        skills: faker.random.words().split(' ')
+        skills: skills,
+        skills_lo: skills.map((v: string) => v.toLowerCase())
       }, override);
     };
     const newUsers = users.map(genUser);

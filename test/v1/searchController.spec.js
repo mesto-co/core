@@ -55,6 +55,8 @@ describe.only('/v1/search2', () => {
     const [user] = await genUsers(1603000265435, [{ skills: [ 'mySkillA', 'mySkillB', 'mySkillC' ] }]);
     expect(await postSearch({ skills: ['mySkillA'], count: 1000 }))
         .toMatchObject({ code: 200, data: { data: [toExpected(user)] } });
+    expect(await postSearch({ skills: ['mySkillA', 'mySkillD'], count: 1000 }))
+        .toMatchObject({ code: 200, data: { data: [toExpected(user)] } });
     expect(await postSearch({ skills: ['mySkillB'], count: 1000 }))
         .toMatchObject({ code: 200, data: { data: [toExpected(user)] } });
     expect(await postSearch({ skills: ['mySkillC'], count: 1000 }))
@@ -62,8 +64,6 @@ describe.only('/v1/search2', () => {
     expect(await postSearch({ skills: ['mySkillA', 'mySkillC'], count: 1000 }))
         .toMatchObject({ code: 200, data: { data: [toExpected(user)] } });
     expect(await postSearch({ skills: ['mySkillA', 'mySkillB', 'mySkillC'], count: 1000 }))
-        .toMatchObject({ code: 200, data: { data: [toExpected(user)] } });
-    expect(await postSearch({ skills: ['myskilla', 'MySkiLlB', 'mySkillC'], count: 1000 }))
         .toMatchObject({ code: 200, data: { data: [toExpected(user)] } });
     expect(await postSearch({ skills: ['abcdef'], count: 1000 }))
         .toMatchObject({ code: 200, data: { data: expect.not.arrayContaining([toExpected(user)]) } });
@@ -109,24 +109,24 @@ describe.only('/v1/search2', () => {
         .toMatchObject({ code: 200, data: { data: expect.not.arrayContaining([toExpected(user)]) } });
   });
   test('/v1/search pagination', async () => {
-    const uniqueSkill = 'mySkillP' + Math.random();
-    const users = await genUsers(1603000265435, Array(3).fill({skills: [uniqueSkill]}));
+    const uniqueSkill = 'mySkillD' + Date.now();
+    const users = await genUsers(1603000265435, Array(5).fill({skills: [uniqueSkill]}));
     const actual = [];
     for (let offset = 0; offset < users.length; ++offset) {
       const { data, code } = await postSearch({ skills: [uniqueSkill], count: 1, offset });
       expect(code).toBe(200);
-      expect(data.total).toBe(users.length);
+      expect(data.total).toBe(5);
       actual.push(...data.data);
     }
-    const idOrder = (a,b) => a.id.localeCompare(b.id) || a.fullName.localeCompare(b.fullName);
+    const idOrder = (a,b) => a.id.localeCompare(b.id);
     expect(users.map(user => toExpected(user)).sort(idOrder)).toStrictEqual(actual.sort(idOrder));
     expect(await postSearch({ skills: [uniqueSkill], count: 1, offset: 6 }))
-        .toMatchObject({ code: 200, data: { data: [], total: users.length } });
+        .toMatchObject({ code: 200, data: { data: [], total: 5 } });
   });
   test('/v1/search q', async () => {
-    const uniqueWord = 'myUniqueWordHm' + Date.now();
-    const uniquePlaceId = 'myPlaceId' + Date.now();
-    const uniqueSkill = 'jhsgflkewrjf' + Date.now();
+    const uniqueWord = 'myUniqueWordHm';
+    const uniquePlaceId = 'myPlaceId';
+    const uniqueSkill = 'jhsgflkewrjf';
     const users = await genUsers(1603000265435, [{
       fullName: uniqueWord,
       place_id: uniquePlaceId,
@@ -154,9 +154,9 @@ describe.only('/v1/search2', () => {
     expect(await postSearch({ q: uniqueWord, busy: false, placeId: uniquePlaceId, count: 1000 }))
         .toMatchObject({ code: 200, data: { data: [toExpected(users[1]), toExpected(users[3])] } });
     expect(await postSearch({ q: uniqueWord, busy: false, skills: [uniqueSkill], placeId: uniquePlaceId, count: 1000 }))
-        .toMatchObject({ code: 200, data: { data: [toExpected(users[1]), toExpected(users[3])] } });
+        .toMatchObject({ code: 200, data: { data: [toExpected(users[1])] } });
     expect(await postSearch({ q: uniqueWord, busy: true, skills: [uniqueSkill], placeId: uniquePlaceId, count: 1000 }))
-        .toMatchObject({ code: 200, data: { data: [toExpected(users[0]), toExpected(users[2])] } });
+        .toMatchObject({ code: 200, data: { data: [toExpected(users[2])] } });
   });
   test('/v1/search empty', async () => {
     await genUsers(1603000265435, Array(20).fill({}));
@@ -176,7 +176,7 @@ describe.only('/v1/search2', () => {
         .toMatchObject({ code: 200, data: { data: Array(5).fill(pattern) } });
   });
   test('/v1/search not approved', async () => {
-    const uniqueSkill = 'mySkillD' + Math.random();
+    const uniqueSkill = 'mySkillD' + Date.now();
     const [approved, ] = await genUsers(1603000265435, [{skills: [uniqueSkill]}, {skills: [uniqueSkill], status: 'awaiting'}]);
     expect(await postSearch({ skills: [uniqueSkill] }))
         .toMatchObject({ code: 200, data: { data: [toExpected(approved)], total: 1 } });
@@ -207,7 +207,7 @@ describe.only('/v1/search2', () => {
   });
   test('/v1/search 400', async () => {
     expect(await post(endpoint, {})).toMatchObject({ code: 401 });
-    expect(await postSearch({ q: 'a'.repeat(256) })).toMatchObject({ code: 400 });
+    expect(await postSearch({ q: 'a'.repeat(33) })).toMatchObject({ code: 400 });
     expect(await postSearch({ q: [] })).toMatchObject({ code: 400 });
     expect(await postSearch({ q: {} })).toMatchObject({ code: 400 });
     expect(await postSearch({ placeId: 'a'.repeat(65) })).toMatchObject({ code: 400 });
