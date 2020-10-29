@@ -207,14 +207,14 @@ describe.only('/v1/search2', () => {
   });
   test('/v1/search 400', async () => {
     expect(await post(endpoint, {})).toMatchObject({ code: 401 });
-    expect(await postSearch({ q: 'a'.repeat(33) })).toMatchObject({ code: 400 });
+    expect(await postSearch({ q: 'a'.repeat(256) })).toMatchObject({ code: 400 });
     expect(await postSearch({ q: [] })).toMatchObject({ code: 400 });
     expect(await postSearch({ q: {} })).toMatchObject({ code: 400 });
     expect(await postSearch({ placeId: 'a'.repeat(65) })).toMatchObject({ code: 400 });
     expect(await postSearch({ skills: 'abc' })).toMatchObject({ code: 400 });
     expect(await postSearch({ skills: [[]] })).toMatchObject({ code: 400 });
     expect(await postSearch({ skills: [''] })).toMatchObject({ code: 400 });
-    expect(await postSearch({ skills: ['a'.repeat(33)] })).toMatchObject({ code: 400 });
+    expect(await postSearch({ skills: ['a'.repeat(256)] })).toMatchObject({ code: 400 });
     expect(await postSearch({ count: 2.5 })).toMatchObject({ code: 400 });
     expect(await postSearch({ count: 0 })).toMatchObject({ code: 400 });
     expect(await postSearch({ count: 1001 })).toMatchObject({ code: 400 });

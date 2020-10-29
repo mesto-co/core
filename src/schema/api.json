@@ -239,7 +239,7 @@
       "properties": {
         "q": { "type": "string", "default": "", "maxLength": 32 },
         "placeId": { "type": "string", "maxLength": 64 },
-        "skills": { "type": "array", "items": { "type": "string", "isStringNotEmpty": true, "maxLength": 32 }, "default": [] },
+        "skills": { "type": "array", "items": { "type": "string", "isStringNotEmpty": true, "maxLength": 255 }, "default": [] },
         "busy": { "type": "boolean" },
         "isFriend": { "type": "boolean" },
         "offset": { "type": "integer", "minimum": 0, "default": 0 },
