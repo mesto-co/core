@@ -54,6 +54,18 @@ test('/v1/user', async () => {
   expect(userWithoutRole.imagePath).toBe(imagePath);
 });
 
+test('/v1/user without skills', async () => {
+  const {code} = await put(ENDPOINT, JSON.stringify({location, about, skills: undefined, role, fullName, imagePath }), header);
+  expect(code).toBe(200);
+
+  const {data: {user}} = await get(ENDPOINT, header);
+  expect(user.fullName).toBe(fullName);
+  expect(user.role).toBe(role);
+  expect(user.about).toBe(about);
+  expect(user.imagePath).toBe(imagePath);
+  expect(user.skills).toStrictEqual([]);
+});
+
 test('/v1/user PUT without userInput', async () => {
   const {code} = await put(ENDPOINT, JSON.stringify({}), header);
   expect(code).toBe(400);
