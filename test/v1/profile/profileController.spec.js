@@ -119,7 +119,7 @@ test('/v1/search/ POST with sql injection attempt', async () => {
 });
 
 test('/v1/search/ POST with skills', async () => {
-  const [{skills}] = await genUsers([{}]);
+  const [{skills}] = await genUsers([{skills: ['/v1/search' + Date.now()]}]);
   const testEntry = {'perPage': 100,'query': [{skills: skills[0]}]};
   const {data: getSearchData, code: searchCode} = await post(ENDPOINT, JSON.stringify(testEntry),header);
   expect(searchCode).toBe(200);
@@ -197,28 +197,29 @@ test('/v1/search/ POST empty query', async () => {
 describe('/v1/search Сергей', () => {
   const skill = 'randomskill';
   const about = 'randomabout';
+  const prefix = Date.now();
   beforeEach(() => genUsers([{
-    fullName: 'Сергей',
+    fullName: prefix + 'Сергей',
     location: '',
     busy: false,
     skills: [skill]
   },
   {
-    fullName: 'Sergey',
+    fullName: prefix + 'Sergey',
     location: '',
     busy: true,
     about: about,
     skills: [skill]
   },
   {
-    fullName: 'Sergei',
+    fullName: prefix + 'Sergei',
     location: '',
     busy: false,
     skills: []
   },
   {
     fullName: 'Игорь',
-    location: 'Сергеев',
+    location: prefix + 'Сергеев',
     busy: true,
     skills: []
   },
@@ -226,63 +227,62 @@ describe('/v1/search Сергей', () => {
     fullName: 'Никита',
     location: '',
     busy: false,
-    skills: ['сергей']
+    skills: [prefix + 'сергей']
   },
   {
     fullName: 'Игорь',
-    about: 'Помогаю только Сергеям',
+    about: 'Помогаю только ' + prefix + 'Сергеям',
     location: '',
     busy: true,
     skills: ['микроконтроллеры']
   }]));
 
   test('/v1/search/ POST Сергей', async () => {
-    const testEntry = {'perPage': 100,'query': [{'fullName': 'Сергей'}]};
+    const testEntry = {'perPage': 100,'query': [{'fullName': prefix + 'Сергей'}]};
     testEntry.currentPage = 1;
     const {data: getSearchData, code: searchCode} = await post(ENDPOINT, JSON.stringify(testEntry), header);
     expect(searchCode).toBe(200);
-    expect(getSearchData.entries.data.length).toBe(6);
-    const [serg1, serg2, serg3, nik, igor1, igor2] = getSearchData.entries.data;
+    expect(getSearchData.entries.data.length).toBe(5);
+    const [serg1, serg2, serg3, nik, igor1] = getSearchData.entries.data;
     const sergs = [serg1,serg2,serg3].sort((a,b) => a.fullName.localeCompare(b.fullName));
-    expect(getSearchData.entries.total).toBe(6);
-    expect(sergs[0].fullName).toBe('Sergei');
+    expect(getSearchData.entries.total).toBe(5);
+    expect(sergs[0].fullName).toBe(prefix + 'Sergei');
     expect(sergs[0].busy).toEqual(false);
-    expect(sergs[1].fullName).toBe('Sergey');
+    expect(sergs[1].fullName).toBe(prefix + 'Sergey');
     expect(sergs[1].busy).toEqual(true);
-    expect(sergs[2].fullName).toBe('Сергей');
+    expect(sergs[2].fullName).toBe(prefix + 'Сергей');
     expect(sergs[2].busy).toEqual(false);
-    expect(nik.skills[0]).toBe('сергей');
-    expect(igor1.location).toBe('Сергеев');
-    expect(igor2.about).toBe('Помогаю только Сергеям');
+    expect(nik.skills[0]).toBe(prefix + 'сергей');
+    expect(igor1.location).toBe(prefix + 'Сергеев');
   });
 
   test('/v1/search/ POST Сергей startup', async () => {
-    const testEntry = {'perPage': 100,'query': [{'fullName': 'Сергей', 'skills': skill}]};
+    const testEntry = {'perPage': 100,'query': [{'fullName': prefix + 'Сергей', 'skills': skill}]};
     testEntry.currentPage = 1;
     const {data: getSearchData, code: searchCode} = await post(ENDPOINT, JSON.stringify(testEntry), header);
     expect(searchCode).toBe(200);
     const [serg1, serg2, serg3] = getSearchData.entries.data;
     const sergs = [serg1,serg2].sort((a,b) => a.fullName.localeCompare(b.fullName));
-    expect(sergs[0].fullName).toBe('Sergey');
+    expect(sergs[0].fullName).toBe(prefix + 'Sergey');
     expect(sergs[0].skills[0]).toBe(skill);
-    expect(sergs[1].fullName).toBe('Сергей');
+    expect(sergs[1].fullName).toBe(prefix + 'Сергей');
     expect(sergs[1].skills[0]).toBe(skill);
-    expect(serg3.fullName).toBe('Sergei');
+    expect(serg3.fullName).toBe(prefix + 'Sergei');
     expect(serg3.skills.length).toBe(0);
   });
 
   test('/v1/search/ POST Сергей startup местный', async () => {
-    const testEntry = {'perPage': 100,'query': [{'fullName': 'Сергей', 'skills': skill, 'about': about}]};
+    const testEntry = {'perPage': 100,'query': [{'fullName': prefix + 'Сергей', 'skills': skill, 'about': about}]};
     testEntry.currentPage = 1;
     const {data: getSearchData, code: searchCode} = await post(ENDPOINT, JSON.stringify(testEntry), header);
     expect(searchCode).toBe(200);
     const [serg1, serg2, serg3] = getSearchData.entries.data;
-    expect(serg1.fullName).toBe('Sergey');
+    expect(serg1.fullName).toBe(prefix + 'Sergey');
     expect(serg1.skills[0]).toBe(skill);
     expect(serg1.about).toBe(about);
-    expect(serg2.fullName).toBe('Сергей');
+    expect(serg2.fullName).toBe(prefix + 'Сергей');
     expect(serg2.skills[0]).toBe(skill);
-    expect(serg3.fullName).toBe('Sergei');
+    expect(serg3.fullName).toBe(prefix + 'Sergei');
     expect(serg3.skills.length).toBe(0);
   });
 
