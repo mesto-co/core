@@ -204,7 +204,7 @@ async function performSearch(query: string, limit: number, offset: number, userI
     ${onlyFriends ? 'INNER' : 'LEFT'} JOIN "Friend" f ON u.id = f."friendId" AND f."userId" = ?
     ${queries.length ? `WHERE ${[...Array(queries.length).fill('sw.word % ?'), 'sw.word like CONCAT(?::text, \'%\')'].join(' OR ')}` : ''}
     GROUP BY u.id
-    ORDER BY SUM(swu.weight) DESC
+    ORDER BY SUM(swu.weight) DESC, u.id DESC
     LIMIT ?
     OFFSET ?`, queries.length  ? [UserStatus.APPROVED, userId, ...queries, queries[queries.length - 1], limit, offset] : [UserStatus.APPROVED, userId, limit, offset]);
   return {
@@ -266,7 +266,7 @@ searchController.route('/').post(async (request, response) => {
       INNER JOIN "User" u ON swu.user_id = u.id AND ${userWhereClause}
       ${isFriend ? 'INNER' : 'LEFT'} JOIN "Friend" f ON u.id = f."friendId" AND f."userId" = :userId
       GROUP BY u.id
-      ORDER BY sum(swu.weight) DESC
+      ORDER BY sum(swu.weight) DESC, u.id DESC
       OFFSET :offset LIMIT :count`, {
       ...Object.fromEntries(partEntries), userTable: 'User', busy, placeId, skills, offset, count, userStatus: UserStatus.APPROVED, userId
     });

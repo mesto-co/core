@@ -110,18 +110,18 @@ describe.only('/v1/search2', () => {
   });
   test('/v1/search pagination', async () => {
     const uniqueSkill = 'mySkillD' + Date.now();
-    const users = await genUsers(1603000265435, Array(5).fill({skills: [uniqueSkill]}));
+    const users = await genUsers(1603000265435, Array(10).fill({skills: [uniqueSkill]}));
     const actual = [];
     for (let offset = 0; offset < users.length; ++offset) {
       const { data, code } = await postSearch({ skills: [uniqueSkill], count: 1, offset });
       expect(code).toBe(200);
-      expect(data.total).toBe(5);
+      expect(data.total).toBe(users.length);
       actual.push(...data.data);
     }
     const idOrder = (a,b) => a.id.localeCompare(b.id);
     expect(users.map(user => toExpected(user)).sort(idOrder)).toStrictEqual(actual.sort(idOrder));
-    expect(await postSearch({ skills: [uniqueSkill], count: 1, offset: 6 }))
-        .toMatchObject({ code: 200, data: { data: [], total: 5 } });
+    expect(await postSearch({ skills: [uniqueSkill], count: 1, offset: users.length + 1 }))
+        .toMatchObject({ code: 200, data: { data: [], total: users.length } });
   });
   test('/v1/search q', async () => {
     const uniqueWord = 'myUniqueWordHm';
