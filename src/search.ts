@@ -194,7 +194,7 @@ function sanitizeUser(entry: { [x: string]: any; }) {
 }
 
 async function performSearch(query: string, limit: number, offset: number, userId: string, onlyFriends: boolean) {
-  const queries = query ? query.toLowerCase().split(/\s+/) : [];
+  const queries = query ? query.toLowerCase().split(/\s+/).filter(v => v.length > 0) : [];
   // We use raw here due... After previous three comments in this file Aleksei is going to migrate us to raw postgres client.
   const result = await knex.raw(`
     SELECT SUM(swu.weight) as rank, u."fullName", u.id, u.username, u."imagePath", u.location, u.about, u.skills, u.busy, EVERY(f.id IS NOT NULL) as "isFriend", count(*) OVER() AS total
@@ -249,7 +249,7 @@ searchController.route('/').post(async (request, response) => {
     const {id: userId} = request.user!;
     const {q, placeId, skills: skillsRaw, busy, offset, count, isFriend}: V1SearchArgs = getArgs(request);
     const skills = skillsRaw.map(skill => skill.toLowerCase());
-    const parts = q ? q.toLowerCase().split(/\s+/) : [];
+    const parts = q ? q.toLowerCase().split(/\s+/).filter(v => v.length > 0) : [];
     const partEntries = parts.map((part, index) => ['part' + index, part]);
     const queryClause = [
       ...partEntries.map(([key]) => '(sw.word % :' + key + ')'),

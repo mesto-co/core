@@ -256,6 +256,25 @@ describe('/v1/search Сергей', () => {
     expect(igor1.location).toBe(prefix + 'Сергеев');
   });
 
+  test('/v1/search/ POST Сергей (space at the end)', async () => {
+    const testEntry = {'perPage': 100,'query': [{'fullName': prefix + 'Сергей '}]};
+    testEntry.currentPage = 1;
+    const {data: getSearchData, code: searchCode} = await post(ENDPOINT, JSON.stringify(testEntry), header);
+    expect(searchCode).toBe(200);
+    expect(getSearchData.entries.data.length).toBe(5);
+    const [serg1, serg2, serg3, nik, igor1] = getSearchData.entries.data;
+    const sergs = [serg1,serg2,serg3].sort((a,b) => a.fullName.localeCompare(b.fullName));
+    expect(getSearchData.entries.total).toBe(5);
+    expect(sergs[0].fullName).toBe(prefix + 'Sergei');
+    expect(sergs[0].busy).toEqual(false);
+    expect(sergs[1].fullName).toBe(prefix + 'Sergey');
+    expect(sergs[1].busy).toEqual(true);
+    expect(sergs[2].fullName).toBe(prefix + 'Сергей');
+    expect(sergs[2].busy).toEqual(false);
+    expect(nik.skills[0]).toBe(prefix + 'сергей');
+    expect(igor1.location).toBe(prefix + 'Сергеев');
+  });
+
   test('/v1/search/ POST Сергей startup', async () => {
     const testEntry = {'perPage': 100,'query': [{'fullName': prefix + 'Сергей', 'skills': skill}]};
     testEntry.currentPage = 1;
