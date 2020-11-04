@@ -32,7 +32,7 @@ import { errorHandler, notFoundHandler } from './errorHandler';
 import {accessTokenHandler} from './accessTokenHandler';
 import requestIdHandler from './requestId';
 import cors from 'cors';
-import {UserController, UsersController, AddUsersForTest, DelUsersForTest, addFakeUsers, getUsersCount} from './controllers/usersController';
+import {UserController, UsersController, AddUsersForTest, DelUsersForTest, addFakeUsers, getUsersCount, printSomeUsers} from './controllers/usersController';
 import {InvalidateSearchIndexController, InvalidateSearchIndexForTest, SearchController} from './search';
 import { OpenlandGetCodeController, OpenlandGetUserController, OpenlandVerifyCodeController, OpenlandSetNextCodeForTest } from './controllers/openlandController';
 
@@ -100,7 +100,7 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 // do not add any handlers below this line, notFound one should be last!
 
-if ((!process.env.NODE_ENV || process.env.NODE_ENV === 'development') && addFakeUsers && getUsersCount)
-  getUsersCount().then(count => (count < 100 && addFakeUsers) ? addFakeUsers(Array(100 - count).fill({})) : void 0);
+if ((!process.env.NODE_ENV || process.env.NODE_ENV === 'development') && addFakeUsers && getUsersCount && printSomeUsers)
+  getUsersCount().then(count => (count < 100 && addFakeUsers) ? addFakeUsers(Array(100 - count).fill({})) : void 0).then(() => printSomeUsers && printSomeUsers());
 
 export default app;

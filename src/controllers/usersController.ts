@@ -144,6 +144,7 @@ interface TestUser {
 }
 let addFakeUsers: ((user: TestUser[]) => Promise<TestUser[]>)|null = null;
 let getUsersCount: (() => Promise<number>)|null = null;
+let printSomeUsers: (() => Promise<void>)|null = null;
 
 if (enableMethodsForTest) {
   const faker = require('faker');
@@ -185,6 +186,11 @@ if (enableMethodsForTest) {
     return knex.raw('SELECT COUNT(*) as total FROM "User"').then((result: {rows: {total: string}[]}) => result.rows.length ? parseInt(result.rows[0].total, 10) : 0);
   };
 
+  printSomeUsers = async function() {
+    console.debug('You can use following emails for testing:');
+    console.debug(await knex.raw('SELECT email FROM "User" LIMIT 10').then((result: {rows: {total: string}[]}) => result.rows));
+  };
+
   addUsersForTest.route('/')
       .post(async (request, response) => {
         const {users, seed}: {users: TestUser[], seed: number} = getArgs(request);
@@ -214,5 +220,6 @@ export {
   addUsersForTest as AddUsersForTest,
   delUsersForTest as DelUsersForTest,
   addFakeUsers,
-  getUsersCount
+  getUsersCount,
+  printSomeUsers
 };
