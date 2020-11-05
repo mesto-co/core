@@ -248,6 +248,7 @@ searchController.route('/').post(async (request, response) => {
   try {
     const {id: userId} = request.user!;
     const {q, placeId, skills: skillsRaw, busy, offset, count, isFriend}: V1SearchArgs = getArgs(request);
+    const isResolvedPlaceId = placeId ? placeId.includes('|') : false;
     const skills = skillsRaw.map(skill => skill.toLowerCase());
     const parts = q ? q.toLowerCase().split(/\s+/).filter(v => v.length > 0) : [];
     const partEntries = parts.map((part, index) => ['part' + index, part]);
@@ -256,7 +257,7 @@ searchController.route('/').post(async (request, response) => {
       (partEntries.length ? `(sw.word LIKE CONCAT(:part${partEntries.length - 1}::text, '%'))` : '')
     ].filter(v => v.length > 0).join(' OR ');
     const userWhereClause = ' u.status = :userStatus ' +
-      (placeId ? ' AND u.place_id = :placeId' : '') +
+      (placeId ? (isResolvedPlaceId ? ` AND u.place_id LIKE CONCAT(:placeId::text, '%')` : ` AND (u.place_id = :placeId OR u.place_id LIKE CONCAT('%', '|', :placeId::text, '|'))`) : '') +
       (skills.length ? ' AND u.skills_lo && :skills ' : '') +
       (busy !== undefined ? ' AND u.busy = :busy' : '');
     const result = await knex.raw(`

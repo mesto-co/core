@@ -347,5 +347,13 @@
       "$id": "#POST>/v1/admin/setNextOpenlandCodeForTest",
       "allOf": [{ "$ref": "#RequestBase" }],
       "type": "object"
+    },
+    {
+      "$id": "#POST>/v1/resolvePlaceId",
+      "allOf": [{ "$ref": "#RequestBase" }],
+      "properties": {
+        "placeId": { "type": "string", "maxLength": 256 }
+      },
+      "required": [ "placeId" ]
     }
 ]
