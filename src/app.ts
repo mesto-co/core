@@ -23,7 +23,7 @@ import {AuthMagicLinkController, RefreshTokenController} from './controllers/aut
 import {EmailMagicLinkSenderController, EmailInviteLinkSenderController, EmailBetaSenderController} from './controllers/emailSenderController';
 import {UploadImageController} from './controllers/uploadImageController';
 import {FriendEntryController} from './controllers/friendController';
-import {LocationsController} from './controllers/locationController';
+import {LocationsController,PlaceIdResolverController} from './controllers/locationController';
 import {SingleContactController, AllContactsController} from './controllers/contactController';
 import {GetSkillsController, GetLocationsController} from './controllers/databaseController';
 import {PeerboardAuthController} from './controllers/peerboardController';
@@ -82,6 +82,7 @@ register(app, '/v1/profile/uploadImage', UploadImageController, true);
 register(app, '/v1/profile/search/', ProfileController, true);
 register(app, '/v1/search', SearchController, true);
 register(app, '/v1/location/', LocationsController, true);
+register(app, '/v1/resolvePlaceId', PlaceIdResolverController, true);
 register(app, '/v1/contact/:contactId', SingleContactController, true);
 register(app, '/v1/contact', AllContactsController, true);
 register(app, '/v1/openland/sendCode', OpenlandGetCodeController, true);

@@ -75,4 +75,49 @@ router.route('/')
       }
     });
 
-export { router as LocationsController };
+interface GeocodeResult {
+  address_components: {types: string[], short_name: string}[];
+  place_id: string;
+}
+
+function countryId(result: GeocodeResult) {
+  const country = result.address_components.find(component => component.types.includes('country'));
+  return country ? country.short_name : '';
+}
+
+function resolvedPlaceId(result: GeocodeResult) {
+  if (result.address_components.length !== 1)
+    return countryId(result) + '|' + result.place_id + '|';
+  if (result.address_components[0].types.includes('country'))
+    return countryId(result) + '||';
+  return '|' + result.place_id + '|';
+}
+
+const placeIdResolver = express.Router();
+placeIdResolver.route('/').post(async (request, response) => {
+  const {placeId} = getArgs(request);
+  try {
+    const result: {results: GeocodeResult[]} = await new Promise((resolve, reject) => https.get('https://maps.googleapis.com/maps/api/geocode/json?place_id=' + placeId + '&key=' + googleMapsApiKey + '&language=ru', response => {
+      const chunks: Buffer[] = [];
+      response.on('data', chunk => chunks.push(chunk));
+      response.on('end', () => {
+        try {
+          const result = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+          resolve(result);
+        } catch (e) {
+          reject(e);
+        }
+      });
+    }));
+    const [resultObj] = result.results;
+    if (resultObj)
+      return response.status(200).json({placeId: resolvedPlaceId(resultObj)});
+    else
+      return response.status(404).json({}).end();
+  } catch (error) {
+    console.debug('POST /v1/resolvePlaceId', error);
+    response.status(500).json({}).end();
+  }
+});
+
+export { placeIdResolver as PlaceIdResolverController, router as LocationsController };
