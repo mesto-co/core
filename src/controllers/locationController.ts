@@ -34,7 +34,7 @@ router.route('/')
     .post(async (request, response) => {
       const {userInput, sessionToken} = getArgs(request);
       if (sessionToken) {
-        const mapsEndpoint = (userInput: string, sessionToken: string, key: string) => 'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=' + encodeURIComponent(userInput) + '&sessiontoken=' + sessionToken + '&key=' + key + '&language=ru&types=(cities)';
+        const mapsEndpoint = (userInput: string, sessionToken: string, key: string) => 'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=' + encodeURIComponent(userInput) + '&sessiontoken=' + sessionToken + '&key=' + key + '&language=ru&types=(regions)';
         const { userInput, sessionToken } = getArgs(request);
         try {
           const result: any = await new Promise((resolve, reject) => https.get(mapsEndpoint(userInput, sessionToken, googleMapsApiKey), response => {
@@ -89,13 +89,15 @@ function resolvedPlaceId(result: GeocodeResult) {
   if (result.address_components.length !== 1)
     return countryId(result) + '|' + result.place_id + '|';
   if (result.address_components[0].types.includes('country'))
-    return countryId(result) + '||';
+    return countryId(result) + '|';
   return '|' + result.place_id + '|';
 }
 
 const placeIdResolver = express.Router();
 placeIdResolver.route('/').post(async (request, response) => {
   const {placeId} = getArgs(request);
+  if (placeId.endsWith('|'))
+    return response.status(200).json({placeId});
   try {
     const result: {results: GeocodeResult[]} = await new Promise((resolve, reject) => https.get('https://maps.googleapis.com/maps/api/geocode/json?place_id=' + placeId + '&key=' + googleMapsApiKey + '&language=ru', response => {
       const chunks: Buffer[] = [];

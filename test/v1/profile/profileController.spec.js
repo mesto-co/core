@@ -356,7 +356,7 @@ test('/v1/admin/invalidateSearchIndex only available for admin account', async (
     id: '00000000-1111-2222-3333-000000000016',
     fullName: 'Безликий'
   });
-  const {code} = await get(`${getHost()}/v1/admin/invalidateSearchIndex`, userHeader);
+  const {code} = await post(`${getHost()}/v1/admin/invalidateSearchIndex`, JSON.stringify({userIds: []}), userHeader);
   expect(code).toBe(401);
   const {code: withoutUserCode} = await get(`${getHost()}/v1/admin/invalidateSearchIndex`);
   expect(withoutUserCode).toBe(401);

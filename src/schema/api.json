@@ -279,7 +279,7 @@
       "required": [ "contactId" ]
     },
     {
-      "$id": "#GET>/v1/admin/invalidateSearchIndex",
+      "$id": "#POST>/v1/admin/invalidateSearchIndex",
       "allOf": [{ "$ref": "#RequestBase" }]
     },
     {
