@@ -215,11 +215,12 @@ async function performSearch(query: string, limit: number, offset: number, userI
 
 const router = express.Router();
 router.route('/')
-    .get(async (request, response) => {
+    .post(async (request, response) => {
       const {id: userId} = request.user!;
       if (userId !== adminUserId)
         return response.status(401).json({}).end();
-      await Promise.allSettled((await knex('User').select('id')).map((v: {id: string}) => invalidateSearchIndex(v.id)));
+      const {userIds}: {userIds: string[]} = getArgs(request);
+      await Promise.allSettled(userIds.map(id => invalidateSearchIndex(id)));
       response.status(200).json({}).end();
     });
 
