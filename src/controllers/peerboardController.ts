@@ -20,6 +20,7 @@ import jsonwebtoken from 'jsonwebtoken';
 import knex from '../knex';
 import { UserStatus } from '../enums/UserStatus';
 const { peerboardAuthToken } = require('../../config.js');
+const config = require('../../config.js');
 
 const peerboardAuthControler = express.Router();
 peerboardAuthControler.route('/').get(async (request, response) => {
@@ -43,10 +44,14 @@ peerboardAuthControler.route('/').get(async (request, response) => {
           name: user.fullName,
           avatar_url: user.imagePath,
           bio: user.about,
-          role: 'member'
         }
       }
     };
+    if (id === config.emailService.adminUuid) {
+      // @ts-ignore
+      payload.creds.fields.role = 'admin';
+    }
+
     const token = jsonwebtoken.sign(payload, peerboardAuthToken, { expiresIn: '60s' });
     return response.status(200).send({token}).end();
   } catch (e) {

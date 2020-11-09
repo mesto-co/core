@@ -353,7 +353,6 @@
       "allOf": [{ "$ref": "#RequestBase" }],
       "properties": {
         "placeId": { "type": "string", "maxLength": 256 }
-      },
-      "required": [ "placeId" ]
+      }
     }
 ]

@@ -240,6 +240,8 @@ openlandGetUserController.route('/').post(async (request, response) => {
       apiUser.location = user.location;
     if (user.about)
       apiUser.about = user.about;
+    else
+      apiUser.about = '-';
 
     if (user.about) {
       const re = /#m_[^,\s]+/g;

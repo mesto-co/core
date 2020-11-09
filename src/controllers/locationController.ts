@@ -96,7 +96,7 @@ function resolvedPlaceId(result: GeocodeResult) {
 const placeIdResolver = express.Router();
 placeIdResolver.route('/').post(async (request, response) => {
   const {placeId} = getArgs(request);
-  if (placeId.endsWith('|'))
+  if (!placeId || placeId.endsWith('|'))
     return response.status(200).json({placeId});
   try {
     const result: {results: GeocodeResult[]} = await new Promise((resolve, reject) => https.get('https://maps.googleapis.com/maps/api/geocode/json?place_id=' + placeId + '&key=' + googleMapsApiKey + '&language=ru', response => {
