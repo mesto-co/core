@@ -283,6 +283,14 @@
       "allOf": [{ "$ref": "#RequestBase" }]
     },
     {
+      "$id": "#POST>/v1/admin/emails",
+      "allOf": [{ "$ref": "#RequestBase" }]
+    },
+    {
+      "$id": "#POST>/v1/admin/activate",
+      "allOf": [{ "$ref": "#RequestBase" }]
+    },
+    {
       "$id": "#GET>/v1/database/getSkills",
       "allOf": [{ "$ref": "#RequestBase" }],
       "properties": {

@@ -200,13 +200,13 @@ async function performSearch(query: string, limit: number, offset: number, userI
     SELECT SUM(swu.weight) as rank, u."fullName", u.id, u.username, u."imagePath", u.location, u.about, u.skills, u.busy, EVERY(f.id IS NOT NULL) as "isFriend", count(*) OVER() AS total
     FROM search_word sw
     INNER JOIN search_word_user swu ON swu.base = sw.base
-    INNER JOIN "User" u ON swu.user_id = u.id AND u.status = ?
+    INNER JOIN "User" u ON swu.user_id = u.id AND (u.status = ? OR u.status = ?)
     ${onlyFriends ? 'INNER' : 'LEFT'} JOIN "Friend" f ON u.id = f."friendId" AND f."userId" = ?
     ${queries.length ? `WHERE ${[...Array(queries.length).fill('sw.word % ?'), 'sw.word like CONCAT(?::text, \'%\')'].join(' OR ')}` : ''}
     GROUP BY u.id
     ORDER BY SUM(swu.weight) DESC, u.id DESC
     LIMIT ?
-    OFFSET ?`, queries.length  ? [UserStatus.APPROVED, userId, ...queries, queries[queries.length - 1], limit, offset] : [UserStatus.APPROVED, userId, limit, offset]);
+    OFFSET ?`, queries.length  ? [UserStatus.APPROVED, UserStatus.AWAITING, userId, ...queries, queries[queries.length - 1], limit, offset] : [UserStatus.APPROVED, UserStatus.AWAITING, userId, limit, offset]);
   return {
     data: result.rows.map(sanitizeUser),
     total: result.rows.length > 0 && (result.rows[0].total * 1) || 0
@@ -257,7 +257,7 @@ searchController.route('/').post(async (request, response) => {
       ...partEntries.map(([key]) => '(sw.word % :' + key + ')'),
       (partEntries.length ? `(sw.word LIKE CONCAT(:part${partEntries.length - 1}::text, '%'))` : '')
     ].filter(v => v.length > 0).join(' OR ');
-    const userWhereClause = ' u.status = :userStatus ' +
+    const userWhereClause = ' (u.status = :userStatusApproved OR u.status = :userStatusAwaiting)' +
       (placeId ? (isResolvedPlaceId ? ` AND u.place_id LIKE CONCAT(:placeId::text, '%')` : ` AND (u.place_id = :placeId OR u.place_id LIKE CONCAT('%', '|', :placeId::text, '|'))`) : '') +
       (skills.length ? ' AND u.skills_lo && :skills ' : '') +
       (busy !== undefined ? ' AND u.busy = :busy' : '');
@@ -270,7 +270,7 @@ searchController.route('/').post(async (request, response) => {
       GROUP BY u.id
       ORDER BY sum(swu.weight) DESC, u.id DESC
       OFFSET :offset LIMIT :count`, {
-      ...Object.fromEntries(partEntries), userTable: 'User', busy, placeId, skills, offset, count, userStatus: UserStatus.APPROVED, userId
+      ...Object.fromEntries(partEntries), userTable: 'User', busy, placeId, skills, offset, count, userStatusApproved: UserStatus.APPROVED, userStatusAwaiting: UserStatus.AWAITING, userId
     });
     const total = await knex.raw(`
       SELECT count(distinct u.id) as total
@@ -278,7 +278,7 @@ searchController.route('/').post(async (request, response) => {
       INNER JOIN search_word_user swu ON sw.base = swu.base ${queryClause ? 'AND (' + queryClause + ')' : ''}
       INNER JOIN "User" u ON swu.user_id = u.id AND ${userWhereClause}
       ${isFriend ? 'INNER' : 'LEFT'} JOIN "Friend" f ON u.id = f."friendId" AND f."userId" = :userId`, {
-      ...Object.fromEntries(partEntries), userTable: 'User', busy, placeId, skills, offset, count, userStatus: UserStatus.APPROVED, userId
+        ...Object.fromEntries(partEntries), userTable: 'User', busy, placeId, skills, offset, count, userStatusApproved: UserStatus.APPROVED, userStatusAwaiting: UserStatus.AWAITING, userId
     });
     response.status(200).send({
       data: result.rows.map(sanitizeUser),

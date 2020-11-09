@@ -13,7 +13,7 @@
     "eslint:fix": "[ \"$CI\" = true ] && eslint --quiet -f codeframe --ext js,ts . --fix || eslint --ext js,ts . --fix",
     "lint": "npm run eslint && npm run tsc",
     "tsc": "tsc -p .",
-    "clean": "rm -f tsconfig.tsbuildinfo && docker-compose -f ./docker-compose-dev.yml rm --force && rimraf app",
+    "clean": "rm -f tsconfig.tsbuildinfo && rimraf app",
     "test": "npm run lint && npm run test:api",
     "test:api": "jest --testPathPattern=test/",
     "test:ci": "node utils/wait-for.js core 8080 50000 && npm run test",

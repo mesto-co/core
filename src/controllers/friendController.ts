@@ -34,7 +34,7 @@ friendEntryRouter.route('/')
       try {
         const friend = await UserEntries().where('id', friendId).first('status');
 
-        if (!friend || friend.status !== UserStatus.APPROVED)
+        if (!friend || (friend.status !== UserStatus.APPROVED && friend.status !== UserStatus.AWAITING))
           return response.status(404).json({}).end();
 
         const [id] = await FriendEntries().returning('id').insert({friendId, userId});

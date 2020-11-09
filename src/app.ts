@@ -32,7 +32,7 @@ import { errorHandler, notFoundHandler } from './errorHandler';
 import {accessTokenHandler} from './accessTokenHandler';
 import requestIdHandler from './requestId';
 import cors from 'cors';
-import {UserController, UsersController, AddUsersForTest, DelUsersForTest, addFakeUsers, getUsersCount, printSomeUsers} from './controllers/usersController';
+import {UserController, UsersController, AddUsersForTest, DelUsersForTest, addFakeUsers, getUsersCount, printSomeUsers, EmailsController, ActivateController} from './controllers/usersController';
 import {InvalidateSearchIndexController, InvalidateSearchIndexForTest, SearchController} from './search';
 import { OpenlandGetCodeController, OpenlandGetUserController, OpenlandVerifyCodeController, OpenlandSetNextCodeForTest } from './controllers/openlandController';
 
@@ -95,6 +95,8 @@ register(app, '/v1/database/getLocations', GetLocationsController, true);
 
 // endpoints below are available only for admin account
 register(app, '/v1/admin/invalidateSearchIndex', InvalidateSearchIndexController, true);
+register(app, '/v1/admin/emails', EmailsController, true);
+register(app, '/v1/admin/activate', ActivateController, true);
 
 // two handlers below should be last handlers and their order matters.
 app.use(notFoundHandler);

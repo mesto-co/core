@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import express from 'express';
+import express, { request } from 'express';
 import { UserStatus } from '../enums/UserStatus';
 import knex from '../knex';
 import {invalidateSearchIndex} from '../search';
-const {enableMethodsForTest} = require('../../config.js');
+const {adminUserId, enableMethodsForTest} = require('../../config.js');
 
 import {getArgs} from '../utils';
 
@@ -49,7 +49,7 @@ const handleUserRequestById = async (id: string, selfInfo: boolean, request: any
 
     const userPromise = knex.raw(`
       SELECT id, "fullName", username, ${selfInfo ? 'email,' : ''} "imagePath", location, place_id as "placeId", about, role, skills, status, busy
-      FROM "User" WHERE status = ? AND id = ? LIMIT 1`, [UserStatus.APPROVED, id])
+      FROM "User" WHERE (status = ? OR status = ?) AND id = ? LIMIT 1`, [UserStatus.APPROVED, UserStatus.AWAITING, id])
         .then((result: {rows: User[]}) => result.rows.length > 0 ? removeNulls(result.rows[0]) : null);
 
     const isFriendPromise = selfInfo ? false : knex.raw(`SELECT EXISTS(SELECT 1 FROM "Friend" WHERE "userId" = ? AND "friendId" = ?)`, [request.user!.id!, id])
@@ -214,6 +214,33 @@ if (enableMethodsForTest) {
       });
 }
 
+const EmailsController = express.Router();
+EmailsController.route('/').post(async(request, response) => {
+  const {id: userId} = request.user!;
+  const {limit, offset, hasOL, status = 'awaiting'} = getArgs(request);
+  if (userId !== adminUserId)
+    return response.status(401).json({}).end();
+  try {
+    const data = await knex.raw('SELECT email FROM "User" u ' + (hasOL ? ' INNER JOIN "Contact" c ON c."ownerId" = u.id AND c.title = \'openland\'' : '') + ' WHERE u.status = :status LIMIT :limit OFFSET :offset', {
+      limit, offset, status
+    });
+    // @ts-ignore
+    return response.status(200).json(data.rows.map(row => row.email)).end();
+  } catch (e) {
+    console.log(e);
+  }
+});
+
+const ActivateController = express.Router();
+ActivateController.route('/').post(async(request, response) => {
+  const {id: userId} = request.user!;
+  const {email} = getArgs(request);
+  if (userId !== adminUserId)
+    return response.status(401).json({}).end();
+  await knex.raw('UPDATE "User" SET status = :status WHERE email = :email', {email, status: UserStatus.APPROVED});
+  return response.status(200).json({}).end();
+});
+
 export {
   userController as UserController,
   usersController as UsersController,
@@ -221,5 +248,7 @@ export {
   delUsersForTest as DelUsersForTest,
   addFakeUsers,
   getUsersCount,
-  printSomeUsers
+  printSomeUsers,
+  ActivateController,
+  EmailsController
 };
