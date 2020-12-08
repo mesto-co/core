@@ -38,6 +38,12 @@ const UserEntries = () => knex('User');
 
 const UserTokenEntries = () => knex('UserToken');
 
+function isValidReferer(referer) {
+  if (referer && (referer === 'https://dev.mesto.co/' || referer === 'https://app.mesto.co'))
+    return true;
+  return false;
+}
+
 const emailMagicLinkSenderRouter = express.Router();
 emailMagicLinkSenderRouter.route('/')
     .post(async (request, response) => {
@@ -54,8 +60,8 @@ emailMagicLinkSenderRouter.route('/')
             return jsonwebtoken.verify(userToken.token, refreshJwtSecret,{algorithms: ['HS256']}, async (err: VerifyErrors | null) => {
               if (err)
                 return response.status(404).json({}).end();
-
-              const magicLink = `${magicLinkUrl}token=${userToken.token}`;
+              const referer = request.headers['referer'];
+              const magicLink = isValidReferer(referer) ? `${referer}auth/magic-link/?token=${userToken.token}` : `${magicLinkUrl}token=${userToken.token}`;
               await emailService.sendMagicLinkEmail(email, magicLink);
               return response.status(200).json({}).end();
             });
