@@ -38,8 +38,7 @@ describe('/v1/peerboard', () => {
             email: user.email,
             name: user.fullName,
             avatar_url: user.imagePath,
-            bio: user.about,
-            role: 'member'
+            bio: user.about
           }
         }
       });
