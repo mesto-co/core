@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const { post, getHost, genUsers } = require('../../utils.js');
+const { post, getHost, genUsers, getAuthHeader } = require('../../utils.js');
 
 const ENDPOINT = `${getHost()}/v1/auth/refresh`;
 const fs = require('fs').promises;
@@ -28,8 +28,10 @@ const {
 } = require('../../../config.js');
 
 let email = null;
+let user = null;
 beforeEach(async () => {
-  ([{email}] = await genUsers(1602996153726, [{}]));
+  ([user] = await genUsers(1602996153726, [{}]));
+  email = user.email;
 });
 
 test('/v1/auth/refresh', async () => {
@@ -68,4 +70,34 @@ test('/v1/auth/refresh without refresh token', async () => {
 
   expect(code).toBe(400);
   expect(data.message).toBeDefined();
+});
+
+test('/v1/auth/refresh permissions e2e test', async () => {
+  // prepare user
+  const authHeader = getAuthHeader({
+    user: user,
+    permissions: [1]
+  });
+  expect(await post(getHost() + '/v1/addPermission', {user_id: user.id, permission_id: 1}, authHeader))
+      .toMatchObject({ code: 200 });
+  const {data: { tokenId }} = await post(GENERATE_TOKEN_ENDPOINT, JSON.stringify({email}));
+  await post(SEND_MAGIC_LINK_ENDPOINT, JSON.stringify({email, tokenId}));
+
+  const magicLink = await fs.readFile(saveFilePath, 'utf8');
+  const magicLinkToken = new URLSearchParams(url.parse(magicLink).query).get('token');
+  const {data: getTokenByMagicLinkData, code: getTokenByMagicLinkCode} = await post(ENDPOINT, JSON.stringify({refreshToken: magicLinkToken}));
+
+  expect(getTokenByMagicLinkCode).toBe(200);
+  expect(getTokenByMagicLinkData.refreshToken).toBeDefined();
+  expect(getTokenByMagicLinkData.accessToken).toBeDefined();
+
+  const realAuthHeader = {
+    Authorization: `Bearer ${getTokenByMagicLinkData.accessToken}`,
+    ['X-Request-Id']: 'd5ab3356-f4b4-11ea-adc1-0242ac120002'
+  };
+  const [userA] = await genUsers(1609179543003, [{}]);
+  expect(await post(getHost() + '/v1/addPermission', {user_id: userA.id, permission_id: 1}, realAuthHeader))
+      .toMatchObject({ code: 200 });
+  expect(await post(getHost() + '/v1/delPermission', {user_id: userA.id, permission_id: 1}, realAuthHeader))
+      .toMatchObject({ code: 200 });
 });

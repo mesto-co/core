@@ -28,26 +28,18 @@ const {
   }
 } = require('../../config.js');
 
-const UserEntries = () => knex('User');
-const UserTokenEntries = () => knex('UserToken');
-
 const authMagicLinkRouter = express.Router();
 authMagicLinkRouter.route('/')
     .post(async (request, response) => {
       const email = getEmail(request);
       try {
-        const user = await UserEntries().where('email', email).andWhere('status', UserStatus.APPROVED).first();
+        const {rows: [user]} = await knex.raw('SELECT id FROM "User" WHERE email = ? AND status = ? LIMIT 1', [email, UserStatus.APPROVED]);
         if (user) {
-          const {id} = user;
-
-          const payload: RefreshJwtPayloadModel = { userId: id };
+          const payload: RefreshJwtPayloadModel = { userId: user.id };
           const jwt = TokenHelper.signMagicLinkToken(payload);
-
-          const [tokenId] = await UserTokenEntries().returning('id').insert({token: jwt, userId: id});
-
+          const {rows: [{id: tokenId}]} = await knex.raw(`INSERT INTO "UserToken"(token, "userId") VALUES(?, ?) RETURNING id;`, [jwt, user.id]);
           if (tokenId)
             return response.status(200).json({tokenId}).end();
-
           return response.status(500).json({}).end();
         }
 
@@ -72,24 +64,21 @@ refreshTokenRouter.route('/')
               return response.status(401).json({}).end();
 
             try {
-              const user = await UserEntries()
-                  .join('UserToken', 'User.id', 'UserToken.userId')
-                  .where('User.id', decoded!.userId)
-                  .andWhere('User.status', UserStatus.APPROVED)
-                  .andWhere('UserToken.token', refreshToken)
-                  .first('User.id', 'User.fullName', 'User.role');
+              const {rows: [user]} = await knex.raw(`
+                SELECT
+                  u.id, u."fullName",
+                  ARRAY(SELECT permission_id FROM user_permission up WHERE u.id = up.user_id) as permissions
+                FROM "User" u, "UserToken" ut
+                WHERE u.id = ut."userId" AND u.id = ? AND u.status = ? AND ut.token = ?
+                LIMIT 1`, [decoded!.userId, UserStatus.APPROVED, refreshToken]);
 
               if (!user)
                 return response.status(401).json({}).end();
 
               const newRefreshToken = TokenHelper.signRefreshToken({userId: user.id});
-              const [tokenId] = await UserTokenEntries().returning('id').insert({
-                token: newRefreshToken,
-                userId: user.id
-              });
-
+              const {rows: [{id: tokenId}]} = await knex.raw(`INSERT INTO "UserToken"(token, "userId") VALUES(?, ?) RETURNING id;`, [newRefreshToken, user.id]);
               if (tokenId) {
-                await UserTokenEntries().where('token', refreshToken).del();
+                await knex.raw('DELETE FROM "UserToken" WHERE token = ?', [refreshToken]);
 
                 const accessToken = TokenHelper.signAccessToken(user);
                 return response.status(200).json({accessToken, refreshToken: newRefreshToken}).end();

@@ -27,6 +27,7 @@ import {LocationsController,PlaceIdResolverController} from './controllers/locat
 import {SingleContactController, AllContactsController} from './controllers/contactController';
 import {GetSkillsController, GetLocationsController} from './controllers/databaseController';
 import {PeerboardAuthController} from './controllers/peerboardController';
+import {addPermission, delPermission} from './controllers/permissionController';
 
 import { errorHandler, notFoundHandler } from './errorHandler';
 import {accessTokenHandler} from './accessTokenHandler';
@@ -89,6 +90,8 @@ register(app, '/v1/openland/sendCode', OpenlandGetCodeController, true);
 register(app, '/v1/openland/verifyCode', OpenlandVerifyCodeController, true);
 register(app, '/v1/openland/getUser', OpenlandGetUserController, true);
 register(app, '/v1/peerboard/auth', PeerboardAuthController, true);
+register(app, '/v1/addPermission', addPermission, true);
+register(app, '/v1/delPermission', delPermission, true);
 
 register(app, '/v1/database/getSkills', GetSkillsController, true);
 register(app, '/v1/database/getLocations', GetLocationsController, true);

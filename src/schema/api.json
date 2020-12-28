@@ -354,5 +354,23 @@
       "properties": {
         "placeId": { "type": "string", "maxLength": 256 }
       }
+    },
+    {
+      "$id": "#POST>/v1/addPermission",
+      "allOf": [{ "$ref": "#RequestBase" }],
+      "properties": {
+        "user_id": { "type": "string", "format": "uuid" },
+        "permission_id": { "type": "integer" }
+      },
+      "required": [ "user_id", "permission_id" ]
+    },
+    {
+      "$id": "#POST>/v1/delPermission",
+      "allOf": [{ "$ref": "#RequestBase" }],
+      "properties": {
+        "user_id": { "type": "string", "format": "uuid" },
+        "permission_id": { "type": "integer" }
+      },
+      "required": [ "user_id", "permission_id" ]
     }
 ]

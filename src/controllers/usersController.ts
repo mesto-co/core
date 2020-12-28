@@ -205,6 +205,7 @@ if (enableMethodsForTest) {
       .post(async (request, response) => {
         const {userIds}: {userIds: string[]} = getArgs(request);
         // TODO(ak239): ON DELETE CASCADE
+        await knex.raw(`DELETE FROM user_permission WHERE user_id IN (${Array(userIds.length).fill('?').join(',')})`, userIds);
         await knex.raw(`DELETE FROM search_word_user WHERE user_id IN (${Array(userIds.length).fill('?').join(',')})`, userIds);
         await knex.raw(`DELETE FROM "Friend" WHERE "userId" IN (${Array(userIds.length).fill('?').join(',')}) OR "friendId" IN (${Array(userIds.length).fill('?').join(',')})`, [...userIds, ...userIds]);
         await knex.raw(`DELETE FROM "UserToken" WHERE "userId" IN (${Array(userIds.length).fill('?').join(',')})`, userIds);
