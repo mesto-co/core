@@ -17,12 +17,13 @@
 import express from 'express';
 import jsonwebtoken, {VerifyErrors} from 'jsonwebtoken';
 import knex from '../knex';
-import {getArgs, getEmail} from '../utils';
+import {getArgs, getEmail, hasPermission} from '../utils';
 import {UserStatus} from '../enums/UserStatus';
 import {emailService} from '../emailService';
 
 import {TokenHelper} from '../TokenHelper';
 import {RefreshJwtPayloadModel} from '../models/RefreshJwtPayloadModel';
+import { Permission } from '../enums/permission';
 
 const {
   magicLink: {
@@ -75,21 +76,21 @@ const emailInviteLinkSenderRouter = express.Router();
 emailInviteLinkSenderRouter.route('/')
     .post(async (request, response) => {
       const {email} = getArgs(request);
-      const {id: userId} = request.user!;
-      if (userId !== config.emailService.adminUuid)
-        return response.status(403).json({}).end();
       try {
-        const user = await UserEntries().where('email', email).andWhere('status', UserStatus.APPROVED).first();
-        if (user) {
-          const {id} = user;
-          const payload: RefreshJwtPayloadModel = { userId: id };
-          const jwt = TokenHelper.signInviteLinkToken(payload);
-          await UserTokenEntries().returning('id').insert({token: jwt, userId: id});
-          const magicLink = `${magicLinkUrl}token=${jwt}&redirect=/profile/edit/`;
-          await emailService.sendInviteEmail(email, magicLink);
-          return response.status(200).json({}).end();
+        if (hasPermission(request, Permission.SENDINVITEEMAIL)) {
+          const user = await UserEntries().where('email', email).andWhere('status', UserStatus.APPROVED).first();
+          if (user) {
+            const {id} = user;
+            const payload: RefreshJwtPayloadModel = { userId: id };
+            const jwt = TokenHelper.signInviteLinkToken(payload);
+            await UserTokenEntries().insert({token: jwt, userId: id});
+            const magicLink = `${magicLinkUrl}token=${jwt}&redirect=/profile/edit/`;
+            await emailService.sendInviteEmail(email, magicLink);
+            return response.status(200).json({}).end();
+          }
+          return response.status(404).json({}).end();
         }
-        response.status(404).json({}).end();
+        return response.status(401).json({}).end();
       } catch (e) {
         console.debug('email/sendMagicLink error', e);
         response.status(500).json({}).end();

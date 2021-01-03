@@ -15,6 +15,11 @@
  */
 enum Permission {
     ADDDELPERMISSION = 1,
+    ACTIVATEUSER = 2,
+    BANUSER = 3,
+    ADDUSER = 4,
+    SENDINVITEEMAIL = 5,
+    NEWUSERS = 6
 }
 
 export { Permission };

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import express from 'express';
+import { Permission } from './enums/permission';
 import {HEADER_NAME} from './requestId';
 
 const argsSymbol = Symbol('args');
@@ -33,6 +34,10 @@ function getArgs(request: express.Request): any {
   return {};
 }
 
+function hasPermission(request: express.Request, permission: Permission): boolean {
+  return request.user && request.user.permissions && request.user.permissions.includes(permission) || false;
+}
+
 function getEmail(request: express.Request): any {
   const args = getArgs(request);
   const email = args.email;
@@ -41,4 +46,4 @@ function getEmail(request: express.Request): any {
   return email;
 }
 
-export {getArgs, getEmail};
+export {getArgs, getEmail, hasPermission};

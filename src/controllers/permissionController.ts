@@ -17,13 +17,12 @@
 import express from 'express';
 import { Permission } from '../enums/permission';
 import knex from '../knex';
-import { getArgs } from '../utils';
+import { getArgs, hasPermission } from '../utils';
 
 const addPermission = express.Router();
 addPermission.route('/').post(async (request, response) => {
   try {
-    const {permissions} = request.user!;
-    if (!permissions || !permissions.includes(Permission.ADDDELPERMISSION))
+    if (!hasPermission(request, Permission.ADDDELPERMISSION))
       return response.status(401).json({}).end();
     const {permission_id, user_id} = getArgs(request);
     if (!Object.values(Permission).includes(permission_id))
@@ -39,8 +38,7 @@ addPermission.route('/').post(async (request, response) => {
 const delPermission = express.Router();
 delPermission.route('/').post(async (request, response) => {
   try {
-    const {permissions} = request.user!;
-    if (!permissions || !permissions.includes(Permission.ADDDELPERMISSION))
+    if (!hasPermission(request, Permission.ADDDELPERMISSION))
       return response.status(401).json({}).end();
     const {permission_id, user_id} = getArgs(request);
     if (!Object.values(Permission).includes(permission_id))
