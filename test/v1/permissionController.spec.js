@@ -27,6 +27,10 @@ describe('/v1/permission', () => {
         .toMatchObject({ code: 200 });
     expect(await post(getHost() + '/v1/delPermission', {user_id: aUser.id, permission_id: 1}, authHeader))
         .toMatchObject({ code: 200 });
+    expect(await post(getHost() + '/v1/addPermission', {user_id: aUser.id, permission_id: -1}, authHeader))
+        .toMatchObject({ code: 400 });
+    expect(await post(getHost() + '/v1/delPermission', {user_id: aUser.id, permission_id: -1}, authHeader))
+        .toMatchObject({ code: 400 });
   });
   test('/v1/addDelPermission without proper auth', async () => {
     const [rootUser, aUser] = await genUsers(1609178164580, [{}, {}]);

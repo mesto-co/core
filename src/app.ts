@@ -33,7 +33,7 @@ import { errorHandler, notFoundHandler } from './errorHandler';
 import {accessTokenHandler} from './accessTokenHandler';
 import requestIdHandler from './requestId';
 import cors from 'cors';
-import {UserController, UsersController, AddUsersForTest, DelUsersForTest, addFakeUsers, getUsersCount, printSomeUsers} from './controllers/usersController';
+import {UserController, UsersController, AddUsersForTest, DelUsersForTest, addFakeUsers, getUsersCount, printSomeUsers, addUser, activateUser, banUser, existUsers} from './controllers/usersController';
 import {InvalidateSearchIndexController, InvalidateSearchIndexForTest, SearchController} from './search';
 import { OpenlandGetCodeController, OpenlandGetUserController, OpenlandVerifyCodeController, OpenlandSetNextCodeForTest } from './controllers/openlandController';
 
@@ -92,6 +92,11 @@ register(app, '/v1/openland/getUser', OpenlandGetUserController, true);
 register(app, '/v1/peerboard/auth', PeerboardAuthController, true);
 register(app, '/v1/addPermission', addPermission, true);
 register(app, '/v1/delPermission', delPermission, true);
+
+register(app, '/v1/admin/addUser', addUser, true);
+register(app, '/v1/admin/activateUser', activateUser, true);
+register(app, '/v1/admin/banUser', banUser, true);
+register(app, '/v1/admin/existUsers', existUsers, true);
 
 register(app, '/v1/database/getSkills', GetSkillsController, true);
 register(app, '/v1/database/getLocations', GetLocationsController, true);
