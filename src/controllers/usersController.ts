@@ -179,6 +179,7 @@ if (enableMethodsForTest) {
     const columns = Object.keys(newUsers[0]);
     await knex.raw(`INSERT INTO "User"(${Array(columns.length).fill('??').join(',')}) VALUES ${Array(newUsers.length).fill('(' + (Array(columns.length).fill('?').join(',') + ')')).join(',')} ON CONFLICT DO NOTHING`,
         [...columns, ...newUsers.map(user => Object.values(user)).flat()]);
+    await knex.raw(`INSERT INTO user_permission(user_id, permission_id) VALUES ${Array(newUsers.length).fill('(?, ?)').join(',')}`, newUsers.map(u => [u.id, Permission.EVENT]).flat());
     await Promise.allSettled(newUsers.map(user => (user.id ? invalidateSearchIndex(user.id) : void 0)));
     return newUsers;
   };
@@ -206,6 +207,8 @@ if (enableMethodsForTest) {
       .post(async (request, response) => {
         const {userIds}: {userIds: string[]} = getArgs(request);
         // TODO(ak239): ON DELETE CASCADE
+        await knex.raw(`DELETE FROM event WHERE creator IN (${Array(userIds.length).fill('?').join(',')})`, userIds);
+        await knex.raw(`DELETE FROM event_user WHERE user_id IN (${Array(userIds.length).fill('?').join(',')})`, userIds);
         await knex.raw(`DELETE FROM user_permission WHERE user_id IN (${Array(userIds.length).fill('?').join(',')})`, userIds);
         await knex.raw(`DELETE FROM search_word_user WHERE user_id IN (${Array(userIds.length).fill('?').join(',')})`, userIds);
         await knex.raw(`DELETE FROM "Friend" WHERE "userId" IN (${Array(userIds.length).fill('?').join(',')}) OR "friendId" IN (${Array(userIds.length).fill('?').join(',')})`, [...userIds, ...userIds]);
