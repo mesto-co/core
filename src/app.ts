@@ -36,6 +36,7 @@ import cors from 'cors';
 import {UserController, UsersController, AddUsersForTest, DelUsersForTest, addFakeUsers, getUsersCount, printSomeUsers, addUser, activateUser, banUser, existUsers} from './controllers/usersController';
 import {InvalidateSearchIndexController, InvalidateSearchIndexForTest, SearchController} from './search';
 import { OpenlandGetCodeController, OpenlandGetUserController, OpenlandVerifyCodeController, OpenlandSetNextCodeForTest } from './controllers/openlandController';
+import { addEvent, delEvent, editEvent, getEvent, joinEvent, unjoinEvent } from './controllers/eventController';
 
 const config = require('../config.js');
 
@@ -92,6 +93,13 @@ register(app, '/v1/openland/getUser', OpenlandGetUserController, true);
 register(app, '/v1/peerboard/auth', PeerboardAuthController, true);
 register(app, '/v1/addPermission', addPermission, true);
 register(app, '/v1/delPermission', delPermission, true);
+
+register(app, '/v1/event/addEvent', addEvent, true);
+register(app, '/v1/event/getEvent', getEvent, true);
+register(app, '/v1/event/editEvent', editEvent, true);
+register(app, '/v1/event/delEvent', delEvent, true);
+register(app, '/v1/event/joinEvent', joinEvent, true);
+register(app, '/v1/event/unjoinEvent', unjoinEvent, true);
 
 register(app, '/v1/admin/addUser', addUser, true);
 register(app, '/v1/admin/activateUser', activateUser, true);

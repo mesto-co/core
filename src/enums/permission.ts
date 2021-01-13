@@ -19,7 +19,9 @@ enum Permission {
     BANUSER = 3,
     ADDUSER = 4,
     SENDINVITEEMAIL = 5,
-    NEWUSERS = 6
+    NEWUSERS = 6,
+    EVENT = 7,
+    DELEVENT = 8
 }
 
 export { Permission };
