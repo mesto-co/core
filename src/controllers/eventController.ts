@@ -153,4 +153,44 @@ unjoinEvent.route('/').post(async (request, response) => {
   }
 });
 
-export { getEvent, addEvent, delEvent, editEvent, joinEvent, unjoinEvent };
+const searchEvents = express.Router();
+searchEvents.route('/').post(async (request, response) => {
+  try {
+    const {createdByMe, joinedByMe, from, to, offset, count} = getArgs(request);
+    let whereClause = ' WHERE e.time >= :from AND e.time <= :to AND e.status = :status';
+    let joinClause = '';
+    if (createdByMe)
+      whereClause += ' AND creator = :user';
+    if (joinedByMe)
+      joinClause += ' INNER JOIN event_user eu ON eu.user_id = :user AND eu.event_id = e.id';
+    else
+      joinClause += ' LEFT JOIN event_user eu ON eu.user_id = :user AND eu.event_id = e.id';
+    const userId = request.user!.id;
+    const {rows} = await knex.raw(`SELECT e.id, e.creator, e.time, e.title, e.description, e.image, e.link, eu.user_id, count(*) OVER() AS total FROM event e ${joinClause}${whereClause} ORDER BY time ASC LIMIT :count OFFSET :offset`, {
+      from, to, offset, count, user: userId, status: EventStatus.CREATED
+    });
+    const result = rows.map((row: { id: string; creator: string; time: string; title: string; description: string; image: string; user_id: string|undefined; link: string; }) => {
+      let event = {
+        id: row.id,
+        creator: row.creator,
+        time: row.time,
+        title: row.title,
+        description: row.description
+      };
+      if (row.image)
+        event = Object.assign(event, { image: row.image });
+      if (row.creator === userId || row.user_id)
+        event = Object.assign(event, { link: row.link });
+      return event;
+    });
+    const total = rows.length > 0 ? rows[0].total * 1 : 0;
+    return response.status(200).json({ data: result, total: total }).end();
+  } catch (e) {
+    if (e.code === '22007')
+      return response.status(400).json({message: 'Invalide time format'}).end();
+    console.debug('POST event/search', e);
+    return response.status(500).json({}).end();
+  }
+});
+
+export { getEvent, addEvent, delEvent, editEvent, joinEvent, unjoinEvent, searchEvents };

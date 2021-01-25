@@ -155,3 +155,117 @@ test('/v1/event/joinEvent', async () => {
 
   expect(await delEvent(id)).toMatchObject({code: 200});
 });
+
+test('/v1/event/search', async () => {
+  const [userA, userB] = await genUsers(1610520856202, [{}, {}]);
+  const authHeader = getAuthHeader({id: userA.id, permissions: [7]});
+  const anotherUserHeader = getAuthHeader({id: userB.id, permissions: [7]});
+  const addEvent = (data, header) => post(getHost() + '/v1/event/addEvent', data, header);
+  const joinEvent = (id, header = authHeader) => post(getHost() + '/v1/event/joinEvent', {id}, header);
+  const delEvent = id => post(getHost() + '/v1/event/delEvent', {id}, authHeader);
+
+  const searchEvent = (createdByMe, joinedByMe, from, to, offset, count, header = authHeader) => post(getHost() + '/v1/event/search', {createdByMe, joinedByMe, from, to, offset, count}, header);
+  const eventData = [
+    { time: new Date('05/16/20').toISOString(), title: 'event', description: 'created by A, not joined', link: 'https://youtube.com/abc', creator: userA.id },
+    { time: new Date('05/17/20').toISOString(), title: 'event', description: 'created by B, not joined', link: 'https://youtube.com/abc', creator: userB.id },
+    { time: new Date('05/18/20').toISOString(), title: 'event', description: 'created by A, joined by A', link: 'https://youtube.com/abc', creator: userA.id },
+    { time: new Date('05/19/20').toISOString(), title: 'event', description: 'created by B, joined by A', link: 'https://youtube.com/abc', creator: userB.id },
+    { time: new Date('05/20/20').toISOString(), title: 'event', description: 'created by A, joined by B', link: 'https://youtube.com/abc', creator: userA.id },
+    { time: new Date('05/21/20').toISOString(), title: 'event', description: 'created by B, joined by B', link: 'https://youtube.com/abc', creator: userB.id }
+  ];
+    // add one deleted event and check that it is not presented in any of the following responses.
+  const {data: {id: deletedEventId}} = await addEvent(eventData[0], authHeader);
+  await delEvent(deletedEventId);
+
+  await Promise.all(eventData.map(async data => {
+    const {data: {id}} = await addEvent(data, data.creator === userA.id ? authHeader : anotherUserHeader);
+    data.id = id;
+  }));
+  await Promise.all(eventData.map(async data => {
+    if (data.description.includes('joined by A'))
+      return joinEvent(data.id, authHeader);
+    if (data.description.includes('joined by B'))
+      return joinEvent(data.id, anotherUserHeader);
+  }));
+  // check the link in the event data, should be presented iff the event was created by current user or the current user joined an event
+  expect(await searchEvent(false, false, eventData[0].time, eventData[eventData.length - 1].time, 0, 10)).toMatchObject({
+    code: 200,
+    data: { data: eventData.map(data => removeLink(data, ['created by A', 'joined by A'])) }
+  });
+  // check pagination
+  for (let i = 0; i < eventData.length - 1; ++i) {
+    expect(await searchEvent(false, false, eventData[0].time, eventData[eventData.length - 1].time, i, 1)).toMatchObject({
+      code: 200,
+      data: { data: [removeLink(eventData[i], ['created by A', 'joined by A'])], total: eventData.length }
+    });
+  }
+  // check createdByMe
+  expect(await searchEvent(true, false, eventData[0].time, eventData[eventData.length - 1].time, 0, 10)).toMatchObject({
+    code: 200,
+    data: { data: eventData.filter(data => data.creator === userA.id) }
+  });
+  // ... with from and to
+  expect(await searchEvent(true, false, eventData[2].time, eventData[4].time, 0, 10)).toMatchObject({
+    code: 200,
+    data: { data: [eventData[2], eventData[4]] }
+  });
+  expect(await searchEvent(true, false, eventData[0].time, eventData[eventData.length - 1].time, 0, 10, anotherUserHeader)).toMatchObject({
+    code: 200,
+    data: { data: eventData.filter(data => data.creator === userB.id) }
+  });
+
+  // check joinedByMe
+  expect(await searchEvent(false, true, eventData[0].time, eventData[eventData.length - 1].time, 0, 10)).toMatchObject({
+    code: 200,
+    data: { data: eventData.filter(data => data.description.includes('joined by A')) }
+  });
+  // ... with from and to
+  expect(await searchEvent(false, true, eventData[0].time, eventData[2].time, 0, 10)).toMatchObject({
+    code: 200,
+    data: { data: [eventData[2]] }
+  });
+  // ... from and to are included boundaries
+  expect(await searchEvent(false, true, eventData[2].time, eventData[2].time, 0, 10)).toMatchObject({
+    code: 200,
+    data: { data: [eventData[2]] }
+  });
+  expect(await searchEvent(false, true, eventData[0].time, eventData[eventData.length - 1].time, 0, 10, anotherUserHeader)).toMatchObject({
+    code: 200,
+    data: { data: eventData.filter(data => data.description.includes('joined by B')) }
+  });
+
+  // from > to returns 200 and empty array
+  expect(await searchEvent(false, true, eventData[1].time, eventData[0].time, 0, 10, anotherUserHeader)).toMatchObject({
+    code: 200,
+    data: { data: [], total: 0 },
+  });
+
+  // bad input
+  expect(await searchEvent('str', true, eventData[0].time, eventData[5].time, 0, 10)).toMatchObject({
+    code: 400
+  });
+  expect(await searchEvent(false, 'str', eventData[0].time, eventData[5].time, 0, 10)).toMatchObject({
+    code: 400
+  });
+  expect(await searchEvent(false, true, 'aaa', eventData[5].time, 0, 10)).toMatchObject({
+    code: 400
+  });
+  expect(await searchEvent(false, true, eventData[0].time, 'aaa', 0, 10)).toMatchObject({
+    code: 400
+  });
+
+  // unauthorized
+  expect(await searchEvent(false, true, eventData[0].time, eventData[5].time, 0, 10, {})).toMatchObject({
+    code: 401
+  });
+
+  function removeLink(data, descriptionIncludes) {
+    const cpy = { ...data };
+    for (const description of descriptionIncludes) {
+      if (cpy.description.includes(description))
+        return cpy;
+    }
+    delete cpy.link;
+    return cpy;
+  }
+});
