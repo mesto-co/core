@@ -479,5 +479,18 @@
         "id": { "type": "string", "format": "uuid" }
       },
       "required": [ "id" ]
+    },
+    {
+      "$id": "#POST>/v1/event/search",
+      "allOf": [{ "$ref": "#RequestBase" }],
+      "properties": {
+        "createdByMe": { "type": "boolean", "default": false },
+        "joinedByMe": { "type": "boolean", "default": false },
+        "from": { "type": "string", "maxLength": 32 },
+        "to": { "type": "string", "maxLength": 32 },
+        "offset": { "type": "integer", "minimum": 0, "default": 0 },
+        "count": { "type": "integer", "minimum": 1, "maximum": 1000, "default": 10 }
+      },
+      "requred": [ "from", "to" ]
     }
 ]

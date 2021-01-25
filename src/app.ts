@@ -36,7 +36,7 @@ import cors from 'cors';
 import {UserController, UsersController, AddUsersForTest, DelUsersForTest, addFakeUsers, getUsersCount, printSomeUsers, addUser, activateUser, banUser, existUsers} from './controllers/usersController';
 import {InvalidateSearchIndexController, InvalidateSearchIndexForTest, SearchController} from './search';
 import { OpenlandGetCodeController, OpenlandGetUserController, OpenlandVerifyCodeController, OpenlandSetNextCodeForTest } from './controllers/openlandController';
-import { addEvent, delEvent, editEvent, getEvent, joinEvent, unjoinEvent } from './controllers/eventController';
+import { addEvent, delEvent, editEvent, getEvent, joinEvent, unjoinEvent, searchEvents } from './controllers/eventController';
 
 const config = require('../config.js');
 
@@ -100,6 +100,7 @@ register(app, '/v1/event/editEvent', editEvent, true);
 register(app, '/v1/event/delEvent', delEvent, true);
 register(app, '/v1/event/joinEvent', joinEvent, true);
 register(app, '/v1/event/unjoinEvent', unjoinEvent, true);
+register(app, '/v1/event/search', searchEvents, true);
 
 register(app, '/v1/admin/addUser', addUser, true);
 register(app, '/v1/admin/activateUser', activateUser, true);
