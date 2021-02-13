@@ -31,12 +31,14 @@ getEvent.route('/').get(async (request, response) => {
     const currentUser = request.user!.id;
     const {rows: rowsJoin} = await knex.raw('SELECT 1 FROM event_user WHERE event_id = :id AND user_id = :currentUser', { id, currentUser });
     const joined = rowsJoin.length > 0;
-    const {rows: [eventRow]} = await knex.raw(`SELECT creator, time, title, description, image, link FROM event WHERE id = :id AND status = :status`, { id, status: EventStatus.CREATED });
+    const {rows: [eventRow]} = await knex.raw(`SELECT creator, time, time_end, category, title, description, image, link FROM event WHERE id = :id AND status = :status`, { id, status: EventStatus.CREATED });
     if (!eventRow)
       return response.status(404).json({}).end();
     let result = {
       creator: eventRow.creator,
       time: eventRow.time,
+      time_end: eventRow.time_end,
+      category: eventRow.category,
       title: eventRow.title,
       description: eventRow.description
     };
@@ -57,8 +59,8 @@ addEvent.route('/').post(async (request, response) => {
     if (!hasPermission(request, Permission.EVENT))
       return response.status(401).json({}).end();
     const creator = request.user!.id;
-    const {time, title, description, image, link} = getArgs(request);
-    const {rows: [{id}]} = await knex.raw('INSERT INTO event(creator, time, title, description, image, link, status) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id', [creator, time, title, description, image || null, link, EventStatus.CREATED]);
+    const {time, title, description, image, link, category, time_end} = getArgs(request);
+    const {rows: [{id}]} = await knex.raw('INSERT INTO event(creator, time, time_end, category, title, description, image, link, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id', [creator, time, time_end, category, title, description, image || null, link, EventStatus.CREATED]);
     return response.status(200).json({id}).end();
   } catch (e) {
     // invalid_datetime_format
@@ -77,12 +79,14 @@ editEvent.route('/').post(async (request, response) => {
     if (!hasPermission(request, Permission.EVENT))
       return response.status(401).json({}).end();
     const currentUser = request.user!.id;
-    const {id, title, time, description, image, link} = getArgs(request);
-    const {rowCount} = await knex.raw('UPDATE event SET title = :title, description = :description, image = :image, link = :link, time = :time WHERE id = :id AND creator = :currentUser AND status = :status', {
+    const {id, title, time, description, image, link, time_end, category} = getArgs(request);
+    const {rowCount} = await knex.raw('UPDATE event SET title = :title, description = :description, image = :image, link = :link, time = :time, time_end = :time_end, category = :category WHERE id = :id AND creator = :currentUser AND status = :status', {
       title,
       description,
       image: image || null,
       time,
+      time_end,
+      category,
       link,
       id,
       currentUser,
@@ -156,7 +160,7 @@ unjoinEvent.route('/').post(async (request, response) => {
 const searchEvents = express.Router();
 searchEvents.route('/').post(async (request, response) => {
   try {
-    const {createdByMe, joinedByMe, from, to, offset, count} = getArgs(request);
+    const {createdByMe, joinedByMe, from, to, offset, count, category} = getArgs(request);
     let whereClause = ' WHERE e.time >= :from AND e.time <= :to AND e.status = :status';
     let joinClause = '';
     if (createdByMe)
@@ -165,15 +169,19 @@ searchEvents.route('/').post(async (request, response) => {
       joinClause += ' INNER JOIN event_user eu ON eu.user_id = :user AND eu.event_id = e.id';
     else
       joinClause += ' LEFT JOIN event_user eu ON eu.user_id = :user AND eu.event_id = e.id';
+    if (category)
+      whereClause += ' AND category = :category';
     const userId = request.user!.id;
-    const {rows} = await knex.raw(`SELECT e.id, e.creator, e.time, e.title, e.description, e.image, e.link, eu.user_id, count(*) OVER() AS total FROM event e ${joinClause}${whereClause} ORDER BY time ASC LIMIT :count OFFSET :offset`, {
-      from, to, offset, count, user: userId, status: EventStatus.CREATED
+    const {rows} = await knex.raw(`SELECT e.id, e.creator, e.time, e.time_end, e.category, e.title, e.description, e.image, e.link, eu.user_id, count(*) OVER() AS total FROM event e ${joinClause}${whereClause} ORDER BY time ASC LIMIT :count OFFSET :offset`, {
+      from, to, offset, count, user: userId, status: EventStatus.CREATED, category
     });
-    const result = rows.map((row: { id: string; creator: string; time: string; title: string; description: string; image: string; user_id: string|undefined; link: string; }) => {
+    const result = rows.map((row: { id: string; creator: string; time: string; time_end: string; category: string; title: string; description: string; image: string; user_id: string|undefined; link: string; }) => {
       let event = {
         id: row.id,
         creator: row.creator,
+        category: row.category,
         time: row.time,
+        time_end: row.time_end,
         title: row.title,
         description: row.description
       };
