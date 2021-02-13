@@ -160,7 +160,7 @@ unjoinEvent.route('/').post(async (request, response) => {
 const searchEvents = express.Router();
 searchEvents.route('/').post(async (request, response) => {
   try {
-    const {createdByMe, joinedByMe, from, to, offset, count, category} = getArgs(request);
+    const {createdByMe, joinedByMe, from, to, offset, count, category, countJoined} = getArgs(request);
     let whereClause = ' WHERE e.time >= :from AND e.time <= :to AND e.status = :status';
     let joinClause = '';
     if (createdByMe)
@@ -183,7 +183,8 @@ searchEvents.route('/').post(async (request, response) => {
         time: row.time,
         time_end: row.time_end,
         title: row.title,
-        description: row.description
+        description: row.description,
+        joined: []
       };
       if (row.image)
         event = Object.assign(event, { image: row.image });
@@ -191,6 +192,22 @@ searchEvents.route('/').post(async (request, response) => {
         event = Object.assign(event, { link: row.link });
       return event;
     });
+    if (countJoined > 0 && result.length > 0) {
+      const eventIds = result.map((event: { id: string}) => event.id);
+      // By limiting results by eventIds * countJoined we will get at least countJoined users for each event, so we need to filter some users after.
+      const {rows}: {rows: [{id: string, fullName: string, imagePath: (string|null), event_id: string}]} = await knex.raw(`SELECT u.id, u."fullName", u."imagePath", eu.event_id FROM "User" u INNER JOIN event_user eu ON u.id = eu.user_id WHERE eu.event_id IN (${Array(eventIds.length).fill('?').join(',')}) LIMIT ?`, [...eventIds, eventIds.length * countJoined]);
+      const usersPerEvent = new Map();
+      for (const row of rows) {
+        const users = usersPerEvent.get(row.event_id) || [];
+        users.push(Object.assign({
+          id: row.id,
+          fullName: row.fullName
+        }, row.imagePath ? {imagePath: row.imagePath} : {}));
+        usersPerEvent.set(row.event_id, users);
+      }
+      for (const event of result)
+        event.joined = (usersPerEvent.get(event.id) || []).slice(0, countJoined);
+    }
     const total = rows.length > 0 ? rows[0].total * 1 : 0;
     return response.status(200).json({ data: result, total: total }).end();
   } catch (e) {
