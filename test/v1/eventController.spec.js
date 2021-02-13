@@ -189,7 +189,8 @@ test('/v1/event/search', async () => {
     { time: new Date('05/18/20').toISOString(), time_end: new Date('05/18/20').toISOString(), title: 'event', category: 'youtube3', description: 'created by A, joined by A', link: 'https://youtube.com/abc', creator: userA.id },
     { time: new Date('05/19/20').toISOString(), time_end: new Date('05/19/20').toISOString(), title: 'event', category: 'youtube1', description: 'created by B, joined by A', link: 'https://youtube.com/abc', creator: userB.id },
     { time: new Date('05/20/20').toISOString(), time_end: new Date('05/20/20').toISOString(), title: 'event', category: 'youtube2', description: 'created by A, joined by B', link: 'https://youtube.com/abc', creator: userA.id },
-    { time: new Date('05/21/20').toISOString(), time_end: new Date('05/21/20').toISOString(), title: 'event', category: 'youtube3', description: 'created by B, joined by B', link: 'https://youtube.com/abc', creator: userB.id }
+    { time: new Date('05/21/20').toISOString(), time_end: new Date('05/21/20').toISOString(), title: 'event', category: 'youtube3', description: 'created by B, joined by B', link: 'https://youtube.com/abc', creator: userB.id },
+    { time: new Date('05/22/20').toISOString(), time_end: new Date('05/22/20').toISOString(), title: 'event', category: 'youtube3', description: 'created by B, joined by A, joined by B', link: 'https://youtube.com/abc', creator: userB.id }
   ];
     // add one deleted event and check that it is not presented in any of the following responses.
   const {data: {id: deletedEventId}} = await addEvent(eventData[0], authHeader);
@@ -201,9 +202,9 @@ test('/v1/event/search', async () => {
   }));
   await Promise.all(eventData.map(async data => {
     if (data.description.includes('joined by A'))
-      return joinEvent(data.id, authHeader);
+      await joinEvent(data.id, authHeader);
     if (data.description.includes('joined by B'))
-      return joinEvent(data.id, anotherUserHeader);
+      await joinEvent(data.id, anotherUserHeader);
   }));
   // check the link in the event data, should be presented iff the event was created by current user or the current user joined an event
   expect(await searchEvent(false, false, eventData[0].time, eventData[eventData.length - 1].time, 0, 10)).toMatchObject({
@@ -269,6 +270,12 @@ test('/v1/event/search', async () => {
     data: { data: [], total: 0 },
   });
 
+  // check joined
+  expect(await searchEvent(false, false, eventData[0].time, eventData[eventData.length - 1].time, 0, 10)).toMatchObject({
+    code: 200,
+    data: { data: eventData.map(data => addJoined(removeLink(data, ['created by A', 'joined by A']))) }
+  });
+
   // bad input
   expect(await searchEvent('str', true, eventData[0].time, eventData[5].time, 0, 10)).toMatchObject({
     code: 400
@@ -298,6 +305,15 @@ test('/v1/event/search', async () => {
         return cpy;
     }
     delete cpy.link;
+    return cpy;
+  }
+
+  function addJoined(data) {
+    const cpy = { ... data, joined: [] };
+    if (cpy.description.includes('joined by A'))
+      cpy.joined.push({id: userA.id, fullName: userA.fullName, imagePath: userA.imagePath});
+    if (cpy.description.includes('joined by B'))
+      cpy.joined.push({id: userB.id, fullName: userB.fullName, imagePath: userB.imagePath});
     return cpy;
   }
 });
