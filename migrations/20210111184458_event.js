@@ -31,7 +31,8 @@ exports.up = async function(knex) {
         title varchar(128) NOT NULL CHECK (title <> ''),
         description varchar(4096) NOT NULL CHECK (description <> ''),
         image varchar(256) NULL,
-        link varchar(256) NOT NULL CHECK (link <> ''),
+        link varchar(256) NULL,
+        eventType varchar(256) NOT NULL CHECK (eventType <> ''),
         status event_status_t
     )`);
   await knex.raw(`CREATE TABLE event_user (

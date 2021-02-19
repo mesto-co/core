@@ -22,7 +22,7 @@ test('/v1/event/addEvent', async () => {
   const addEvent = (data, header = authHeader) => post(getHost() + '/v1/event/addEvent', data, header);
   const getEvent = id => get(getHost() + '/v1/event/getEvent?id=' + id, authHeader);
   const delEvent = id => post(getHost() + '/v1/event/delEvent', {id}, authHeader);
-  const eventData = { time: new Date().toISOString(), title: 'event', description: 'description', link: 'https://youtube.com/abc'};
+  const eventData = { time: new Date().toISOString(), title: 'event', description: 'description', link: 'https://youtube.com/abc', eventType: 'youtube'};
   const result = await addEvent(eventData);
   expect(await getEvent(result.data.id)).toMatchObject({
     code: 200,
@@ -42,9 +42,11 @@ test('/v1/event/addEvent', async () => {
   expect(await addEvent({...eventData, description: undefined})).toMatchObject({code: 400});
   expect(await addEvent({...eventData, description: ''})).toMatchObject({code: 400});
   expect(await addEvent({...eventData, description: 'a'.repeat(4097)})).toMatchObject({code: 400});
-  expect(await addEvent({...eventData, link: undefined})).toMatchObject({code: 400});
   expect(await addEvent({...eventData, link: 'a'.repeat(257)})).toMatchObject({code: 400});
   expect(await addEvent({...eventData, link: 'a'.repeat(256)})).toMatchObject({code: 400});
+  expect(await addEvent({...eventData, eventType: undefined})).toMatchObject({code: 400});
+  expect(await addEvent({...eventData, eventType: 'a'.repeat(257)})).toMatchObject({code: 400});
+  expect(await addEvent({...eventData, eventType: 'a'.repeat(256)})).toMatchObject({code: 400});
 
   const unauthorizedHeader = getAuthHeader({id: user.id});
   expect(await addEvent(eventData, unauthorizedHeader)).toMatchObject({code: 401});
@@ -59,7 +61,7 @@ test('/v1/event/editEvent', async () => {
   const getEvent = id => get(getHost() + '/v1/event/getEvent?id=' + id, authHeader);
   const editEvent = (id, data, header = authHeader) => post(getHost() + '/v1/event/editEvent', {...data, id}, header);
   const delEvent = id => post(getHost() + '/v1/event/delEvent', {id}, authHeader);
-  const eventData = { time: new Date().toISOString(), title: 'event', description: 'description', link: 'https://youtube.com/abc'};
+  const eventData = { time: new Date().toISOString(), title: 'event', description: 'description', link: 'https://youtube.com/abc', eventType: 'youtube'};
   const {data: {id}} = await addEvent(eventData);
 
   const withUpdatedTime = {...eventData, time: new Date().toISOString()};
@@ -69,6 +71,10 @@ test('/v1/event/editEvent', async () => {
   const withUpdatedTitle = {...eventData, title: 'new-title'};
   expect(await editEvent(id, withUpdatedTitle)).toMatchObject({code: 200});
   expect(await getEvent(id)).toMatchObject({code: 200, data: withUpdatedTitle});
+
+  const withUpdatedEventType = {...eventData, title: 'zoom'};
+  expect(await editEvent(id, withUpdatedEventType)).toMatchObject({code: 200});
+  expect(await getEvent(id)).toMatchObject({code: 200, data: withUpdatedEventType});
 
   const withUpdatedDescription = {...eventData, description: 'new description'};
   expect(await editEvent(id, withUpdatedDescription)).toMatchObject({code: 200});
@@ -90,9 +96,11 @@ test('/v1/event/editEvent', async () => {
   expect(await editEvent(id, {...eventData, title: 'a'.repeat(129)})).toMatchObject({code: 400});
   expect(await editEvent(id, {...eventData, description: undefined})).toMatchObject({code: 400});
   expect(await editEvent(id, {...eventData, description: 'a'.repeat(4097)})).toMatchObject({code: 400});
-  expect(await editEvent(id, {...eventData, link: undefined})).toMatchObject({code: 400});
   expect(await editEvent(id, {...eventData, link: 'a'.repeat(257)})).toMatchObject({code: 400});
   expect(await editEvent(id, {...eventData, link: 'a'.repeat(256)})).toMatchObject({code: 400});
+  expect(await editEvent({...eventData, eventType: undefined})).toMatchObject({code: 400});
+  expect(await editEvent({...eventData, eventType: 'a'.repeat(257)})).toMatchObject({code: 400});
+  expect(await editEvent({...eventData, eventType: 'a'.repeat(256)})).toMatchObject({code: 400});
   expect(await editEvent('d5ab3356-f4b4-11ea-adc1-0242ac120002', eventData)).toMatchObject({code: 404});
   expect(await editEvent(id, eventData, anotherUserHeader)).toMatchObject({code: 404});
   const unauthorizedHeader = getAuthHeader({id: user.id});

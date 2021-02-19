@@ -31,7 +31,7 @@ getEvent.route('/').get(async (request, response) => {
     const currentUser = request.user!.id;
     const {rows: rowsJoin} = await knex.raw('SELECT 1 FROM event_user WHERE event_id = :id AND user_id = :currentUser', { id, currentUser });
     const joined = rowsJoin.length > 0;
-    const {rows: [eventRow]} = await knex.raw(`SELECT creator, time, title, description, image, link FROM event WHERE id = :id AND status = :status`, { id, status: EventStatus.CREATED });
+    const {rows: [eventRow]} = await knex.raw(`SELECT creator, time, title, description, image, link, eventType FROM event WHERE id = :id AND status = :status`, { id, status: EventStatus.CREATED });
     if (!eventRow)
       return response.status(404).json({}).end();
     let result = {
@@ -57,8 +57,8 @@ addEvent.route('/').post(async (request, response) => {
     if (!hasPermission(request, Permission.EVENT))
       return response.status(401).json({}).end();
     const creator = request.user!.id;
-    const {time, title, description, image, link} = getArgs(request);
-    const {rows: [{id}]} = await knex.raw('INSERT INTO event(creator, time, title, description, image, link, status) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id', [creator, time, title, description, image || null, link, EventStatus.CREATED]);
+    const {time, title, description, image, link, eventType} = getArgs(request);
+    const {rows: [{id}]} = await knex.raw('INSERT INTO event(creator, time, title, description, image, link, eventType, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id', [creator, time, title, description, image || null, link, eventType, EventStatus.CREATED]);
     return response.status(200).json({id}).end();
   } catch (e) {
     // invalid_datetime_format
@@ -77,8 +77,8 @@ editEvent.route('/').post(async (request, response) => {
     if (!hasPermission(request, Permission.EVENT))
       return response.status(401).json({}).end();
     const currentUser = request.user!.id;
-    const {id, title, time, description, image, link} = getArgs(request);
-    const {rowCount} = await knex.raw('UPDATE event SET title = :title, description = :description, image = :image, link = :link, time = :time WHERE id = :id AND creator = :currentUser AND status = :status', {
+    const {id, title, time, description, image, link, eventType} = getArgs(request);
+    const {rowCount} = await knex.raw('UPDATE event SET title = :title, description = :description, image = :image, link = :link, eventType = :eventType, time = :time WHERE id = :id AND creator = :currentUser AND status = :status', {
       title,
       description,
       image: image || null,
@@ -86,6 +86,7 @@ editEvent.route('/').post(async (request, response) => {
       link,
       id,
       currentUser,
+      eventType,
       status: EventStatus.CREATED
     });
     if (rowCount < 1)
@@ -166,16 +167,17 @@ searchEvents.route('/').post(async (request, response) => {
     else
       joinClause += ' LEFT JOIN event_user eu ON eu.user_id = :user AND eu.event_id = e.id';
     const userId = request.user!.id;
-    const {rows} = await knex.raw(`SELECT e.id, e.creator, e.time, e.title, e.description, e.image, e.link, eu.user_id, count(*) OVER() AS total FROM event e ${joinClause}${whereClause} ORDER BY time ASC LIMIT :count OFFSET :offset`, {
+    const {rows} = await knex.raw(`SELECT e.id, e.creator, e.time, e.title, e.description, e.image, e.link, e.eventType, eu.user_id, count(*) OVER() AS total FROM event e ${joinClause}${whereClause} ORDER BY time ASC LIMIT :count OFFSET :offset`, {
       from, to, offset, count, user: userId, status: EventStatus.CREATED
     });
-    const result = rows.map((row: { id: string; creator: string; time: string; title: string; description: string; image: string; user_id: string|undefined; link: string; }) => {
+    const result = rows.map((row: { id: string; creator: string; time: string; title: string; description: string; image: string; user_id: string|undefined; link: string; eventType: string;}) => {
       let event = {
         id: row.id,
         creator: row.creator,
         time: row.time,
         title: row.title,
-        description: row.description
+        description: row.description,
+        eventType: row.eventType
       };
       if (row.image)
         event = Object.assign(event, { image: row.image });
