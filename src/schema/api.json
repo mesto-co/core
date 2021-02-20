@@ -435,7 +435,7 @@
         "image": { "type": "string", "format": "uri", "maxLength": 256 },
         "link": { "type": "string", "format": "uri", "maxLength": 256, "minLength": 1 }
       },
-      "required": [ "time", "time_end", "category", "title", "description", "link" ]
+      "required": [ "time", "time_end", "category", "title", "description" ]
     },
     {
       "$id": "#GET>/v1/event/getEvent",
@@ -458,7 +458,7 @@
         "image": { "type": "string", "format": "uri", "maxLength": 256 },
         "link": { "type": "string", "format": "uri", "maxLength": 256 }
       },
-      "required": [ "id", "time", "time_end", "category", "title", "description", "link" ]
+      "required": [ "id", "time", "time_end", "category", "title", "description" ]
     },
     {
       "$id": "#POST>/v1/event/delEvent",
