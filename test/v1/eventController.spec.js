@@ -47,7 +47,6 @@ test('/v1/event/addEvent', async () => {
   expect(await addEvent({...eventData, description: undefined})).toMatchObject({code: 400});
   expect(await addEvent({...eventData, description: ''})).toMatchObject({code: 400});
   expect(await addEvent({...eventData, description: 'a'.repeat(4097)})).toMatchObject({code: 400});
-  expect(await addEvent({...eventData, link: undefined})).toMatchObject({code: 400});
   expect(await addEvent({...eventData, link: 'a'.repeat(257)})).toMatchObject({code: 400});
   expect(await addEvent({...eventData, link: 'a'.repeat(256)})).toMatchObject({code: 400});
 
@@ -108,7 +107,6 @@ test('/v1/event/editEvent', async () => {
   expect(await editEvent(id, {...eventData, category: 'a'.repeat(129)})).toMatchObject({code: 400});
   expect(await editEvent(id, {...eventData, description: undefined})).toMatchObject({code: 400});
   expect(await editEvent(id, {...eventData, description: 'a'.repeat(4097)})).toMatchObject({code: 400});
-  expect(await editEvent(id, {...eventData, link: undefined})).toMatchObject({code: 400});
   expect(await editEvent(id, {...eventData, link: 'a'.repeat(257)})).toMatchObject({code: 400});
   expect(await editEvent(id, {...eventData, link: 'a'.repeat(256)})).toMatchObject({code: 400});
   expect(await editEvent('d5ab3356-f4b4-11ea-adc1-0242ac120002', eventData)).toMatchObject({code: 404});

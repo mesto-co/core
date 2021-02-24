@@ -20,8 +20,8 @@ import knex from '../knex';
 import { getArgs, hasPermission } from '../utils';
 
 enum EventStatus {
-    CREATED = 'created',
-    DELETED = 'deleted',
+  CREATED = 'created',
+  DELETED = 'deleted',
 }
 
 const getEvent = express.Router();
@@ -60,7 +60,7 @@ addEvent.route('/').post(async (request, response) => {
       return response.status(401).json({}).end();
     const creator = request.user!.id;
     const {time, title, description, image, link, category, time_end} = getArgs(request);
-    const {rows: [{id}]} = await knex.raw('INSERT INTO event(creator, time, time_end, category, title, description, image, link, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id', [creator, time, time_end, category, title, description, image || null, link, EventStatus.CREATED]);
+    const {rows: [{id}]} = await knex.raw('INSERT INTO event(creator, time, time_end, category, title, description, image, link, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id', [creator, time, time_end, category, title, description, image || null, link || null, EventStatus.CREATED]);
     return response.status(200).json({id}).end();
   } catch (e) {
     // invalid_datetime_format
@@ -87,7 +87,7 @@ editEvent.route('/').post(async (request, response) => {
       time,
       time_end,
       category,
-      link,
+      link: link || null,
       id,
       currentUser,
       status: EventStatus.CREATED
