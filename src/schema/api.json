@@ -378,7 +378,7 @@
       "allOf": [{ "$ref": "#RequestBase" }],
       "properties": {
         "email": { "type": "string", "format": "email" },
-        "fullName":{ "type":"string", "maxLength": 255, "minLength": 3 },
+        "fullName":{ "type":"string", "maxLength": 255, "minLength": 2 },
         "imagePath": { "type": "string", "format": "uri" },
         "location": { "type": "string", "isStringNotEmpty": true },
         "placeId": { "type": "string", "isStringNotEmpty": true },
