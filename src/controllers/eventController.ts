@@ -129,14 +129,10 @@ joinEvent.route('/').post(async (request, response) => {
   try {
     const {id} = getArgs(request);
     const currentUser = request.user!.id;
-    const {rows: rowsJoin} = await knex.raw('SELECT 1 FROM event_user WHERE event_id = :id AND user_id = :currentUser', { id, currentUser });
-    const joined = rowsJoin.length > 0;
-    if (!joined) {
-      await knex.raw('INSERT INTO event_user(user_id, event_id) VALUES (:userId, :id)', {
-        userId: currentUser,
-        id
-      });
-    }
+    await knex.raw('INSERT INTO event_user(user_id, event_id) VALUES (:userId, :id)', {
+      userId: currentUser,
+      id
+    });
     return response.status(200).json({}).end();
   } catch (e) {
     // FOREIGN KEY VIOLATION
