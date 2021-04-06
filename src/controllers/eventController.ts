@@ -135,7 +135,7 @@ joinEvent.route('/').post(async (request, response) => {
     });
     return response.status(200).json({}).end();
   } catch (e) {
-    switch (e) {
+    switch (e.code) {
       case '23505':
         // UNIQUE VIOLATION
         return response.status(409).json({message: 'The user is already registered for the event '}).end();
