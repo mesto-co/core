@@ -135,9 +135,14 @@ joinEvent.route('/').post(async (request, response) => {
     });
     return response.status(200).json({}).end();
   } catch (e) {
-    // FOREIGN KEY VIOLATION
-    if (e.code === '23503')
-      return response.status(404).json({message: 'User or event was not found'}).end();
+    switch (e) {
+      case '23505':
+        // UNIQUE VIOLATION
+        return response.status(409).json({message: 'The user is already registered for the event '}).end();
+      case '23503':
+        // FOREIGN KEY VIOLATION
+        return response.status(404).json({message: 'User or event was not found'}).end();
+    }
     console.debug('POST event/join', e);
     return response.status(500).json({}).end();
   }

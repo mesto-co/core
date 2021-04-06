@@ -160,7 +160,7 @@ test('/v1/event/joinEvent', async () => {
   expect(await getEvent(id)).toMatchObject({code: 200, data: eventData});
   expect(await getEvent(id, anotherUserHeader)).toMatchObject({code: 200, data: withoutLink});
   expect(await joinEvent(id, anotherUserHeader)).toMatchObject({code: 200});
-  expect(await joinEvent(id, anotherUserHeader)).toMatchObject({code: 500});
+  expect(await joinEvent(id, anotherUserHeader)).toMatchObject({code: 409});
   expect(await getEvent(id, anotherUserHeader)).toMatchObject({code: 200, data: eventData});
   expect(await unjoinEvent(id, anotherUserHeader)).toMatchObject({code: 200});
   expect(await getEvent(id, anotherUserHeader)).toMatchObject({code: 200, data: withoutLink});
