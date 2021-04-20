@@ -40,12 +40,27 @@ getEvent.route('/').get(async (request, response) => {
       time_end: eventRow.time_end,
       category: eventRow.category,
       title: eventRow.title,
-      description: eventRow.description
+      description: eventRow.description,
+      joined: []
     };
     if (eventRow.image)
       result = Object.assign(result, {image: eventRow.image});
     if (joined || eventRow.creator === currentUser)
       result = Object.assign(result, {link: eventRow.link});
+
+    const {rows}: {rows: [{id: string, fullName: string, imagePath: (string|null), event_id: string}]} = await knex.raw(`SELECT id, "fullName", "imagePath" FROM "User" WHERE "User".id in (SELECT event_user.user_id AS id FROM event_user WHERE event_user.event_id = :id`, { id });
+    const usersPerEvent = new Map();
+    for (const row of rows) {
+      const users = usersPerEvent.get(row.event_id) || [];
+      users.push(Object.assign({
+        id: row.id,
+        fullName: row.fullName
+      }, row.imagePath ? {imagePath: row.imagePath} : {}));
+      usersPerEvent.set(row.event_id, users);
+    }
+
+    result.joined = (usersPerEvent.get(id) || []).slice(0, 20);
+
     return response.status(200).json(result).end();
   } catch (e) {
     console.debug('POST event/get error', e);
@@ -63,11 +78,14 @@ addEvent.route('/').post(async (request, response) => {
     const {rows: [{id}]} = await knex.raw('INSERT INTO event(creator, time, time_end, category, title, description, image, link, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id', [creator, time, time_end, category, title, description, image || null, link || null, EventStatus.CREATED]);
     return response.status(200).json({id}).end();
   } catch (e) {
-    // invalid_datetime_format
-    if (e.code === '22007')
-      return response.status(400).json({message: 'Invalid time format'}).end();
-    if (e.code === '23514')
-      return response.status(400).json({message: 'Invalid creator'}).end();
+    switch (e.code) {
+      case '22007':
+        // invalid_datetime_format
+        return response.status(400).json({message: 'Invalid time format'}).end();
+      case '23514':
+        // check_violation
+        return response.status(400).json({message: 'Invalid creator'}).end();
+    }
     console.debug('POST event/add error', e);
     return response.status(500).json({}).end();
   }
