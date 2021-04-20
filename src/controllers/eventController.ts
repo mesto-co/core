@@ -48,7 +48,7 @@ getEvent.route('/').get(async (request, response) => {
     if (joined || eventRow.creator === currentUser)
       result = Object.assign(result, {link: eventRow.link});
 
-    const {rows}: {rows: [{id: string, fullName: string, imagePath: (string|null), event_id: string}]} = await knex.raw(`SELECT id, "fullName", "imagePath" FROM "User" WHERE "User".id in (SELECT event_user.user_id AS id FROM event_user WHERE event_user.event_id = :id`, { id });
+    const {rows}: {rows: [{id: string, fullName: string, imagePath: (string|null), event_id: string}]} = await knex.raw(`SELECT id, "fullName", "imagePath" FROM "User" WHERE "User".id in (SELECT event_user.user_id AS id FROM event_user WHERE event_user.event_id = :id)`, { id });
     const usersPerEvent = new Map();
     for (const row of rows) {
       const users = usersPerEvent.get(row.event_id) || [];
