@@ -40,13 +40,27 @@ getEvent.route('/').get(async (request, response) => {
       time_end: eventRow.time_end,
       category: eventRow.category,
       title: eventRow.title,
-      description: eventRow.description,
-      joined: []
+      description: eventRow.description
     };
     if (eventRow.image)
       result = Object.assign(result, {image: eventRow.image});
     if (joined || eventRow.creator === currentUser)
       result = Object.assign(result, {link: eventRow.link});
+
+    return response.status(200).json(result).end();
+  } catch (e) {
+    console.debug('POST event/get error', e);
+    response.status(500).json({}).end();
+  }
+});
+
+const getJoinedUsers = express.Router();
+getJoinedUsers.route('/').get(async (request, response) => {
+  try {
+    const {id} = getArgs(request);
+    const result = {
+      joined: []
+    };
 
     const {rows}: {rows: [{id: string, fullName: string, imagePath: (string|null), event_id: string}]} = await knex.raw(`SELECT id, "fullName", "imagePath" FROM "User" WHERE "User".id in (SELECT event_user.user_id AS id FROM event_user WHERE event_user.event_id = :id)`, { id });
     const usersPerEvent = new Map();
@@ -63,7 +77,7 @@ getEvent.route('/').get(async (request, response) => {
 
     return response.status(200).json(result).end();
   } catch (e) {
-    console.debug('POST event/get error', e);
+    console.debug('POST event/get joined error', e);
     response.status(500).json({}).end();
   }
 });
@@ -242,4 +256,4 @@ searchEvents.route('/').post(async (request, response) => {
   }
 });
 
-export { getEvent, addEvent, delEvent, editEvent, joinEvent, unjoinEvent, searchEvents };
+export { getEvent, getJoinedUsers, addEvent, delEvent, editEvent, joinEvent, unjoinEvent, searchEvents };
