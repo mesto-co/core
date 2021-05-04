@@ -34,7 +34,7 @@ test('/v1/event/addEvent', async () => {
   expect(result).toMatchObject({code: 200, data: { id: expect.any(String) }});
   expect(await delEvent(result.data.id)).toMatchObject({code: 200});
 
-  const getJoinedUsers = id => get(getHost() + '/v1/event/getJoined?id=' + id, authHeader);
+  const getJoinedUsers = id => get(getHost() + '/v1/event/getJoinedUsers?id=' + id, authHeader);
   expect(await getJoinedUsers(result.data.id)).toMatchObject({
     code: 200,
     data: {result: []}
