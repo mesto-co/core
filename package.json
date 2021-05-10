@@ -63,7 +63,7 @@
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.21.5",
-    "nodemailer": "^6.4.11",
+    "nodemailer": "^6.4.16",
     "pg": "^8.3.3",
     "ws": "^7.3.1"
   }
