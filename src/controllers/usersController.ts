@@ -215,6 +215,7 @@ if (enableMethodsForTest) {
         await knex.raw(`DELETE FROM "Friend" WHERE "userId" IN (${Array(userIds.length).fill('?').join(',')}) OR "friendId" IN (${Array(userIds.length).fill('?').join(',')})`, [...userIds, ...userIds]);
         await knex.raw(`DELETE FROM "UserToken" WHERE "userId" IN (${Array(userIds.length).fill('?').join(',')})`, userIds);
         await knex.raw(`DELETE FROM "Contact" WHERE "ownerId" IN (${Array(userIds.length).fill('?').join(',')})`, userIds);
+        await knex.raw(`DELETE FROM user_last_email_sent WHERE user_id IN (${Array(userIds.length).fill('?').join(',')})`, userIds);
         await knex.raw(`DELETE FROM "User" WHERE id IN (${Array(userIds.length).fill('?').join(',')})`, userIds);
         response.status(200).json({}).end();
       });

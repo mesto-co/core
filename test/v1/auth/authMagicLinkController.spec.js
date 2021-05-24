@@ -17,6 +17,8 @@
 const { post, getHost, genUsers } = require('../../utils.js');
 
 const ENDPOINT = `${getHost()}/v1/auth/magicLink`;
+const GENERATE_TOKEN_ENDPOINT = `${getHost()}/v1/auth/magicLink`;
+const SEND_MAGIC_LINK_ENDPOINT = `${getHost()}/v1/email/sendMagicLink`;
 
 let [email, awaitingEmail, closedEmail, rejectedEmail] = [null, null, null, null];
 
@@ -68,4 +70,15 @@ test('/v1/auth/magicLink POST non-approved users', async () => {
     const {code} = await post(ENDPOINT, JSON.stringify({email}));
     expect(code).toBe(404);
   }));
+});
+
+test('/v1/auth/magicLink throttling', async () => {
+  const {data: { tokenId }} = await post(GENERATE_TOKEN_ENDPOINT, JSON.stringify({email}));
+  expect(await post(SEND_MAGIC_LINK_ENDPOINT, JSON.stringify({email, tokenId})))
+      .toMatchObject({ code: 200 });
+  expect(await post(SEND_MAGIC_LINK_ENDPOINT, JSON.stringify({email, tokenId})))
+      .toMatchObject({ code: 419 });
+  await new Promise(resolve => setTimeout(resolve, 2000));
+  expect(await post(SEND_MAGIC_LINK_ENDPOINT, JSON.stringify({email, tokenId})))
+      .toMatchObject({ code: 200 });
 });
