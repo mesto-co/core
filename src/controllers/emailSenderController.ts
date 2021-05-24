@@ -31,9 +31,11 @@ const {
   },
   refreshToken: {
     jwtSecret: refreshJwtSecret,
+  },
+  emailService: {
+    minIntervalInSeconds
   }
 } = require('../../config.js');
-const config = require('../../config.js');
 
 const UserEntries = () => knex('User');
 
@@ -52,9 +54,15 @@ emailMagicLinkSenderRouter.route('/')
           const userToken = await UserTokenEntries().where('id', tokenId).andWhere('userId', id).first();
 
           if (userToken) {
+            const {rows} = await knex.raw('SELECT 1 FROM user_last_email_sent WHERE user_id = ? AND sent_at > CURRENT_TIMESTAMP - ? * interval \'1 second\'', [id, minIntervalInSeconds]);
+            if (rows.length)
+              return response.status(419).json({}).end();
             return jsonwebtoken.verify(userToken.token, refreshJwtSecret,{algorithms: ['HS256']}, async (err: VerifyErrors | null) => {
               if (err)
                 return response.status(404).json({}).end();
+
+              await knex.raw(`INSERT INTO user_last_email_sent (user_id) VALUES (?)
+                ON CONFLICT (user_id) DO UPDATE SET sent_at = CURRENT_TIMESTAMP;`, [id]);
 
               const magicLink = `${magicLinkUrl}token=${userToken.token}`;
               await emailService.sendMagicLinkEmail(email, magicLink);
@@ -97,14 +105,4 @@ emailInviteLinkSenderRouter.route('/')
       }
     });
 
-const emailBetaSenderRouter = express.Router();
-emailBetaSenderRouter.route('/')
-    .post(async (request, response) => {
-      const {email} = getArgs(request);
-      const {id: userId} = request.user!;
-      if (userId !== config.emailService.adminUuid)
-        return response.status(403).json({}).end();
-      await emailService.sendBetaEmail(email);
-      return response.status(200).json({}).end();
-    });
-export { emailMagicLinkSenderRouter as EmailMagicLinkSenderController, emailInviteLinkSenderRouter as EmailInviteLinkSenderController, emailBetaSenderRouter as EmailBetaSenderController };
+export { emailMagicLinkSenderRouter as EmailMagicLinkSenderController, emailInviteLinkSenderRouter as EmailInviteLinkSenderController };

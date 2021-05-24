@@ -46,7 +46,8 @@ const lambdaConfig = {
     smtpHost: process.env.SMTP_HOST,
     smtpUser: process.env.SMTP_USER,
     smtpPass: process.env.SMTP_PASS,
-    adminUuid: process.env.EMAIL_ADMIN_UUID
+    adminUuid: process.env.EMAIL_ADMIN_UUID,
+    minIntervalInSeconds: process.env.EMAIL_MIN_INTERVAL_IN_SECONDS || 60
   },
   aws: {
     region: process.env.AWS_REGION,
@@ -100,7 +101,8 @@ const developmentConfig = {
     ...lambdaConfig.emailService,
 
     saveFilePath: 'app/magic-link.txt',
-    debug: true
+    debug: true,
+    minIntervalInSeconds: 1
   },
 
   imageUpload: {

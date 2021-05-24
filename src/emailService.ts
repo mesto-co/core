@@ -19,7 +19,6 @@ const config = require('../config.js');
 import { promises as fs } from 'fs';
 import magicLinkTemplate from './templates/magicLinkEmail';
 import inviteEmailTemplate from './templates/inviteEmail';
-import betaEmailTemplate from './templates/betaTestEmail';
 import nodemailer from 'nodemailer';
 import Mail = require('nodemailer/lib/mailer');
 
@@ -39,12 +38,6 @@ class EmailService {
   async sendInviteEmail(recipient: string, magicLink: string) {
     const content = inviteEmailTemplate(magicLink);
     const subject = 'Добро пожаловать в Место';
-    return this.sendEmail(recipient, subject, content);
-  }
-
-  async sendBetaEmail(recipient: string) {
-    const content = betaEmailTemplate();
-    const subject = 'beta платформы Места';
     return this.sendEmail(recipient, subject, content);
   }
 

@@ -139,14 +139,6 @@
       "required": [ "email" ]
     },
     {
-      "$id": "#POST>/v1/email/sendBetaLink",
-      "allOf": [{ "$ref": "#RequestBase" }],
-      "properties": {
-        "email": { "type": "string", "format": "email" }
-      },
-      "required": [ "email" ]
-    },
-    {
       "$id": "#POST>/v1/auth/refresh",
       "allOf": [{ "$ref": "#RequestBase" }],
       "properties": {
