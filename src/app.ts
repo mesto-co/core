@@ -20,7 +20,7 @@ import validator from './validator';
 import {TestController, TestEntryController, TestSuccessRouter} from './controllers/testController';
 import {ProfileController} from './controllers/profileController';
 import {AuthMagicLinkController, RefreshTokenController} from './controllers/authController';
-import {EmailMagicLinkSenderController, EmailInviteLinkSenderController} from './controllers/emailSenderController';
+import {EmailMagicLinkSenderController, EmailInviteLinkSenderController, RemoveOldTokensController} from './controllers/emailSenderController';
 import {UploadImageController} from './controllers/uploadImageController';
 import {FriendEntryController} from './controllers/friendController';
 import {LocationsController,PlaceIdResolverController} from './controllers/locationController';
@@ -105,6 +105,7 @@ register(app, '/v1/admin/addUser', addUser, true);
 register(app, '/v1/admin/activateUser', activateUser, true);
 register(app, '/v1/admin/banUser', banUser, true);
 register(app, '/v1/admin/existUsers', existUsers, true);
+register(app, '/v1/admin/removeOldTokens', RemoveOldTokensController, true);
 
 register(app, '/v1/database/getSkills', GetSkillsController, true);
 register(app, '/v1/database/getLocations', GetLocationsController, true);

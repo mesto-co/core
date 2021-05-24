@@ -105,4 +105,25 @@ emailInviteLinkSenderRouter.route('/')
       }
     });
 
-export { emailMagicLinkSenderRouter as EmailMagicLinkSenderController, emailInviteLinkSenderRouter as EmailInviteLinkSenderController };
+const removeOldTokens = express.Router();
+removeOldTokens.route('/')
+    .post(async (request, response) => {
+      if (hasPermission(request, Permission.REMOVEOLDTOKENS)) {
+        const {rows}: {rows: [{id: string, token: string}]} = await knex.raw('SELECT id, token FROM "UserToken"');
+        const remove: string[] = [];
+        await Promise.allSettled(rows.map(row =>
+          new Promise(resolve => {
+            jsonwebtoken.verify(row.token, refreshJwtSecret,{algorithms: ['HS256']}, err => {
+              if (err)
+                remove.push(row.id);
+            });
+          })));
+        if (remove.length)
+          await knex.raw(`DELETE FROM "UserToken" WHERE id IN(${Array(remove.length).fill('?').join(',')})`, remove);
+
+        return response.status(200).json({count: remove.length}).end();
+      }
+      return response.status(401).json({}).end();
+    });
+
+export { emailMagicLinkSenderRouter as EmailMagicLinkSenderController, emailInviteLinkSenderRouter as EmailInviteLinkSenderController, removeOldTokens as RemoveOldTokensController };
