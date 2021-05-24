@@ -77,7 +77,7 @@ test('/v1/auth/magicLink throttling', async () => {
   expect(await post(SEND_MAGIC_LINK_ENDPOINT, JSON.stringify({email, tokenId})))
       .toMatchObject({ code: 200 });
   expect(await post(SEND_MAGIC_LINK_ENDPOINT, JSON.stringify({email, tokenId})))
-      .toMatchObject({ code: 419 });
+      .toMatchObject({ code: 429 });
   await new Promise(resolve => setTimeout(resolve, 2000));
   expect(await post(SEND_MAGIC_LINK_ENDPOINT, JSON.stringify({email, tokenId})))
       .toMatchObject({ code: 200 });

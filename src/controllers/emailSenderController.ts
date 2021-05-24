@@ -56,7 +56,7 @@ emailMagicLinkSenderRouter.route('/')
           if (userToken) {
             const {rows} = await knex.raw('SELECT 1 FROM user_last_email_sent WHERE user_id = ? AND sent_at > CURRENT_TIMESTAMP - ? * interval \'1 second\'', [id, minIntervalInSeconds]);
             if (rows.length)
-              return response.status(419).json({}).end();
+              return response.status(429).json({}).end();
             return jsonwebtoken.verify(userToken.token, refreshJwtSecret,{algorithms: ['HS256']}, async (err: VerifyErrors | null) => {
               if (err)
                 return response.status(404).json({}).end();
