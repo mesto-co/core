@@ -27,7 +27,7 @@ test('/v1/event/addEvent', async () => {
   const result = await addEvent(eventData);
   expect(await getEvent(result.data.id)).toMatchObject({
     code: 200,
-    data: {time: eventData.time, time_end: eventData.time_end, category: eventData.category, title: eventData.title, description: eventData.description}
+    data: {time: eventData.time, time_end: eventData.time_end, category: eventData.category, title: eventData.title, description: eventData.description, placeId: null}
   });
   expect(await getEvent('d5ab3356-f4b4-11ea-adc1-0242ac120002')).toMatchObject({
     code: 404
@@ -56,6 +56,9 @@ test('/v1/event/addEvent', async () => {
   expect(await addEvent({...eventData, description: 'a'.repeat(4097)})).toMatchObject({code: 400});
   expect(await addEvent({...eventData, link: 'a'.repeat(257)})).toMatchObject({code: 400});
   expect(await addEvent({...eventData, link: 'a'.repeat(256)})).toMatchObject({code: 400});
+
+  expect(await addEvent({...eventData, placeId: 'a'.repeat(65)})).toMatchObject({code: 400});
+  expect(await addEvent({...eventData, placeId: 'a'.repeat(63)})).toMatchObject({code: 200});
 
   const unauthorizedHeader = getAuthHeader({id: user.id});
   expect(await addEvent(eventData, unauthorizedHeader)).toMatchObject({code: 401});
@@ -117,6 +120,8 @@ test('/v1/event/editEvent', async () => {
   expect(await editEvent(id, {...eventData, link: 'a'.repeat(257)})).toMatchObject({code: 400});
   expect(await editEvent(id, {...eventData, link: 'a'.repeat(256)})).toMatchObject({code: 400});
   expect(await editEvent('d5ab3356-f4b4-11ea-adc1-0242ac120002', eventData)).toMatchObject({code: 404});
+  expect(await editEvent(id,{...eventData, placeId: 'a'.repeat(65)})).toMatchObject({code: 400});
+  expect(await editEvent(id,{...eventData, placeId: 'a'.repeat(63)})).toMatchObject({code: 200});
   expect(await editEvent(id, eventData, anotherUserHeader)).toMatchObject({code: 404});
   const unauthorizedHeader = getAuthHeader({id: user.id});
   expect(await editEvent(id, eventData, unauthorizedHeader)).toMatchObject({code: 401});

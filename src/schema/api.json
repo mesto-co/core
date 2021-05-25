@@ -419,6 +419,7 @@
       "$id": "#POST>/v1/event/addEvent",
       "allOf": [{ "$ref": "#RequestBase" }],
       "properties": {
+        "placeId": { "type": "string", "maxLength": 64, "default": null },
         "time": { "type": "string", "maxLength": 32 },
         "time_end": { "type": "string", "maxLength": 32 },
         "category": { "type": "string", "maxLength": 128, "minLength": 1 },
@@ -450,6 +451,7 @@
       "allOf": [{ "$ref": "#RequestBase" }],
       "properties": {
         "id": { "type": "string", "format": "uuid" },
+        "placeId": { "type": "string", "maxLength": 64, "default": null },
         "time": { "type": "string", "maxLength": 32 },
         "time_end": { "type": "string", "maxLength": 32 },
         "category": { "type": "string", "maxLength": 128, "minLength": 1 },
@@ -488,6 +490,7 @@
       "$id": "#POST>/v1/event/search",
       "allOf": [{ "$ref": "#RequestBase" }],
       "properties": {
+        "placeId": { "type": "string", "maxLength": 64, "default": "" },
         "createdByMe": { "type": "boolean", "default": false },
         "joinedByMe": { "type": "boolean", "default": false },
         "category": { "type": "string", "maxLength": 128 },
@@ -496,7 +499,8 @@
         "offset": { "type": "integer", "minimum": 0, "default": 0 },
         "count": { "type": "integer", "minimum": 1, "maximum": 1000, "default": 10 },
         "countJoined": { "type": "integer", "minimum": 0, "maximum": 20, "default": 10 },
-        "q": { "type": "string", "default": "", "maxLength": 32 }
+        "q": { "type": "string", "default": "", "maxLength": 32 },
+        "placeId": { "type": "string", "maxLength": 64 }
       },
       "requred": [ "from", "to" ]
     },
