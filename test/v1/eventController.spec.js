@@ -181,7 +181,7 @@ test('/v1/event/search', async () => {
   const joinEvent = (id, header = authHeader) => post(getHost() + '/v1/event/joinEvent', {id}, header);
   const delEvent = id => post(getHost() + '/v1/event/delEvent', {id}, authHeader);
 
-  const searchEvent = (createdByMe, joinedByMe, from, to, offset, count, category, header = authHeader) => post(getHost() + '/v1/event/search', {createdByMe, joinedByMe, from, to, offset, count, category}, header);
+  const searchEvent = (q, createdByMe, joinedByMe, from, to, offset, count, category, header = authHeader) => post(getHost() + '/v1/event/search', {createdByMe, joinedByMe, from, to, offset, count, category}, header);
   const eventData = [
     { time: new Date('05/16/20').toISOString(), time_end: new Date('05/16/20').toISOString(), title: 'event', category: 'youtube1', description: 'created by A, not joined', link: 'https://youtube.com/abc', creator: userA.id },
     { time: new Date('05/17/20').toISOString(), time_end: new Date('05/17/20').toISOString(), title: 'event', category: 'youtube2', description: 'created by B, not joined', link: 'https://youtube.com/abc', creator: userB.id },
@@ -206,94 +206,99 @@ test('/v1/event/search', async () => {
       await joinEvent(data.id, anotherUserHeader);
   }));
   // check the link in the event data, should be presented iff the event was created by current user or the current user joined an event
-  expect(await searchEvent(false, false, eventData[0].time, eventData[eventData.length - 1].time, 0, 10)).toMatchObject({
+  expect(await searchEvent('', false, false, eventData[0].time, eventData[eventData.length - 1].time, 0, 10)).toMatchObject({
     code: 200,
     data: { data: eventData.map(data => removeLink(data, ['created by A', 'joined by A'])) }
   });
   // check pagination
   for (let i = 0; i < eventData.length - 1; ++i) {
-    expect(await searchEvent(false, false, eventData[0].time, eventData[eventData.length - 1].time, i, 1)).toMatchObject({
+    expect(await searchEvent('',false, false, eventData[0].time, eventData[eventData.length - 1].time, i, 1)).toMatchObject({
       code: 200,
       data: { data: [removeLink(eventData[i], ['created by A', 'joined by A'])], total: eventData.length }
     });
   }
   // check createdByMe
-  expect(await searchEvent(true, false, eventData[0].time, eventData[eventData.length - 1].time, 0, 10)).toMatchObject({
+  expect(await searchEvent('', true, false, eventData[0].time, eventData[eventData.length - 1].time, 0, 10)).toMatchObject({
     code: 200,
     data: { data: eventData.filter(data => data.creator === userA.id) }
   });
   // ... with from and to
-  expect(await searchEvent(true, false, eventData[2].time, eventData[4].time, 0, 10)).toMatchObject({
+  expect(await searchEvent('',true, false, eventData[2].time, eventData[4].time, 0, 10)).toMatchObject({
     code: 200,
     data: { data: [eventData[2], eventData[4]] }
   });
-  expect(await searchEvent(true, false, eventData[0].time, eventData[eventData.length - 1].time, 0, 10, undefined, anotherUserHeader)).toMatchObject({
+  expect(await searchEvent('', true, false, eventData[0].time, eventData[eventData.length - 1].time, 0, 10, undefined, anotherUserHeader)).toMatchObject({
     code: 200,
     data: { data: eventData.filter(data => data.creator === userB.id) }
   });
   // ... with category
-  expect(await searchEvent(true, false, eventData[0].time, eventData[eventData.length - 1].time, 0, 10, 'youtube1')).toMatchObject({
+  expect(await searchEvent('', true, false, eventData[0].time, eventData[eventData.length - 1].time, 0, 10, 'youtube1')).toMatchObject({
     code: 200,
     data: { data: eventData.filter(data => data.creator === userA.id && data.category === 'youtube1') }
   });
 
   // check category
-  expect(await searchEvent(false, false, eventData[0].time, eventData[eventData.length - 1].time, 0, 10, 'youtube1')).toMatchObject({
+  expect(await searchEvent('', false, false, eventData[0].time, eventData[eventData.length - 1].time, 0, 10, 'youtube1')).toMatchObject({
     code: 200,
     data: { data: eventData.filter(data => data.category === 'youtube1') }
   });
 
   // check joinedByMe
-  expect(await searchEvent(false, true, eventData[0].time, eventData[eventData.length - 1].time, 0, 10)).toMatchObject({
+  expect(await searchEvent('', false, true, eventData[0].time, eventData[eventData.length - 1].time, 0, 10)).toMatchObject({
     code: 200,
     data: { data: eventData.filter(data => data.description.includes('joined by A')) }
   });
   // ... with from and to
-  expect(await searchEvent(false, true, eventData[0].time, eventData[2].time, 0, 10)).toMatchObject({
+  expect(await searchEvent('', false, true, eventData[0].time, eventData[2].time, 0, 10)).toMatchObject({
     code: 200,
     data: { data: [eventData[2]] }
   });
   // ... from and to are included boundaries
-  expect(await searchEvent(false, true, eventData[2].time, eventData[2].time, 0, 10)).toMatchObject({
+  expect(await searchEvent('', false, true, eventData[2].time, eventData[2].time, 0, 10)).toMatchObject({
     code: 200,
     data: { data: [eventData[2]] }
   });
-  expect(await searchEvent(false, true, eventData[0].time, eventData[eventData.length - 1].time, 0, 10, undefined, anotherUserHeader)).toMatchObject({
+  expect(await searchEvent('', false, true, eventData[0].time, eventData[eventData.length - 1].time, 0, 10, undefined, anotherUserHeader)).toMatchObject({
     code: 200,
     data: { data: eventData.filter(data => data.description.includes('joined by B')) }
   });
 
   // from > to returns 200 and empty array
-  expect(await searchEvent(false, true, eventData[1].time, eventData[0].time, 0, 10, undefined, anotherUserHeader)).toMatchObject({
+  expect(await searchEvent('', false, true, eventData[1].time, eventData[0].time, 0, 10, undefined, anotherUserHeader)).toMatchObject({
     code: 200,
     data: { data: [], total: 0 },
   });
 
   // check joined
-  expect(await searchEvent(false, false, eventData[0].time, eventData[eventData.length - 1].time, 0, 10)).toMatchObject({
+  expect(await searchEvent('', false, false, eventData[0].time, eventData[eventData.length - 1].time, 0, 10)).toMatchObject({
     code: 200,
     data: { data: eventData.map(data => addJoined(removeLink(data, ['created by A', 'joined by A']))) }
   });
 
   // bad input
-  expect(await searchEvent('str', true, eventData[0].time, eventData[5].time, 0, 10)).toMatchObject({
+  expect(await searchEvent('', 'str', true, eventData[0].time, eventData[5].time, 0, 10)).toMatchObject({
     code: 400
   });
-  expect(await searchEvent(false, 'str', eventData[0].time, eventData[5].time, 0, 10)).toMatchObject({
+  expect(await searchEvent('', false, 'str', eventData[0].time, eventData[5].time, 0, 10)).toMatchObject({
     code: 400
   });
-  expect(await searchEvent(false, true, 'aaa', eventData[5].time, 0, 10)).toMatchObject({
+  expect(await searchEvent('', false, true, 'aaa', eventData[5].time, 0, 10)).toMatchObject({
     code: 400
   });
-  expect(await searchEvent(false, true, eventData[0].time, 'aaa', 0, 10)).toMatchObject({
+  expect(await searchEvent('', false, true, eventData[0].time, 'aaa', 0, 10)).toMatchObject({
     code: 400
   });
-  expect(await searchEvent(false, true, eventData[0].time, eventData[5].time, 0, 10, 'a'.repeat(129))).toMatchObject({
+  expect(await searchEvent('', false, true, eventData[0].time, eventData[5].time, 0, 10, 'a'.repeat(129))).toMatchObject({
     code: 400
   });
 
+  expect(await searchEvent('123', false, true, eventData[1].time, eventData[0].time, 0, 10, undefined, anotherUserHeader)).toMatchObject({
+    code: 200,
+    data: { data: [], total: 0 },
+  });
+
   // unauthorized
-  expect(await searchEvent(false, true, eventData[0].time, eventData[5].time, 0, 10, undefined, {})).toMatchObject({
+  expect(await searchEvent('', false, true, eventData[0].time, eventData[5].time, 0, 10, undefined, {})).toMatchObject({
     code: 401
   });
 
