@@ -198,7 +198,8 @@ unjoinEvent.route('/').post(async (request, response) => {
 const searchEvents = express.Router();
 searchEvents.route('/').post(async (request, response) => {
   try {
-    const {createdByMe, joinedByMe, from, to, offset, count, category, countJoined} = getArgs(request);
+
+    const {createdByMe, joinedByMe, from, to, offset, count, category, countJoined, q } = getArgs(request);
     let whereClause = ' WHERE e.time >= :from AND e.time <= :to AND e.status = :status';
     let joinClause = '';
     if (createdByMe)
@@ -209,6 +210,8 @@ searchEvents.route('/').post(async (request, response) => {
       joinClause += ' LEFT JOIN event_user eu ON eu.user_id = :user AND eu.event_id = e.id';
     if (category)
       whereClause += ' AND category = :category';
+    if (q)
+      whereClause += ' AND title LIKE %:q%';
     const userId = request.user!.id;
     const {rows} = await knex.raw(`SELECT e.id, e.creator, e.time, e.time_end, e.category, e.title, e.description, e.image, e.link, eu.user_id, count(*) OVER() AS total FROM event e ${joinClause}${whereClause} ORDER BY time ASC LIMIT :count OFFSET :offset`, {
       from, to, offset, count, user: userId, status: EventStatus.CREATED, category
