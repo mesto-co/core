@@ -215,11 +215,12 @@ searchEvents.route('/').post(async (request, response) => {
       whereClause += ' AND title LIKE %:q%';
     if (placeId)
       whereClause += ' AND place_id = :placeId';
+    const caseWhenClause = ` case when exists (select true from event_user where user_id= :user AND event_id=eu.event_id) then 'true' else 'false' end as is_joined`;
     const userId = request.user!.id;
-    const {rows} = await knex.raw(`SELECT e.id, e.creator, e.time, e.time_end, e.category, e.title, e.description, e.image, e.link, e.place_id, eu.user_id, count(*) OVER() AS total FROM event e ${joinClause}${whereClause} ORDER BY time ASC LIMIT :count OFFSET :offset`, {
+    const {rows} = await knex.raw(`SELECT e.id, e.creator, e.time, e.time_end, e.category, e.title, e.description, e.image, e.link, e.place_id, eu.user_id, count(*) OVER() AS total, ${caseWhenClause} FROM event e ${joinClause}${whereClause} ORDER BY time ASC LIMIT :count OFFSET :offset`, {
       from, to, offset, count, user: userId, status: EventStatus.CREATED, category, placeId
     });
-    const result = rows.map((row: { id: string; creator: string; time: string; time_end: string; category: string; title: string; description: string; image: string; user_id: string|undefined; link: string; place_id: string }) => {
+    const result = rows.map((row: { id: string; creator: string; time: string; time_end: string; category: string; title: string; description: string; image: string; user_id: string|undefined; link: string; place_id: string, is_joined: string }) => {
       let event = {
         id: row.id,
         creator: row.creator,
@@ -229,6 +230,7 @@ searchEvents.route('/').post(async (request, response) => {
         title: row.title,
         description: row.description,
         placeId: row.place_id,
+        is_joined: row.is_joined,
         joined: []
       };
       if (row.image)
