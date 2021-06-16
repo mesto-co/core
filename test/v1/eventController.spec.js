@@ -21,7 +21,6 @@ test('/v1/event/addEvent', async () => {
   const authHeader = getAuthHeader({id: user.id, permissions: [7, 8]});
   const addEvent = (data, header = authHeader) => post(getHost() + '/v1/event/addEvent', data, header);
   const getEvent = id => get(getHost() + '/v1/event/getEvent?id=' + id, authHeader);
-  const getJoinedUsers = id => get(getHost() + '/v1/event/getEvent?id=' + id, authHeader);
   const delEvent = id => post(getHost() + '/v1/event/delEvent', {id}, authHeader);
   const eventData = {
     time: new Date().toISOString(),
@@ -47,12 +46,6 @@ test('/v1/event/addEvent', async () => {
     code: 404
   });
   expect(result).toMatchObject({code: 200, data: {id: expect.any(String)}});
-  expect(await getJoinedUsers(result.data.id)).toMatchObject({
-    code: 200
-  });
-  expect(await getJoinedUsers('d5ab3356-f4b4-11ea-adc1-0242ac120002')).toMatchObject({
-    code: 404
-  });
   expect(await delEvent(result.data.id)).toMatchObject({code: 200});
 
   expect(await addEvent({...eventData, time: undefined})).toMatchObject({code: 400});

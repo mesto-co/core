@@ -59,22 +59,19 @@ const getJoinedUsers = express.Router();
 getJoinedUsers.route('/').get(async (request, response) => {
   try {
     const {id} = getArgs(request);
-    const result = {
-      joined: []
-    };
 
     const {rows}: {rows: [{id: string, fullName: string, imagePath: (string|null), event_id: string}]} = await knex.raw(`select "User".id, "User"."fullName", "User"."imagePath", event_user.event_id from "User" inner join event_user on "User".id = event_user.user_id where event_user.event_id = :id`, { id });
-    const usersPerEvent = new Map();
+    const joinedUsers = [];
     for (const row of rows) {
-      const users = usersPerEvent.get(row.event_id) || [];
-      users.push(Object.assign({
+      joinedUsers.push(Object.assign({
         id: row.id,
         fullName: row.fullName
       }, row.imagePath ? {imagePath: row.imagePath} : {}));
-      usersPerEvent.set(row.event_id, users);
     }
 
-    result.joined = (usersPerEvent.get(id) || []).slice(0, 20);
+    const result = {
+      joined: joinedUsers
+    };
 
     return response.status(200).json(result).end();
   } catch (e) {
@@ -215,9 +212,8 @@ searchEvents.route('/').post(async (request, response) => {
       whereClause += ' AND title LIKE %:q%';
     if (placeId)
       whereClause += ' AND place_id = :placeId';
-    const caseWhenClause = ` case when exists (select true from event_user where user_id= :user AND event_id=eu.event_id) then 'true' else 'false' end as is_joined`;
     const userId = request.user!.id;
-    const {rows} = await knex.raw(`SELECT e.id, e.creator, e.time, e.time_end, e.category, e.title, e.description, e.image, e.link, e.place_id, eu.user_id, count(*) OVER() AS total, ${caseWhenClause} FROM event e ${joinClause}${whereClause} ORDER BY time ASC LIMIT :count OFFSET :offset`, {
+    const {rows} = await knex.raw(`SELECT e.id, e.creator, e.time, e.time_end, e.category, e.title, e.description, e.image, e.link, e.place_id, eu.user_id, count(*) OVER() AS total, eu.event_id is not null as is_joined FROM event e ${joinClause}${whereClause} ORDER BY time ASC LIMIT :count OFFSET :offset`, {
       from, to, offset, count, user: userId, status: EventStatus.CREATED, category, placeId
     });
     const result = rows.map((row: { id: string; creator: string; time: string; time_end: string; category: string; title: string; description: string; image: string; user_id: string|undefined; link: string; place_id: string, is_joined: string }) => {
