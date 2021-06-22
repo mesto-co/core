@@ -60,7 +60,7 @@ getJoinedUsers.route('/').get(async (request, response) => {
   try {
     const {id} = getArgs(request);
 
-    const {rows}: {rows: [{id: string, fullName: string, imagePath: (string|null), event_id: string}]} = await knex.raw(`select "User".id, "User"."fullName", "User"."imagePath", event_user.event_id from "User" inner join event_user on "User".id = event_user.user_id where event_user.event_id = :id`, { id });
+    const {rows}: {rows: [{id: string, fullName: string, imagePath: (string|null)}]} = await knex.raw(`select "User".id, "User"."fullName", "User"."imagePath", event_user.event_id from "User" inner join event_user on "User".id = event_user.user_id where event_user.event_id = :id`, { id });
     const joinedUsers = [];
     for (const row of rows) {
       joinedUsers.push(Object.assign({

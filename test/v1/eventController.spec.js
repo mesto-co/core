@@ -307,8 +307,10 @@ test('/v1/event/search', async () => {
     if (data.description.includes('joined by A'))
       await joinEvent(data.id, authHeader);
 
+
     if (data.description.includes('joined by B'))
       await joinEvent(data.id, anotherUserHeader);
+
 
   }));
   // check the link in the event data, should be presented iff the event was created by current user or the current user joined an event
@@ -413,7 +415,6 @@ test('/v1/event/search', async () => {
     for (const description of descriptionIncludes) {
       if (cpy.description.includes(description))
         return cpy;
-
     }
     delete cpy.link;
     return cpy;
@@ -424,8 +425,10 @@ test('/v1/event/search', async () => {
     if (cpy.description.includes('joined by A'))
       cpy.joined.push({id: userA.id, fullName: userA.fullName, imagePath: userA.imagePath});
 
+
     if (cpy.description.includes('joined by B'))
       cpy.joined.push({id: userB.id, fullName: userB.fullName, imagePath: userB.imagePath});
+
 
     return cpy;
   }
@@ -458,7 +461,20 @@ test('/v1/event/getJoinedUsers', async () => {
   expect(await getJoinedUsers(null)).toMatchObject({code: 400});
   expect(await getJoinedUsers(id)).toMatchObject({code: 200, data: {joined: []}});
   expect(await joinEvent(id, anotherUserHeader)).toMatchObject({code: 200});
-  expect(await getJoinedUsers(id)).toMatchObject({code: 200});
+
+  expect(await getJoinedUsers(id)).toMatchObject({
+    code: 200,
+    data: {
+      joined: [
+        {
+          id: anotherUser.id,
+          fullName: anotherUser.fullName,
+          imagePath: anotherUser.imagePath
+        }
+      ]
+    }
+  });
+
   expect(await unjoinEvent(id, anotherUserHeader)).toMatchObject({code: 200});
   expect(await getJoinedUsers(id)).toMatchObject({code: 200, data: {joined: []}});
   expect(await delEvent(id)).toMatchObject({code: 200});
