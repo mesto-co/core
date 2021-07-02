@@ -479,3 +479,52 @@ test('/v1/event/getJoinedUsers', async () => {
   expect(await getJoinedUsers(id)).toMatchObject({code: 200, data: {joined: []}});
   expect(await delEvent(id)).toMatchObject({code: 200});
 });
+
+test('/v1/event/search isJoined', async () => {
+  const [user] = await genUsers(1610520856202, [{}, {}]);
+  const authHeader = getAuthHeader({id: user.id, permissions: [7]});
+  const addEvent = (data, header = authHeader) => post(getHost() + '/v1/event/addEvent', data, header);
+  const getEvent = (id, header = authHeader) => get(getHost() + '/v1/event/getEvent?id=' + id, header);
+  const joinEvent = (id, header = authHeader) => post(getHost() + '/v1/event/joinEvent', {id}, header);
+  const unjoinEvent = (id, header = authHeader) => post(getHost() + '/v1/event/unjoinEvent', {id}, header);
+  const searchEvent = (q, createdByMe, joinedByMe, from, to, offset, count, category, header = authHeader) => post(getHost() + '/v1/event/search', {
+    createdByMe,
+    joinedByMe,
+    from,
+    to,
+    offset,
+    count,
+    category
+  }, header);
+  const eventData = {
+    time: new Date().toISOString(),
+    time_end: new Date().toISOString(),
+    category: 'youtube',
+    title: 'event',
+    description: 'description',
+    link: 'https://youtube.com/abc'
+  };
+  const {data: {id}} = await addEvent(eventData);
+  // check data
+  expect(await getEvent(id)).toMatchObject({code: 200, data: eventData});
+  // check with search
+  expect(await searchEvent('', false, false, eventData.time, eventData.time, 0, 10)).toMatchObject({
+    code: 200,
+    data: {total: 1}
+  });
+  // check is_joined
+  expect(await searchEvent('', false, false, eventData.time, eventData.time, 0, 10)).toMatchObject({
+    code: 200,
+    data: {data: [{is_joined: false}], total: 1}
+  });
+  expect(await joinEvent(id, authHeader)).toMatchObject({code: 200});
+  expect(await searchEvent('', false, false, eventData.time, eventData.time, 0, 10)).toMatchObject({
+    code: 200,
+    data: {data: [{is_joined: true}], total: 1}
+  });
+  expect(await unjoinEvent(id, authHeader)).toMatchObject({code: 200});
+  expect(await searchEvent('', false, false, eventData.time, eventData.time, 0, 10)).toMatchObject({
+    code: 200,
+    data: {data: [{is_joined: false}], total: 1}
+  });
+});
