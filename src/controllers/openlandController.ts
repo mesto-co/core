@@ -255,7 +255,7 @@ openlandGetUserController.route('/').post(async (request, response) => {
 
       } while (m);
       if (skillsFromAbout.length)
-        apiUser.skills = skillsFromAbout;
+        apiUser.skills = Array.from(new Set(skillsFromAbout));
     }
 
     const contacts = [{ title: 'openland', url: 'https://openland.com/' + (user.shortname || user.id) }];

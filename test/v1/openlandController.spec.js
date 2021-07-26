@@ -81,14 +81,14 @@ describe('/v1/openland', () => {
   const postGetUser = body => post(getHost() + '/v1/openland/getUser', body, authHeader);
   test('/v1/openland/getUser', async () => {
     const expectedData = {
-      fullName: 'MestoTest Bot',
+      fullName: 'Mesto.Test2',
       imagePath: expect.any(String),
-      username: 'mestotest',
+      username: 'mestotest2',
       location: 'MestoTestLocation',
-      about: 'MestoTestAbout',
+      about: '#m_bot #m_ai #m_ai #m_ai #m_robot',
       contacts: expect.arrayContaining([{
         title: 'openland',
-        url: 'https://openland.com/mestotest',
+        url: 'https://openland.com/mestotest2',
       },
       {
         title: 'website',
@@ -109,17 +109,18 @@ describe('/v1/openland', () => {
       {
         title: 'facebook',
         url: 'mestofacebook',
-      }])
+      }]),
+      skills: ['bot', 'ai', 'robot']
     };
-    expect(await postGetUser({openland: 'mestotest'}))
+    expect(await postGetUser({openland: 'mestotest2'}))
         .toMatchObject({ code: 200, data: { data: expectedData }});
-    expect(await postGetUser({openland: '@mestotest'}))
+    expect(await postGetUser({openland: '@mestotest2'}))
         .toMatchObject({ code: 200, data: { data: expectedData }});
-    expect(await postGetUser({openland: '4dkbJabjJkiVrMpBebLlCbzLQJ'}))
+    expect(await postGetUser({openland: 'RgjvkyvwbYUZ3yPX505ks4ddob'}))
         .toMatchObject({ code: 200, data: { data: expectedData }});
-    expect(await postGetUser({openland: 'https://openland.com/4dkbJabjJkiVrMpBebLlCbzLQJ'}))
+    expect(await postGetUser({openland: 'https://openland.com/RgjvkyvwbYUZ3yPX505ks4ddob'}))
         .toMatchObject({ code: 200, data: { data: expectedData }});
-    expect(await postGetUser({openland: 'https://openland.com/mestotest'}))
+    expect(await postGetUser({openland: 'https://openland.com/mestotest2'}))
         .toMatchObject({ code: 200, data: { data: expectedData }});
     expect(await postGetUser({})).toMatchObject({ code: 400 });
     expect(await postGetUser({ openland: 'a'.repeat(64) })).toMatchObject({ code: 404 });
