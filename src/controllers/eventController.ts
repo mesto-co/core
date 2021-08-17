@@ -207,14 +207,14 @@ searchEvents.route('/').post(async (request, response) => {
     else
       joinClause += ' LEFT JOIN event_user eu ON eu.user_id = :user AND eu.event_id = e.id';
     if (category)
-      whereClause += ' AND category = :category';
+      whereClause += ' AND e.category = :category';
     if (q)
-      whereClause += ' AND title LIKE %:q%';
+      whereClause += ` AND e.title LIKE :query`;
     if (placeId)
-      whereClause += ' AND place_id = :placeId';
+      whereClause += ' AND e.place_id = :placeId';
     const userId = request.user!.id;
     const {rows} = await knex.raw(`SELECT e.id, e.creator, e.time, e.time_end, e.category, e.title, e.description, e.image, e.link, e.place_id, eu.user_id, count(*) OVER() AS total, eu.event_id is not null as is_joined FROM event e ${joinClause}${whereClause} ORDER BY time ASC LIMIT :count OFFSET :offset`, {
-      from, to, offset, count, user: userId, status: EventStatus.CREATED, category, placeId
+      from, to, offset, count, user: userId, status: EventStatus.CREATED, category, placeId, query: '%' + q + '%'
     });
     const result = rows.map((row: { id: string; creator: string; time: string; time_end: string; category: string; title: string; description: string; image: string; user_id: string|undefined; link: string; place_id: string, is_joined: string }) => {
       let event = {

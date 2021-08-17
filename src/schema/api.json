@@ -499,10 +499,9 @@
         "offset": { "type": "integer", "minimum": 0, "default": 0 },
         "count": { "type": "integer", "minimum": 1, "maximum": 1000, "default": 10 },
         "countJoined": { "type": "integer", "minimum": 0, "maximum": 20, "default": 10 },
-        "q": { "type": "string", "default": "", "maxLength": 32 },
-        "placeId": { "type": "string", "maxLength": 64 }
+        "q": { "type": "string", "maxLength": 32 , "default": "" }
       },
-      "requred": [ "from", "to" ]
+      "required": [ "from", "to" ]
     },
     {
       "$id": "#POST>/v1/admin/removeOldTokens",
