@@ -528,3 +528,42 @@ test('/v1/event/search isJoined', async () => {
     data: {data: [{is_joined: false}], total: 1}
   });
 });
+
+test('/v1/event/search search query', async () => {
+  const [user] = await genUsers(1610520856202, [{}, {}]);
+  const authHeader = getAuthHeader({id: user.id, permissions: [7]});
+  const addEvent = (data, header = authHeader) => post(getHost() + '/v1/event/addEvent', data, header);
+  const getEvent = (id, header = authHeader) => get(getHost() + '/v1/event/getEvent?id=' + id, header);
+  const searchEvent = (q, createdByMe, joinedByMe, from, to, offset, count, category, header = authHeader) => post(getHost() + '/v1/event/search', {
+    q,
+    createdByMe,
+    joinedByMe,
+    from,
+    to,
+    offset,
+    count,
+    category
+  }, header);
+  const eventData = {
+    time: new Date().toISOString(),
+    time_end: new Date().toISOString(),
+    category: 'youtube',
+    title: 'event',
+    description: 'description',
+    link: 'https://youtube.com/abc'
+  };
+
+  const {data: {id}} = await addEvent(eventData);
+  // check data
+  expect(await getEvent(id)).toMatchObject({code: 200, data: eventData});
+  // check with search
+  expect(await searchEvent('eve', true, false, eventData.time, eventData.time_end, 0, 10)).toMatchObject({
+    code: 200,
+    data: {total: 1}
+  });
+
+  expect(await searchEvent('adabakedabra', true, false, eventData.time, eventData.time_end, 0, 10)).toMatchObject({
+    code: 200,
+    data: {total: 0}
+  });
+});
