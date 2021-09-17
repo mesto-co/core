@@ -31,7 +31,10 @@ getEvent.route('/').get(async (request, response) => {
     const currentUser = request.user!.id;
     const {rows: rowsJoin} = await knex.raw('SELECT 1 FROM event_user WHERE event_id = :id AND user_id = :currentUser', { id, currentUser });
     const joined = rowsJoin.length > 0;
-    const {rows: [eventRow]} = await knex.raw(`SELECT creator, time, time_end, category, title, description, image, link, place_id FROM event WHERE id = :id AND status = :status`, { id, status: EventStatus.CREATED });
+
+    const joinClause = ' LEFT JOIN "User" creator_user ON creator_user.id = e.creator';
+
+    const {rows: [eventRow]} = await knex.raw(`SELECT e.creator, e.time, e.time_end, e.category, e.title, e.description, e.image, e.link, e.place_id, e.location, creator_user."imagePath", creator_user."fullName" FROM event e ${joinClause} WHERE e.id = :id AND e.status = :status`, { id, status: EventStatus.CREATED });
     if (!eventRow)
       return response.status(404).json({}).end();
     let result = {
@@ -41,7 +44,10 @@ getEvent.route('/').get(async (request, response) => {
       category: eventRow.category,
       title: eventRow.title,
       description: eventRow.description,
-      placeId: eventRow.place_id
+      placeId: eventRow.place_id,
+      location: eventRow.location,
+      creator_name: eventRow.fullName,
+      creator_image: eventRow.imagePath
     };
     if (eventRow.image)
       result = Object.assign(result, {image: eventRow.image});
@@ -86,8 +92,8 @@ addEvent.route('/').post(async (request, response) => {
     if (!hasPermission(request, Permission.EVENT))
       return response.status(401).json({}).end();
     const creator = request.user!.id;
-    const {time, title, description, image, link, category, time_end, placeId} = getArgs(request);
-    const {rows: [{id}]} = await knex.raw('INSERT INTO event(creator, time, time_end, category, title, description, image, link, place_id, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id', [creator, time, time_end, category, title, description, image || null, link || null, placeId || null, EventStatus.CREATED]);
+    const {time, title, description, image, link, category, time_end, placeId, location} = getArgs(request);
+    const {rows: [{id}]} = await knex.raw('INSERT INTO event(creator, time, time_end, category, title, description, image, link, place_id, status, location) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id', [creator, time, time_end, category, title, description, image || null, link || null, placeId || null, EventStatus.CREATED, location || null]);
     return response.status(200).json({id}).end();
   } catch (e) {
     switch (e.code) {
@@ -109,8 +115,8 @@ editEvent.route('/').post(async (request, response) => {
     if (!hasPermission(request, Permission.EVENT))
       return response.status(401).json({}).end();
     const currentUser = request.user!.id;
-    const {id, title, time, description, image, link, time_end, category, placeId} = getArgs(request);
-    const {rowCount} = await knex.raw('UPDATE event SET title = :title, description = :description, image = :image, link = :link, time = :time, time_end = :time_end, category = :category, place_id = :place_id WHERE id = :id AND creator = :currentUser AND status = :status', {
+    const {id, title, time, description, image, link, time_end, category, placeId, location} = getArgs(request);
+    const {rowCount} = await knex.raw('UPDATE event SET title = :title, description = :description, image = :image, link = :link, time = :time, time_end = :time_end, category = :category, place_id = :place_id, location = :location WHERE id = :id AND creator = :currentUser AND status = :status', {
       title,
       description,
       image: image || null,
@@ -118,6 +124,7 @@ editEvent.route('/').post(async (request, response) => {
       time_end,
       category,
       place_id: placeId || null,
+      location: location || null,
       link: link || null,
       id,
       currentUser,
@@ -206,6 +213,9 @@ searchEvents.route('/').post(async (request, response) => {
       joinClause += ' INNER JOIN event_user eu ON eu.user_id = :user AND eu.event_id = e.id';
     else
       joinClause += ' LEFT JOIN event_user eu ON eu.user_id = :user AND eu.event_id = e.id';
+
+    joinClause += ' LEFT JOIN "User" creator_user ON creator_user.id = e.creator';
+
     if (category)
       whereClause += ' AND e.category = :category';
     if (q)
@@ -213,10 +223,10 @@ searchEvents.route('/').post(async (request, response) => {
     if (placeId)
       whereClause += ' AND e.place_id = :placeId';
     const userId = request.user!.id;
-    const {rows} = await knex.raw(`SELECT e.id, e.creator, e.time, e.time_end, e.category, e.title, e.description, e.image, e.link, e.place_id, eu.user_id, count(*) OVER() AS total, eu.event_id is not null as is_joined FROM event e ${joinClause}${whereClause} ORDER BY time ASC LIMIT :count OFFSET :offset`, {
+    const {rows} = await knex.raw(`SELECT e.id, e.creator, e.time, e.time_end, e.category, e.title, e.description, e.image, e.link, e.place_id, e.location, eu.user_id, count(*) OVER() AS total, eu.event_id is not null as is_joined, creator_user."imagePath", creator_user."fullName" FROM event e ${joinClause}${whereClause} ORDER BY time ASC LIMIT :count OFFSET :offset`, {
       from, to, offset, count, user: userId, status: EventStatus.CREATED, category, placeId, query: '%' + q + '%'
     });
-    const result = rows.map((row: { id: string; creator: string; time: string; time_end: string; category: string; title: string; description: string; image: string; user_id: string|undefined; link: string; place_id: string, is_joined: string }) => {
+    const result = rows.map((row: { id: string; creator: string; time: string; time_end: string; category: string; title: string; description: string; image: string; user_id: string|undefined; link: string; place_id: string, location: string, is_joined: string, imagePath: string, fullName: string }) => {
       let event = {
         id: row.id,
         creator: row.creator,
@@ -226,7 +236,10 @@ searchEvents.route('/').post(async (request, response) => {
         title: row.title,
         description: row.description,
         placeId: row.place_id,
+        location: row.location,
         is_joined: row.is_joined,
+        creator_name: row.fullName,
+        creator_image: row.imagePath,
         joined: []
       };
       if (row.image)

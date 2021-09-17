@@ -567,3 +567,50 @@ test('/v1/event/search search query', async () => {
     data: {total: 0}
   });
 });
+
+test('/v1/event/add and edit location and get creator name and image', async () => {
+  const [user] = await genUsers(1610520856202, [{}, {}]);
+  const authHeader = getAuthHeader({id: user.id, permissions: [7]});
+  const addEvent = (data, header = authHeader) => post(getHost() + '/v1/event/addEvent', data, header);
+  const getEvent = (id, header = authHeader) => get(getHost() + '/v1/event/getEvent?id=' + id, header);
+  const editEvent = (id, data, header = authHeader) => post(getHost() + '/v1/event/editEvent', {...data, id}, header);
+
+  const eventData = {
+    time: new Date().toISOString(),
+    time_end: new Date().toISOString(),
+    category: 'youtube',
+    title: 'event',
+    location: 'Moscow',
+    description: 'description',
+    link: 'https://youtube.com/abc'
+  };
+
+  const {data: {id}} = await addEvent(eventData);
+  expect(await getEvent(id)).toMatchObject({code: 200, data: {...eventData, creator_name: user.fullName, creator_image: user.imagePath}});
+  const withUpdatedLocation = {...eventData, location: 'Paris'};
+  expect(await editEvent(id, withUpdatedLocation)).toMatchObject({code: 200});
+  expect(await getEvent(id)).toMatchObject({code: 200, data: withUpdatedLocation});
+
+  const searchEvent = (q, createdByMe, joinedByMe, from, to, offset, count, category, header = authHeader) => post(getHost() + '/v1/event/search', {
+    q,
+    createdByMe,
+    joinedByMe,
+    from,
+    to,
+    offset,
+    count,
+    category
+  }, header);
+
+  expect(await searchEvent('', true, false, eventData.time, eventData.time_end, 0, 10)).toMatchObject({
+    code: 200,
+    data: {
+      total: 1,
+      data: [{
+        creator_name: user.fullName,
+        creator_image: user.imagePath
+      }]
+    }
+  });
+
+});
