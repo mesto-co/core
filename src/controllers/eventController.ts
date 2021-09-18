@@ -32,7 +32,7 @@ getEvent.route('/').get(async (request, response) => {
     const {rows: rowsJoin} = await knex.raw('SELECT 1 FROM event_user WHERE event_id = :id AND user_id = :currentUser', { id, currentUser });
     const joined = rowsJoin.length > 0;
 
-    const joinClause = ' LEFT JOIN "User" creator_user ON creator_user.id = e.creator';
+    const joinClause = ' INNER JOIN "User" creator_user ON creator_user.id = e.creator';
 
     const {rows: [eventRow]} = await knex.raw(`SELECT e.creator, e.time, e.time_end, e.category, e.title, e.description, e.image, e.link, e.place_id, e.location, creator_user."imagePath", creator_user."fullName" FROM event e ${joinClause} WHERE e.id = :id AND e.status = :status`, { id, status: EventStatus.CREATED });
     if (!eventRow)
@@ -214,7 +214,7 @@ searchEvents.route('/').post(async (request, response) => {
     else
       joinClause += ' LEFT JOIN event_user eu ON eu.user_id = :user AND eu.event_id = e.id';
 
-    joinClause += ' LEFT JOIN "User" creator_user ON creator_user.id = e.creator';
+    joinClause += ' INNER JOIN "User" creator_user ON creator_user.id = e.creator';
 
     if (category)
       whereClause += ' AND e.category = :category';

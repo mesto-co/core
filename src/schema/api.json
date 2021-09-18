@@ -427,7 +427,7 @@
         "description": { "type": "string", "maxLength": 4096, "minLength": 1 },
         "image": { "type": "string", "format": "uri", "maxLength": 256 },
         "link": { "type": "string", "format": "uri", "maxLength": 256, "minLength": 1 },
-        "location": { "type": "string", "default": null }
+        "location": { "type": "string", "isStringNotEmpty": true }
       },
       "required": [ "time", "time_end", "category", "title", "description" ]
     },
@@ -460,7 +460,7 @@
         "description": { "type": "string", "maxLength": 4096 },
         "image": { "type": "string", "format": "uri", "maxLength": 256 },
         "link": { "type": "string", "format": "uri", "maxLength": 256 },
-        "location": { "type": "string", "default": null }
+        "location": { "type": "string", "isStringNotEmpty": true }
       },
       "required": [ "id", "time", "time_end", "category", "title", "description" ]
     },
