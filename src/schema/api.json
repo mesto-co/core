@@ -421,7 +421,7 @@
       "properties": {
         "placeId": { "type": "string", "maxLength": 64, "default": null },
         "time": { "type": "string", "maxLength": 32 },
-        "time_end": { "type": "string", "maxLength": 32 },
+        "timeEnd": { "type": "string", "maxLength": 32 },
         "category": { "type": "string", "maxLength": 128, "minLength": 1 },
         "title": { "type": "string", "maxLength": 128, "minLength": 1 },
         "description": { "type": "string", "maxLength": 4096, "minLength": 1 },
@@ -429,7 +429,7 @@
         "link": { "type": "string", "format": "uri", "maxLength": 256, "minLength": 1 },
         "location": { "type": "string", "isStringNotEmpty": true }
       },
-      "required": [ "time", "time_end", "category", "title", "description" ]
+      "required": [ "time", "timeEnd", "category", "title", "description" ]
     },
     {
       "$id": "#GET>/v1/event/getEvent",
@@ -454,7 +454,7 @@
         "id": { "type": "string", "format": "uuid" },
         "placeId": { "type": "string", "maxLength": 64, "default": null },
         "time": { "type": "string", "maxLength": 32 },
-        "time_end": { "type": "string", "maxLength": 32 },
+        "timeEnd": { "type": "string", "maxLength": 32 },
         "category": { "type": "string", "maxLength": 128, "minLength": 1 },
         "title": { "type": "string", "maxLength": 128 },
         "description": { "type": "string", "maxLength": 4096 },
@@ -462,7 +462,7 @@
         "link": { "type": "string", "format": "uri", "maxLength": 256 },
         "location": { "type": "string", "isStringNotEmpty": true }
       },
-      "required": [ "id", "time", "time_end", "category", "title", "description" ]
+      "required": [ "id", "time", "timeEnd", "category", "title", "description" ]
     },
     {
       "$id": "#POST>/v1/event/delEvent",

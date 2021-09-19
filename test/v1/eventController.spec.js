@@ -24,7 +24,7 @@ test('/v1/event/addEvent', async () => {
   const delEvent = id => post(getHost() + '/v1/event/delEvent', {id}, authHeader);
   const eventData = {
     time: new Date().toISOString(),
-    time_end: new Date().toISOString(),
+    timeEnd: new Date().toISOString(),
     title: 'event',
     category: 'youtube',
     description: 'description',
@@ -35,7 +35,7 @@ test('/v1/event/addEvent', async () => {
     code: 200,
     data: {
       time: eventData.time,
-      time_end: eventData.time_end,
+      timeEnd: eventData.timeEnd,
       category: eventData.category,
       title: eventData.title,
       description: eventData.description,
@@ -50,8 +50,8 @@ test('/v1/event/addEvent', async () => {
 
   expect(await addEvent({...eventData, time: undefined})).toMatchObject({code: 400});
   expect(await addEvent({...eventData, time: 'not-a-time-string'})).toMatchObject({code: 400});
-  expect(await addEvent({...eventData, time_end: undefined})).toMatchObject({code: 400});
-  expect(await addEvent({...eventData, time_end: 'not-a-time-string'})).toMatchObject({code: 400});
+  expect(await addEvent({...eventData, timeEnd: undefined})).toMatchObject({code: 400});
+  expect(await addEvent({...eventData, timeEnd: 'not-a-time-string'})).toMatchObject({code: 400});
   expect(await addEvent({...eventData, title: undefined})).toMatchObject({code: 400});
   expect(await addEvent({...eventData, title: ''})).toMatchObject({code: 400});
   expect(await addEvent({...eventData, title: 'a'.repeat(129)})).toMatchObject({code: 400});
@@ -82,19 +82,47 @@ test('/v1/event/editEvent', async () => {
   const delEvent = id => post(getHost() + '/v1/event/delEvent', {id}, authHeader);
   const eventData = {
     time: new Date().toISOString(),
-    time_end: new Date().toISOString(),
+    timeEnd: new Date().toISOString(),
     category: 'youtube',
     title: 'event',
+    location: 'Moscow',
     description: 'description',
     link: 'https://youtube.com/abc'
   };
   const {data: {id}} = await addEvent(eventData);
 
+  expect(await getEvent(id)).toMatchObject({code: 200, data: {...eventData, creatorName: user.fullName, creatorImage: user.imagePath}});
+  const withUpdatedLocation = {...eventData, location: 'Paris'};
+  expect(await editEvent(id, withUpdatedLocation)).toMatchObject({code: 200});
+  expect(await getEvent(id)).toMatchObject({code: 200, data: withUpdatedLocation});
+
+  const searchEvent = (q, createdByMe, joinedByMe, from, to, offset, count, category, header = authHeader) => post(getHost() + '/v1/event/search', {
+    q,
+    createdByMe,
+    joinedByMe,
+    from,
+    to,
+    offset,
+    count,
+    category
+  }, header);
+
+  expect(await searchEvent('', true, false, eventData.time, eventData.timeEnd, 0, 10)).toMatchObject({
+    code: 200,
+    data: {
+      total: 1,
+      data: [{
+        creatorName: user.fullName,
+        creatorImage: user.imagePath
+      }]
+    }
+  });
+
   const withUpdatedTime = {...eventData, time: new Date().toISOString()};
   expect(await editEvent(id, withUpdatedTime)).toMatchObject({code: 200});
   expect(await getEvent(id)).toMatchObject({code: 200, data: withUpdatedTime});
 
-  const withUpdatedTimeEnd = {...eventData, time_end: new Date().toISOString()};
+  const withUpdatedTimeEnd = {...eventData, timeEnd: new Date().toISOString()};
   expect(await editEvent(id, withUpdatedTimeEnd)).toMatchObject({code: 200});
   expect(await getEvent(id)).toMatchObject({code: 200, data: withUpdatedTimeEnd});
 
@@ -121,8 +149,8 @@ test('/v1/event/editEvent', async () => {
   expect(await editEvent('', {...eventData, time: undefined})).toMatchObject({code: 400});
   expect(await editEvent(id, {...eventData, time: undefined})).toMatchObject({code: 400});
   expect(await editEvent(id, {...eventData, time: 'not-a-time-string'})).toMatchObject({code: 400});
-  expect(await editEvent(id, {...eventData, time_end: undefined})).toMatchObject({code: 400});
-  expect(await editEvent(id, {...eventData, time_end: 'not-a-time-string'})).toMatchObject({code: 400});
+  expect(await editEvent(id, {...eventData, timeEnd: undefined})).toMatchObject({code: 400});
+  expect(await editEvent(id, {...eventData, timeEnd: 'not-a-time-string'})).toMatchObject({code: 400});
   expect(await editEvent(id, {...eventData, title: undefined})).toMatchObject({code: 400});
   expect(await editEvent(id, {...eventData, title: ''})).toMatchObject({code: 400});
   expect(await editEvent(id, {...eventData, title: 'a'.repeat(129)})).toMatchObject({code: 400});
@@ -153,7 +181,7 @@ test('/v1/event/delEvent', async () => {
   const delEvent = (id, header = authHeader) => post(getHost() + '/v1/event/delEvent', {id}, header);
   const eventData = {
     time: new Date().toISOString(),
-    time_end: new Date().toISOString(),
+    timeEnd: new Date().toISOString(),
     category: 'youtube',
     title: 'event',
     description: 'description',
@@ -188,7 +216,7 @@ test('/v1/event/joinEvent', async () => {
 
   const eventData = {
     time: new Date().toISOString(),
-    time_end: new Date().toISOString(),
+    timeEnd: new Date().toISOString(),
     category: 'youtube',
     title: 'event',
     description: 'description',
@@ -222,6 +250,7 @@ test('/v1/event/search', async () => {
   const delEvent = id => post(getHost() + '/v1/event/delEvent', {id}, authHeader);
 
   const searchEvent = (q, createdByMe, joinedByMe, from, to, offset, count, category, header = authHeader) => post(getHost() + '/v1/event/search', {
+    q,
     createdByMe,
     joinedByMe,
     from,
@@ -230,10 +259,11 @@ test('/v1/event/search', async () => {
     count,
     category
   }, header);
+
   const eventData = [
     {
       time: new Date('05/16/20').toISOString(),
-      time_end: new Date('05/16/20').toISOString(),
+      timeEnd: new Date('05/16/20').toISOString(),
       title: 'event',
       category: 'youtube1',
       description: 'created by A, not joined',
@@ -242,7 +272,7 @@ test('/v1/event/search', async () => {
     },
     {
       time: new Date('05/17/20').toISOString(),
-      time_end: new Date('05/17/20').toISOString(),
+      timeEnd: new Date('05/17/20').toISOString(),
       title: 'event',
       category: 'youtube2',
       description: 'created by B, not joined',
@@ -251,7 +281,7 @@ test('/v1/event/search', async () => {
     },
     {
       time: new Date('05/18/20').toISOString(),
-      time_end: new Date('05/18/20').toISOString(),
+      timeEnd: new Date('05/18/20').toISOString(),
       title: 'event',
       category: 'youtube3',
       description: 'created by A, joined by A',
@@ -260,7 +290,7 @@ test('/v1/event/search', async () => {
     },
     {
       time: new Date('05/19/20').toISOString(),
-      time_end: new Date('05/19/20').toISOString(),
+      timeEnd: new Date('05/19/20').toISOString(),
       title: 'event',
       category: 'youtube1',
       description: 'created by B, joined by A',
@@ -269,7 +299,7 @@ test('/v1/event/search', async () => {
     },
     {
       time: new Date('05/20/20').toISOString(),
-      time_end: new Date('05/20/20').toISOString(),
+      timeEnd: new Date('05/20/20').toISOString(),
       title: 'event',
       category: 'youtube2',
       description: 'created by A, joined by B',
@@ -278,7 +308,7 @@ test('/v1/event/search', async () => {
     },
     {
       time: new Date('05/21/20').toISOString(),
-      time_end: new Date('05/21/20').toISOString(),
+      timeEnd: new Date('05/21/20').toISOString(),
       title: 'event',
       category: 'youtube3',
       description: 'created by B, joined by B',
@@ -287,7 +317,7 @@ test('/v1/event/search', async () => {
     },
     {
       time: new Date('05/22/20').toISOString(),
-      time_end: new Date('05/22/20').toISOString(),
+      timeEnd: new Date('05/22/20').toISOString(),
       title: 'event',
       category: 'youtube3',
       description: 'created by B, joined by A, joined by B',
@@ -307,11 +337,8 @@ test('/v1/event/search', async () => {
     if (data.description.includes('joined by A'))
       await joinEvent(data.id, authHeader);
 
-
     if (data.description.includes('joined by B'))
       await joinEvent(data.id, anotherUserHeader);
-
-
   }));
   // check the link in the event data, should be presented iff the event was created by current user or the current user joined an event
   expect(await searchEvent('', false, false, eventData[0].time, eventData[eventData.length - 1].time, 0, 10)).toMatchObject({
@@ -447,7 +474,7 @@ test('/v1/event/getJoinedUsers', async () => {
 
   const eventData = {
     time: new Date().toISOString(),
-    time_end: new Date().toISOString(),
+    timeEnd: new Date().toISOString(),
     category: 'youtube',
     title: 'event',
     description: 'description',
@@ -498,7 +525,7 @@ test('/v1/event/search isJoined', async () => {
   }, header);
   const eventData = {
     time: new Date().toISOString(),
-    time_end: new Date().toISOString(),
+    timeEnd: new Date().toISOString(),
     category: 'youtube',
     title: 'event',
     description: 'description',
@@ -512,20 +539,20 @@ test('/v1/event/search isJoined', async () => {
     code: 200,
     data: {total: 1}
   });
-  // check is_joined
+  // check isJoined
   expect(await searchEvent('', false, false, eventData.time, eventData.time, 0, 10)).toMatchObject({
     code: 200,
-    data: {data: [{is_joined: false}], total: 1}
+    data: {data: [{isJoined: false}], total: 1}
   });
   expect(await joinEvent(id, authHeader)).toMatchObject({code: 200});
   expect(await searchEvent('', false, false, eventData.time, eventData.time, 0, 10)).toMatchObject({
     code: 200,
-    data: {data: [{is_joined: true}], total: 1}
+    data: {data: [{isJoined: true}], total: 1}
   });
   expect(await unjoinEvent(id, authHeader)).toMatchObject({code: 200});
   expect(await searchEvent('', false, false, eventData.time, eventData.time, 0, 10)).toMatchObject({
     code: 200,
-    data: {data: [{is_joined: false}], total: 1}
+    data: {data: [{isJoined: false}], total: 1}
   });
 });
 
@@ -544,9 +571,10 @@ test('/v1/event/search search query', async () => {
     count,
     category
   }, header);
+
   const eventData = {
     time: new Date().toISOString(),
-    time_end: new Date().toISOString(),
+    timeEnd: new Date().toISOString(),
     category: 'youtube',
     title: 'event',
     description: 'description',
@@ -557,60 +585,13 @@ test('/v1/event/search search query', async () => {
   // check data
   expect(await getEvent(id)).toMatchObject({code: 200, data: eventData});
   // check with search
-  expect(await searchEvent('eve', true, false, eventData.time, eventData.time_end, 0, 10)).toMatchObject({
+  expect(await searchEvent('eve', true, false, eventData.time, eventData.timeEnd, 0, 10)).toMatchObject({
     code: 200,
     data: {total: 1}
   });
 
-  expect(await searchEvent('adabakedabra', true, false, eventData.time, eventData.time_end, 0, 10)).toMatchObject({
+  expect(await searchEvent('adabakedabra', true, false, eventData.time, eventData.timeEnd, 0, 10)).toMatchObject({
     code: 200,
     data: {total: 0}
   });
-});
-
-test('/v1/event/add and edit location and get creator name and image', async () => {
-  const [user] = await genUsers(1610520856202, [{}, {}]);
-  const authHeader = getAuthHeader({id: user.id, permissions: [7]});
-  const addEvent = (data, header = authHeader) => post(getHost() + '/v1/event/addEvent', data, header);
-  const getEvent = (id, header = authHeader) => get(getHost() + '/v1/event/getEvent?id=' + id, header);
-  const editEvent = (id, data, header = authHeader) => post(getHost() + '/v1/event/editEvent', {...data, id}, header);
-
-  const eventData = {
-    time: new Date().toISOString(),
-    time_end: new Date().toISOString(),
-    category: 'youtube',
-    title: 'event',
-    location: 'Moscow',
-    description: 'description',
-    link: 'https://youtube.com/abc'
-  };
-
-  const {data: {id}} = await addEvent(eventData);
-  expect(await getEvent(id)).toMatchObject({code: 200, data: {...eventData, creator_name: user.fullName, creator_image: user.imagePath}});
-  const withUpdatedLocation = {...eventData, location: 'Paris'};
-  expect(await editEvent(id, withUpdatedLocation)).toMatchObject({code: 200});
-  expect(await getEvent(id)).toMatchObject({code: 200, data: withUpdatedLocation});
-
-  const searchEvent = (q, createdByMe, joinedByMe, from, to, offset, count, category, header = authHeader) => post(getHost() + '/v1/event/search', {
-    q,
-    createdByMe,
-    joinedByMe,
-    from,
-    to,
-    offset,
-    count,
-    category
-  }, header);
-
-  expect(await searchEvent('', true, false, eventData.time, eventData.time_end, 0, 10)).toMatchObject({
-    code: 200,
-    data: {
-      total: 1,
-      data: [{
-        creator_name: user.fullName,
-        creator_image: user.imagePath
-      }]
-    }
-  });
-
 });
