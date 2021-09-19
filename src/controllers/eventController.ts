@@ -40,14 +40,14 @@ getEvent.route('/').get(async (request, response) => {
     let result = {
       creator: eventRow.creator,
       time: eventRow.time,
-      time_end: eventRow.time_end,
+      timeEnd: eventRow.time_end,
       category: eventRow.category,
       title: eventRow.title,
       description: eventRow.description,
       placeId: eventRow.place_id,
       location: eventRow.location,
-      creator_name: eventRow.fullName,
-      creator_image: eventRow.imagePath
+      creatorName: eventRow.fullName,
+      creatorImage: eventRow.imagePath
     };
     if (eventRow.image)
       result = Object.assign(result, {image: eventRow.image});
@@ -92,8 +92,20 @@ addEvent.route('/').post(async (request, response) => {
     if (!hasPermission(request, Permission.EVENT))
       return response.status(401).json({}).end();
     const creator = request.user!.id;
-    const {time, title, description, image, link, category, time_end, placeId, location} = getArgs(request);
-    const {rows: [{id}]} = await knex.raw('INSERT INTO event(creator, time, time_end, category, title, description, image, link, place_id, status, location) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id', [creator, time, time_end, category, title, description, image || null, link || null, placeId || null, EventStatus.CREATED, location || null]);
+    const {time, title, description, image, link, category, timeEnd, placeId, location} = getArgs(request);
+    const {rows: [{id}]} = await knex.raw('INSERT INTO event(creator, time, time_end, category, title, description, image, link, place_id, status, location) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id', [
+      creator,
+      time,
+      timeEnd,
+      category,
+      title,
+      description,
+      image || null,
+      link || null,
+      placeId || null,
+      EventStatus.CREATED,
+      location || null
+    ]);
     return response.status(200).json({id}).end();
   } catch (e) {
     switch (e.code) {
@@ -115,15 +127,15 @@ editEvent.route('/').post(async (request, response) => {
     if (!hasPermission(request, Permission.EVENT))
       return response.status(401).json({}).end();
     const currentUser = request.user!.id;
-    const {id, title, time, description, image, link, time_end, category, placeId, location} = getArgs(request);
-    const {rowCount} = await knex.raw('UPDATE event SET title = :title, description = :description, image = :image, link = :link, time = :time, time_end = :time_end, category = :category, place_id = :place_id, location = :location WHERE id = :id AND creator = :currentUser AND status = :status', {
+    const {id, title, time, description, image, link, timeEnd, category, placeId, location} = getArgs(request);
+    const {rowCount} = await knex.raw('UPDATE event SET title = :title, description = :description, image = :image, link = :link, time = :time, time_end = :timeEnd, category = :category, place_id = :placeId, location = :location WHERE id = :id AND creator = :currentUser AND status = :status', {
       title,
       description,
       image: image || null,
       time,
-      time_end,
+      timeEnd,
       category,
-      place_id: placeId || null,
+      placeId: placeId || null,
       location: location || null,
       link: link || null,
       id,
@@ -136,7 +148,7 @@ editEvent.route('/').post(async (request, response) => {
   } catch (e) {
     // invalid_datetime_format
     if (e.code === '22007')
-      return response.status(400).json({message: 'Invalide time format'}).end();
+      return response.status(400).json({message: 'Invalid time format'}).end();
     if (e.code === '23514')
       return response.status(400).json({message: 'Invalid creator'}).end();
     console.debug('POST event/edit', e);
@@ -232,14 +244,14 @@ searchEvents.route('/').post(async (request, response) => {
         creator: row.creator,
         category: row.category,
         time: row.time,
-        time_end: row.time_end,
+        timeEnd: row.time_end,
         title: row.title,
         description: row.description,
         placeId: row.place_id,
         location: row.location,
-        is_joined: row.is_joined,
-        creator_name: row.fullName,
-        creator_image: row.imagePath,
+        isJoined: row.is_joined,
+        creatorName: row.fullName,
+        creatorImage: row.imagePath,
         joined: []
       };
       if (row.image)
@@ -268,7 +280,7 @@ searchEvents.route('/').post(async (request, response) => {
     return response.status(200).json({ data: result, total: total }).end();
   } catch (e) {
     if (e.code === '22007')
-      return response.status(400).json({message: 'Invalide time format'}).end();
+      return response.status(400).json({message: 'Invalid time format'}).end();
     console.debug('POST event/search', e);
     return response.status(500).json({}).end();
   }
