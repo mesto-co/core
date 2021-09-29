@@ -13,20 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-enum Permission {
-    ADDDELPERMISSION = 1,
-    ACTIVATEUSER = 2,
-    BANUSER = 3,
-    // ADDUSER = 4,
-    // SENDINVITEEMAIL = 5,
-    // NEWUSERS = 6,
-    EVENT = 7,
-    DELEVENT = 8,
-    REMOVEOLDTOKENS = 9,
-    SENDTELEGRAMLINK = 13,
-    RESOLVEEMAIL = 14,
-    UPDATEUSER = 15,
-    SEARCHBYEMAIL = 16,
-}
 
-export { Permission };
+exports.up = async function(knex) {
+  await knex.raw(`CREATE TABLE telegram_secret (
+        user_id uuid references "User"(id),
+        secret CHAR(32) NOT NULL,
+        expire_at TIMESTAMP NOT NULL
+    )`);
+  await knex.raw(`CREATE UNIQUE INDEX telegram_secret_user_id ON telegram_secret (user_id);`);
+};
+
+exports.down = async function(knex) {
+  await knex.raw(`DROP INDEX telegram_secret_user_id;`);
+  await knex.raw(`DROP TABLE telegram_secret;`);
+};

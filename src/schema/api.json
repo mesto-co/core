@@ -156,6 +156,24 @@
       "required": [ "email" ]
     },
     {
+        "$id": "#POST>/v1/email/sendTelegramLink",
+        "allOf": [{ "$ref": "#RequestBase" }],
+        "properties": {
+            "email": { "type": "string", "format": "email" },
+            "prefix": { "type": "string" }
+        },
+        "required": ["email", "prefix"]
+    },
+    {
+        "$id": "#POST>/v1/auth/checkTelegramSecret",
+        "allOf": [{ "$ref": "#RequestBase" }],
+        "properties": {
+            "email": { "type": "string", "format": "email" },
+            "secret": { "type": "string" }
+        },
+        "required": ["email", "secret"]
+    },
+    {
       "$id": "#POST>/v1/auth/refresh",
       "allOf": [{ "$ref": "#RequestBase" }],
       "properties": {

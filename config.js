@@ -71,7 +71,8 @@ const lambdaConfig = {
   adminUserId: process.env.ADMIN_USER_ID,
   enableMethodsForTest: false,
   // node -e "console.log(crypto.randomBytes(32).toString('hex'))"
-  amoToken: process.env.AMO_TOKEN || '133a68442d0557dca95f17c055f38d7e517769e9ef990196ab5706faff4f5c3d'
+  amoToken: process.env.AMO_TOKEN || '133a68442d0557dca95f17c055f38d7e517769e9ef990196ab5706faff4f5c3d',
+  telegramSecretLink: 'http://t.me/MestoInfoBot?start='
 };
 
 const developmentConfig = {
