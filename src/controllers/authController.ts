@@ -16,12 +16,13 @@
 
 import express from 'express';
 import knex from '../knex';
-import {getArgs, getEmail} from '../utils';
+import {getArgs, getEmail, hasPermission} from '../utils';
 import {UserStatus} from '../enums/UserStatus';
 import {TokenHelper} from '../TokenHelper';
 import {RefreshJwtPayloadModel} from '../models/RefreshJwtPayloadModel';
 import jsonwebtoken, {VerifyErrors} from 'jsonwebtoken';
 import {checkPassword} from '../password';
+import { Permission } from '../enums/permission';
 
 const {
   refreshToken: {
@@ -126,8 +127,30 @@ authPasswordRouter.route('/')
         }
     );
 
+const checkTelegramSecretRouter = express.Router();
+checkTelegramSecretRouter.route('/')
+    .post(async (request, response) => {
+      const email = getEmail(request);
+      const {secret} = getArgs(request);
+      try {
+        if (hasPermission(request, Permission.SENDTELEGRAMLINK)) {
+          const isValidSecret = await knex.raw(`SELECT EXISTS(SELECT 1 FROM telegram_secret ts INNER JOIN "User" u ON u.id = ts.user_id WHERE u.email = ? AND ts.secret = ?)`, [email, secret])
+              .then((result: {rows: {exists: boolean}[]}) => result.rows.length > 0 ? result.rows[0].exists : false);
+          if (!isValidSecret)
+            return response.status(404).json({}).end();
+          await knex.raw(`DELETE FROM telegram_secret ts USING "User" u WHERE u.id = ts.user_id AND u.email = ? AND ts.secret = ?`, [email, secret]);
+          return response.status(200).json({}).end();
+        }
+        return response.status(401).json({}).end();
+      } catch (e) {
+        console.debug('email/checkTelegramSecretRouter error', e);
+        response.status(500).json({}).end();
+      }
+    });
+
 export {
   authMagicLinkRouter as AuthMagicLinkController,
   refreshTokenRouter as RefreshTokenController,
-  authPasswordRouter
+  authPasswordRouter,
+  checkTelegramSecretRouter as CheckTelegramSecretController
 };

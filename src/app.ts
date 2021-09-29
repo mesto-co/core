@@ -19,8 +19,8 @@ import express from 'express';
 import validator from './validator';
 import {TestController, TestEntryController, TestSuccessRouter} from './controllers/testController';
 import {ProfileController, ProfileEmailController} from './controllers/profileController';
-import {AuthMagicLinkController, authPasswordRouter, RefreshTokenController} from './controllers/authController';
-import {EmailMagicLinkSenderController, RemoveOldTokensController} from './controllers/emailSenderController';
+import {AuthMagicLinkController, authPasswordRouter, RefreshTokenController, CheckTelegramSecretController} from './controllers/authController';
+import {EmailMagicLinkSenderController, EmailTelegramLinkSenderController, RemoveOldTokensController} from './controllers/emailSenderController';
 import {UploadImageController} from './controllers/uploadImageController';
 import {FriendEntryController} from './controllers/friendController';
 import {LocationsController,PlaceIdResolverController} from './controllers/locationController';
@@ -75,6 +75,9 @@ if (config.enableMethodsForTest) {
 }
 
 // all endpoints closed by authentication below this line
+
+register(app, '/v1/email/sendTelegramLink', EmailTelegramLinkSenderController, true);
+register(app, '/v1/auth/checkTelegramSecret', CheckTelegramSecretController, true);
 
 // Profiles end-points
 register(app, '/v1/user/friend/:friendId', FriendEntryController, true);
