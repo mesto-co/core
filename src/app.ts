@@ -35,7 +35,6 @@ import requestIdHandler from './requestId';
 import cors from 'cors';
 import {UserController, UsersController, AddUsersForTest, DelUsersForTest, addFakeUsers, getUsersCount, printSomeUsers, addUser, activateUser, banUser, existUsers} from './controllers/usersController';
 import {InvalidateSearchIndexController, InvalidateSearchIndexForTest, SearchController} from './search';
-import { OpenlandGetCodeController, OpenlandGetUserController, OpenlandVerifyCodeController, OpenlandSetNextCodeForTest } from './controllers/openlandController';
 import { addEvent, delEvent, editEvent, getEvent, getJoinedUsers, joinEvent, unjoinEvent, searchEvents } from './controllers/eventController';
 
 const config = require('../config.js');
@@ -68,7 +67,6 @@ if (config.enableMethodsForTest) {
   register(app, '/v1/admin/addUsersForTest', AddUsersForTest, false);
   register(app, '/v1/admin/delUsersForTest', DelUsersForTest, false);
   register(app, '/v1/admin/invalidateSearchIndexForTest', InvalidateSearchIndexForTest, false);
-  register(app, '/v1/admin/setNextOpenlandCodeForTest', OpenlandSetNextCodeForTest, false);
 }
 
 // all endpoints closed by authentication below this line
@@ -86,9 +84,6 @@ register(app, '/v1/location/', LocationsController, true);
 register(app, '/v1/resolvePlaceId', PlaceIdResolverController, true);
 register(app, '/v1/contact/:contactId', SingleContactController, true);
 register(app, '/v1/contact', AllContactsController, true);
-register(app, '/v1/openland/sendCode', OpenlandGetCodeController, true);
-register(app, '/v1/openland/verifyCode', OpenlandVerifyCodeController, true);
-register(app, '/v1/openland/getUser', OpenlandGetUserController, true);
 register(app, '/v1/peerboard/auth', PeerboardAuthController, true);
 register(app, '/v1/addPermission', addPermission, true);
 register(app, '/v1/delPermission', delPermission, true);
