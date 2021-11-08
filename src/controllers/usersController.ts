@@ -18,8 +18,9 @@ import express from 'express';
 import { Permission } from '../enums/permission';
 import { UserStatus } from '../enums/UserStatus';
 import knex from '../knex';
+import { storePassword } from '../password';
 import {invalidateSearchIndex} from '../search';
-const {enableMethodsForTest} = require('../../config.js');
+const {enableMethodsForTest, salt} = require('../../config.js');
 
 import {getArgs, hasPermission} from '../utils';
 
@@ -122,6 +123,25 @@ userController.route('/')
         response.status(401).json({}).end();
       }
     });
+
+const userSetPassword = express.Router();
+userSetPassword.route('/').post(async (request, response) => {
+  try {
+    const {password} = getArgs(request);
+    if (request.user) {
+      const hash = await storePassword(password, salt);
+      const {id} = request.user!;
+      console.log(hash, id);
+      await knex.raw(`UPDATE "User" SET "passwordHash" = ? WHERE id = ?`, [hash, id]);
+      return response.status(200).json({}).end();
+    } else {
+      return response.status(401).json({}).end();
+    }
+  } catch (e) {
+    console.debug('userSetPassword error', e);
+    return response.status(500).json({}).end();
+  }
+});
 
 const addUsersForTest = express.Router();
 const delUsersForTest = express.Router();
@@ -298,5 +318,6 @@ export {
   addUser,
   activateUser,
   banUser,
-  existUsers
+  existUsers,
+  userSetPassword
 };

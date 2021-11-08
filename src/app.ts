@@ -19,7 +19,7 @@ import express from 'express';
 import validator from './validator';
 import {TestController, TestEntryController, TestSuccessRouter} from './controllers/testController';
 import {ProfileController} from './controllers/profileController';
-import {AuthMagicLinkController, RefreshTokenController} from './controllers/authController';
+import {AuthMagicLinkController, authPasswordRouter, RefreshTokenController} from './controllers/authController';
 import {EmailMagicLinkSenderController, EmailInviteLinkSenderController, RemoveOldTokensController} from './controllers/emailSenderController';
 import {UploadImageController} from './controllers/uploadImageController';
 import {FriendEntryController} from './controllers/friendController';
@@ -33,7 +33,7 @@ import { errorHandler, notFoundHandler } from './errorHandler';
 import {accessTokenHandler} from './accessTokenHandler';
 import requestIdHandler from './requestId';
 import cors from 'cors';
-import {UserController, UsersController, AddUsersForTest, DelUsersForTest, addFakeUsers, getUsersCount, printSomeUsers, addUser, activateUser, banUser, existUsers} from './controllers/usersController';
+import {UserController, UsersController, AddUsersForTest, DelUsersForTest, addFakeUsers, getUsersCount, printSomeUsers, addUser, activateUser, banUser, existUsers, userSetPassword} from './controllers/usersController';
 import {InvalidateSearchIndexController, InvalidateSearchIndexForTest, SearchController} from './search';
 import { addEvent, delEvent, editEvent, getEvent, getJoinedUsers, joinEvent, unjoinEvent, searchEvents } from './controllers/eventController';
 
@@ -62,6 +62,7 @@ register(app, '/test/success', TestSuccessRouter);
 register(app, '/v1/auth/magicLink', AuthMagicLinkController);
 register(app, '/v1/auth/refresh', RefreshTokenController);
 register(app, '/v1/email/sendMagicLink', EmailMagicLinkSenderController);
+register(app, '/v1/auth/getRefreshTokenByPassword', authPasswordRouter);
 
 if (config.enableMethodsForTest) {
   register(app, '/v1/admin/addUsersForTest', AddUsersForTest, false);
@@ -76,6 +77,7 @@ register(app, '/v1/email/sendInviteLink', EmailInviteLinkSenderController, true)
 // Profiles end-points
 register(app, '/v1/user/friend/:friendId', FriendEntryController, true);
 register(app, '/v1/users/:id', UsersController, true);
+register(app, '/v1/user/setPassword', userSetPassword, true);
 register(app, '/v1/user', UserController, true);
 register(app, '/v1/profile/uploadImage', UploadImageController, true);
 register(app, '/v1/profile/search/', ProfileController, true);

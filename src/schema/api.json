@@ -122,6 +122,15 @@
       "required": [ "email" ]
     },
     {
+      "$id": "#POST>/v1/auth/getRefreshTokenByPassword",
+      "allOf": [{ "$ref": "#RequestBase" }],
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "password": { "type": "string" }
+      },
+      "required": [ "email", "password" ]
+    },
+    {
       "$id": "#POST>/v1/email/sendMagicLink",
       "allOf": [{ "$ref": "#RequestBase" }],
       "properties": {
@@ -225,6 +234,14 @@
           }
       },
       "required":["about","fullName"]
+    },
+    {
+      "$id": "#POST>/v1/user/setPassword",
+      "allOf": [{ "$ref": "#RequestBase" }],
+      "properties": {
+        "password": { "type": "string", "maxLength": 128, "minLength": 6 }
+      },
+      "required":["password"]
     },
     {
       "$id": "#POST>/v1/search",

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const { post, getHost, genUsers, getAuthHeader } = require('../../utils.js');
+const { post, getHost, genUsers, getAuthHeader, get } = require('../../utils.js');
 
 const ENDPOINT = `${getHost()}/v1/auth/refresh`;
 const fs = require('fs').promises;
@@ -100,4 +100,43 @@ test('/v1/auth/refresh permissions e2e test', async () => {
       .toMatchObject({ code: 200 });
   expect(await post(getHost() + '/v1/delPermission', {user_id: userA.id, permission_id: 1}, realAuthHeader))
       .toMatchObject({ code: 200 });
+});
+
+test('/v1/user/setPassword', async () => {
+  const authHeader = getAuthHeader({
+    ...user,
+    permissions: [1]
+  });
+  expect(await post(getHost() + '/v1/user/setPassword', {password: 'abcdef'}, authHeader))
+      .toMatchObject({
+        code: 200
+      });
+  const {data: {accessToken, refreshToken}} = await post(getHost() + '/v1/auth/getRefreshTokenByPassword', {
+    password: 'abcdef',
+    email: user.email
+  });
+  expect(accessToken).not.toBeUndefined();
+  expect(refreshToken).not.toBeUndefined();
+
+  // access token is good for access.
+  const userExpected = Object.assign({}, user);
+  delete userExpected.passwordHash;
+  delete userExpected.phone;
+  delete userExpected.place_id;
+  delete userExpected.skills_lo;
+  expect(await get(getHost() + '/v1/user', {
+    Authorization: `Bearer ${accessToken}`,
+    ['X-Request-Id']: 'd5ab3356-f4b4-11ea-adc1-0242ac120002'
+  })).toMatchObject({
+    code: 200,
+    data: {
+      user: userExpected
+    }
+  });
+  // refresh tokens are good for refresh.
+  const {data: {accessToken: accessTokenAfterRefresh, refreshToken: refreshTokenAfterRefresh}} = await post(getHost() + '/v1/auth/refresh', {
+    refreshToken
+  });
+  expect(accessTokenAfterRefresh).not.toBeUndefined();
+  expect(refreshTokenAfterRefresh).not.toBeUndefined();
 });
