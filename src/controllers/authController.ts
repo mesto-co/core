@@ -21,11 +21,13 @@ import {UserStatus} from '../enums/UserStatus';
 import {TokenHelper} from '../TokenHelper';
 import {RefreshJwtPayloadModel} from '../models/RefreshJwtPayloadModel';
 import jsonwebtoken, {VerifyErrors} from 'jsonwebtoken';
+import {checkPassword} from '../password';
 
 const {
   refreshToken: {
     jwtSecret: refreshJwtSecret,
-  }
+  },
+  salt
 } = require('../../config.js');
 
 const authMagicLinkRouter = express.Router();
@@ -93,7 +95,31 @@ refreshTokenRouter.route('/')
         }
     );
 
+const authPasswordRouter = express.Router();
+authPasswordRouter.route('/')
+    .post(
+        async (request: express.Request, response: express.Response) => {
+          const {email, password} = getArgs(request);
+          try {
+            const {rows: [user]} = await knex.raw('SELECT id, "passwordHash" FROM "User" WHERE email = ? AND status = ? LIMIT 1', [email, UserStatus.APPROVED]);
+            if (user && user.passwordHash && await checkPassword(password, salt, user.passwordHash)) {
+              const newRefreshToken = TokenHelper.signRefreshToken({userId: user.id});
+              const {rows: [{id: tokenId}]} = await knex.raw(`INSERT INTO "UserToken"(token, "userId") VALUES(?, ?) RETURNING id;`, [newRefreshToken, user.id]);
+              if (tokenId) {
+                const accessToken = TokenHelper.signAccessToken(user);
+                return response.status(200).json({accessToken, refreshToken: newRefreshToken}).end();
+              }
+            }
+            return response.status(404).json({}).end();
+          } catch (e) {
+            console.debug('auth/password error', e);
+            response.status(500).json({}).end();
+          }
+        }
+    );
+
 export {
   authMagicLinkRouter as AuthMagicLinkController,
-  refreshTokenRouter as RefreshTokenController
+  refreshTokenRouter as RefreshTokenController,
+  authPasswordRouter
 };
