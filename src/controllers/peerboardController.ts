@@ -16,11 +16,22 @@
 
 import express from 'express';
 import jsonwebtoken from 'jsonwebtoken';
+import { URL } from 'url';
 
 import knex from '../knex';
 import { UserStatus } from '../enums/UserStatus';
-const { peerboardAuthToken } = require('../../config.js');
+const { peerboardAuthToken, peerboardAuthTokenOverrides } = require('../../config.js');
 const config = require('../../config.js');
+
+const getPeerboardAuthToken = (request: express.Request) => {
+  try {
+    const referer = request.headers['referer'];
+    if (referer && peerboardAuthTokenOverrides)
+      return peerboardAuthTokenOverrides[new URL(referer).hostname] || peerboardAuthToken;
+  } catch (e) {
+  }
+  return peerboardAuthToken;
+};
 
 const peerboardAuthControler = express.Router();
 peerboardAuthControler.route('/').get(async (request, response) => {
@@ -52,7 +63,7 @@ peerboardAuthControler.route('/').get(async (request, response) => {
       payload.creds.fields.role = 'admin';
     }
 
-    const token = jsonwebtoken.sign(payload, peerboardAuthToken, { expiresIn: '60s' });
+    const token = jsonwebtoken.sign(payload, getPeerboardAuthToken(request), { expiresIn: '60s' });
     return response.status(200).send({token}).end();
   } catch (e) {
     console.debug('GET /v1/peerboard/auth', e);

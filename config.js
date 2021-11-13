@@ -64,6 +64,7 @@ const lambdaConfig = {
   },
   googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
   peerboardAuthToken: process.env.PEERBOARD_AUTH_TOKEN,
+  peerboardAuthTokenOverrides: process.env.PEERBOARD_AUTH_TOKEN_OVERRIDES ? JSON.parse(process.env.PEERBOARD_AUTH_TOKEN_OVERRIDES) : {},
   corsOrigin: process.env.CORS_ORIGIN || 'https://app.mesto.co/',
   adminUserId: process.env.ADMIN_USER_ID,
   enableMethodsForTest: false,
