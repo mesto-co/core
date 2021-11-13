@@ -22,6 +22,8 @@ const lambdaConfig = {
   magicLink: {
     jwtExpiresIn: process.env.MAGIC_LINK_JWT_EXPIRES_IN || '15m',
     url: process.env.MAGIC_LINK_URL,
+    // per domain overrides
+    urlOverrides: process.env.MAGIC_LINK_URL_OVERRIDES ? JSON.parse(process.env.MAGIC_LINK_URL_OVERRIDES) : {}
   },
   inviteLink: {
     jwtExpiresIn: process.env.INVITE_JWT_EXPIRES_IN || '3 days'

@@ -24,10 +24,12 @@ import {emailService} from '../emailService';
 import {TokenHelper} from '../TokenHelper';
 import {RefreshJwtPayloadModel} from '../models/RefreshJwtPayloadModel';
 import { Permission } from '../enums/permission';
+import { URL } from 'url';
 
 const {
   magicLink: {
-    url: magicLinkUrl
+    url: magicLinkUrl,
+    urlOverrides: magicLinkUrlOverrides,
   },
   refreshToken: {
     jwtSecret: refreshJwtSecret,
@@ -40,6 +42,16 @@ const {
 const UserEntries = () => knex('User');
 
 const UserTokenEntries = () => knex('UserToken');
+
+const getMagicUrl = (request: express.Request) => {
+  try {
+    const referer = request.headers['referer'];
+    if (referer && magicLinkUrlOverrides)
+      return magicLinkUrlOverrides[new URL(referer).hostname] || magicLinkUrl;
+  } catch (e) {
+  }
+  return magicLinkUrl;
+};
 
 const emailMagicLinkSenderRouter = express.Router();
 emailMagicLinkSenderRouter.route('/')
@@ -64,7 +76,7 @@ emailMagicLinkSenderRouter.route('/')
               await knex.raw(`INSERT INTO user_last_email_sent (user_id) VALUES (?)
                 ON CONFLICT (user_id) DO UPDATE SET sent_at = CURRENT_TIMESTAMP;`, [id]);
 
-              const magicLink = `${magicLinkUrl}token=${userToken.token}`;
+              const magicLink = `${getMagicUrl(request)}token=${userToken.token}`;
               await emailService.sendMagicLinkEmail(email, magicLink);
               return response.status(200).json({}).end();
             });
