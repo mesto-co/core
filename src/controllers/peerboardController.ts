@@ -20,7 +20,7 @@ import { URL } from 'url';
 
 import knex from '../knex';
 import { UserStatus } from '../enums/UserStatus';
-const { peerboardAuthToken, peerboardAuthTokenOverrides } = require('../../config.js');
+const { peerboardAuthToken, peerboardAuthTokenOverrides, peerboardProfileUrl, peerboardProfileUrlOverrides } = require('../../config.js');
 const config = require('../../config.js');
 
 const getPeerboardAuthToken = (request: express.Request) => {
@@ -31,6 +31,16 @@ const getPeerboardAuthToken = (request: express.Request) => {
   } catch (e) {
   }
   return peerboardAuthToken;
+};
+
+const getPeerboardProfileUrl = (request: express.Request) => {
+  try {
+    const referer = request.headers['referer'];
+    if (referer && peerboardProfileUrlOverrides)
+      return peerboardProfileUrlOverrides[new URL(referer).hostname] || peerboardProfileUrl;
+  } catch (e) {
+  }
+  return peerboardProfileUrl;
 };
 
 const peerboardAuthControler = express.Router();
@@ -55,6 +65,7 @@ peerboardAuthControler.route('/').get(async (request, response) => {
           name: user.fullName,
           avatar_url: user.imagePath,
           bio: user.about,
+          profile_url: getPeerboardProfileUrl(request) + id,
         }
       }
     };
