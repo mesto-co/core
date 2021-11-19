@@ -113,7 +113,7 @@ test('/v1/user/setPassword', async () => {
       });
   const {data: {accessToken, refreshToken}} = await post(getHost() + '/v1/auth/getRefreshTokenByPassword', {
     password: 'abcdef',
-    email: user.email
+    email: user.email.toUpperCase()
   });
   expect(accessToken).not.toBeUndefined();
   expect(refreshToken).not.toBeUndefined();

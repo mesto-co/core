@@ -99,7 +99,8 @@ const authPasswordRouter = express.Router();
 authPasswordRouter.route('/')
     .post(
         async (request: express.Request, response: express.Response) => {
-          const {email, password} = getArgs(request);
+          const email = getEmail(request);
+          const {password} = getArgs(request);
           try {
             const {rows: [user]} = await knex.raw('SELECT id, "passwordHash" FROM "User" WHERE email = ? AND status = ? LIMIT 1', [email, UserStatus.APPROVED]);
             if (user && user.passwordHash && await checkPassword(password, salt, user.passwordHash)) {
