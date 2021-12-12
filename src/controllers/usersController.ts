@@ -264,7 +264,7 @@ activateUser.route('/').post(async (request, response) => {
   try {
     const {email} = getArgs(request);
     if (hasPermission(request, Permission.ACTIVATEUSER)) {
-      await knex.raw('UPDATE "User" SET status = ? WHERE email = ?', [UserStatus.APPROVED, email]);
+      await knex.raw('UPDATE "User" SET status = ? WHERE email = ? AND status = ?', [UserStatus.APPROVED, email, UserStatus.AWAITING]);
       return response.status(200).json({}).end();
     } else {
       return response.status(401).json({}).end();
