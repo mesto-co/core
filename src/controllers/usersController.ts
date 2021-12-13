@@ -320,7 +320,7 @@ existUsers.route('/').post(async (request, response) => {
   try {
     const {emails} = getArgs(request);
     if (hasPermission(request, Permission.NEWUSERS)) {
-      const {rows}: {rows: {email: string}[]} = await knex.raw(`SELECT email FROM "User" WHERE status = ? AND email IN (${Array(emails.length).fill('?').join(',')})`, [UserStatus.APPROVED, ...emails]);
+      const {rows}: {rows: {email: string}[]} = await knex.raw(`SELECT email FROM "User" WHERE email IN (${Array(emails.length).fill('?').join(',')})`, [...emails]);
       return response.status(200).json({emails: rows.map(row => row.email)}).end();
     } else {
       return response.status(401).json({}).end();
