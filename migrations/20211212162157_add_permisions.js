@@ -13,17 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-enum Permission {
-    ADDDELPERMISSION = 1,
-    ACTIVATEUSER = 2,
-    BANUSER = 3,
-    ADDUSER = 4,
-    SENDINVITEEMAIL = 5,
-    NEWUSERS = 6,
-    EVENT = 7,
-    DELEVENT = 8,
-    REMOVEOLDTOKENS = 9,
-    RESOLVEEMAIL = 14,
-}
 
-export { Permission };
+exports.up = async function(knex) {
+  await knex.raw(`INSERT INTO permission(id, description) VALUES (14, 'Resolve email by user id')`);
+};
+
+exports.down = async function(knex) {
+  await knex.raw(`DELETE FROM permission WHERE id = 14`);
+};

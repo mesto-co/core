@@ -22,7 +22,7 @@ import { storePassword } from '../password';
 import {invalidateSearchIndex} from '../search';
 const {enableMethodsForTest, salt} = require('../../config.js');
 
-import {getArgs, hasPermission} from '../utils';
+import {getArgs, hasPermission, getEmail} from '../utils';
 
 interface Contact {
   title: string;
@@ -262,7 +262,7 @@ addUser.route('/').post(async (request, response) => {
 const activateUser = express.Router();
 activateUser.route('/').post(async (request, response) => {
   try {
-    const {email} = getArgs(request);
+    const email = getEmail(request);
     if (hasPermission(request, Permission.ACTIVATEUSER)) {
       await knex.raw('UPDATE "User" SET status = ? WHERE email = ? AND status = ?', [UserStatus.APPROVED, email, UserStatus.AWAITING]);
       return response.status(200).json({}).end();
@@ -278,10 +278,28 @@ activateUser.route('/').post(async (request, response) => {
 const banUser = express.Router();
 banUser.route('/').post(async (request, response) => {
   try {
-    const {email} = getArgs(request);
+    const email = getEmail(request);
     if (hasPermission(request, Permission.BANUSER)) {
       await knex.raw('UPDATE "User" SET status = ? WHERE email = ?', [UserStatus.CLOSED, email]);
       return response.status(200).json({}).end();
+    } else {
+      return response.status(401).json({}).end();
+    }
+  } catch (e) {
+    console.debug('POST admin/banUser error', e);
+    return response.status(500).json({}).end();
+  }
+});
+
+const resolveEmail = express.Router();
+resolveEmail.route('/').post(async (request, response) => {
+  try {
+    const {id} = getArgs(request);
+    if (hasPermission(request, Permission.RESOLVEEMAIL)) {
+      const {rows}: {rows: {email: string}[]} = await knex.raw('SELECT email FROM "User" WHERE id = ?', [id]);
+      if (rows.length)
+        return response.status(200).json({email: rows[0].email}).end();
+      return response.status(404).json({}).end();
     } else {
       return response.status(401).json({}).end();
     }
@@ -319,5 +337,6 @@ export {
   activateUser,
   banUser,
   existUsers,
-  userSetPassword
+  userSetPassword,
+  resolveEmail
 };

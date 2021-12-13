@@ -33,7 +33,8 @@ import { errorHandler, notFoundHandler } from './errorHandler';
 import {accessTokenHandler} from './accessTokenHandler';
 import requestIdHandler from './requestId';
 import cors from 'cors';
-import {UserController, UsersController, AddUsersForTest, DelUsersForTest, addFakeUsers, getUsersCount, printSomeUsers, addUser, activateUser, banUser, existUsers, userSetPassword} from './controllers/usersController';
+import {UserController, UsersController, AddUsersForTest, DelUsersForTest, addFakeUsers, getUsersCount,
+  printSomeUsers, addUser, activateUser, banUser, existUsers, userSetPassword, resolveEmail} from './controllers/usersController';
 import {InvalidateSearchIndexController, InvalidateSearchIndexForTest, SearchController} from './search';
 import { addEvent, delEvent, editEvent, getEvent, getJoinedUsers, joinEvent, unjoinEvent, searchEvents } from './controllers/eventController';
 
@@ -102,6 +103,7 @@ register(app, '/v1/event/search', searchEvents, true);
 register(app, '/v1/admin/addUser', addUser, true);
 register(app, '/v1/admin/activateUser', activateUser, true);
 register(app, '/v1/admin/banUser', banUser, true);
+register(app, '/v1/admin/resolveEmail', resolveEmail, true);
 register(app, '/v1/admin/existUsers', existUsers, true);
 register(app, '/v1/admin/removeOldTokens', RemoveOldTokensController, true);
 

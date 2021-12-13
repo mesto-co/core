@@ -395,6 +395,14 @@
       "required": [ "email" ]
     },
     {
+      "$id": "#POST>/v1/admin/resolveEmail",
+      "allOf": [{ "$ref": "#RequestBase" }],
+      "properties": {
+        "id": { "type": "string", "format": "uuid" }
+      },
+      "required": [ "id" ]
+    },
+    {
       "$id": "#POST>/v1/admin/existUsers",
       "allOf": [{ "$ref": "#RequestBase" }],
       "properties": {
