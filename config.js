@@ -70,9 +70,8 @@ const lambdaConfig = {
   corsOrigin: process.env.CORS_ORIGIN || 'https://app.mesto.co/',
   adminUserId: process.env.ADMIN_USER_ID,
   enableMethodsForTest: false,
-  openlandToken: process.env.OPENLAND_TOKEN,
   // node -e "console.log(crypto.randomBytes(32).toString('hex'))"
-  openlandCodeSecret: process.env.OPENLAND_CODE_SECRET
+  amoToken: process.env.AMO_TOKEN || '133a68442d0557dca95f17c055f38d7e517769e9ef990196ab5706faff4f5c3d'
 };
 
 const developmentConfig = {
@@ -120,8 +119,6 @@ const developmentConfig = {
   corsOrigin: '*',
   adminUserId: '00000000-1111-2222-3333-000000000009',
   enableMethodsForTest: true,
-  openlandToken: process.env.OPENLAND_TOKEN || 'YYeXUMHV_40G3jKvYV2Bz1wIfxpWUB9hfWbXmVkEormuC3jTT2ZqbUWOMw4LGtKxVhqmzA-7ds_Bp3MSXEeW5A',
-  openlandCodeSecret: process.env.OPENLAND_CODE_SECRET || '4003fe4c92ed4ac97363c7528e30bbb798c59fefbcfb35ffe6ef937c45d86d86',
   salt: process.env.SALT || 'e0ce3430c2be00ebe84a98cbc6d67efb6e8a67d331b4c8ad4ea8a3f84bf24e1f'
 };
 

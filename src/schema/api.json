@@ -504,5 +504,11 @@
       "$id": "#POST>/v1/admin/removeOldTokens",
       "allOf": [{ "$ref": "#RequestBase" }],
       "properties": {}
+    },
+    {
+      "$id": "#GET>/v1/amo/webhook"
+    },
+    {
+      "$id": "#POST>/v1/amo/webhook"
     }
 ]
