@@ -279,8 +279,14 @@ const banUser = express.Router();
 banUser.route('/').post(async (request, response) => {
   try {
     const email = getEmail(request);
+    const {id} = getArgs(request);
+    if (!email && !id)
+      return response.status(400).json({}).end();
     if (hasPermission(request, Permission.BANUSER)) {
-      await knex.raw('UPDATE "User" SET status = ? WHERE email = ?', [UserStatus.CLOSED, email]);
+      if (email)
+        await knex.raw('UPDATE "User" SET status = ? WHERE email = ?', [UserStatus.CLOSED, email]);
+      else
+        await knex.raw('UPDATE "User" SET status = ? WHERE id = ?', [UserStatus.CLOSED, id]);
       return response.status(200).json({}).end();
     } else {
       return response.status(401).json({}).end();

@@ -390,9 +390,9 @@
       "$id": "#POST>/v1/admin/banUser",
       "allOf": [{ "$ref": "#RequestBase" }],
       "properties": {
-        "email": { "type": "string", "format": "email" }
-      },
-      "required": [ "email" ]
+        "email": { "type": "string", "format": "email" },
+        "id": { "type": "string", "format": "uuid" }
+      }
     },
     {
       "$id": "#POST>/v1/admin/resolveEmail",
