@@ -105,10 +105,14 @@ userController.route('/')
       await handleUserRequestById(request.user!.id!, true, request, response);
     })
     .put(async (request, response) => {
-      const { location = null, role = null, about, fullName, skills, imagePath = null, busy = false, placeId = null } = getArgs(request);
-      if (request.user) {
+      const { location = null, role = null, about, fullName, skills, imagePath = null, busy = false, placeId = null, userId = null } = getArgs(request);
+      let id;
+      if (userId && hasPermission(request, Permission.UPDATEUSER))
+        id = userId;
+      else if (!userId && request.user)
+        id = request.user.id;
+      if (id) {
         try {
-          const id = request.user.id;
           await knex.raw(`
             UPDATE "User" SET about = :about, location = :location, place_id = :placeId, role = :role, "fullName" = :fullName,
             skills = :skills, skills_lo = :skills_lo, "imagePath" = :imagePath, busy = :busy WHERE id = :id`,

@@ -191,6 +191,7 @@
       "$id": "#PUT>/v1/user",
       "allOf": [{ "$ref": "#RequestBase" }],
       "properties": {
+          "userId": { "type": "string", "format": "uuid" },
           "location": {
             "type": "string",
             "isStringNotEmpty": true
