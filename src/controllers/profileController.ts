@@ -16,8 +16,9 @@
 
 import express from 'express';
 
-import {getArgs} from '../utils';
-import { performSearch } from '../search';
+import {getArgs, hasPermission} from '../utils';
+import {performSearch, performSearchEmail} from '../search';
+import {Permission} from '../enums/permission';
 
 interface SearchQuery {
   fullName: string | undefined,
@@ -26,8 +27,8 @@ interface SearchQuery {
   skills: string | undefined
 }
 
-const router = express.Router();
-router.route('/')
+const searchRouter = express.Router();
+searchRouter.route('/')
     .post(async (request, response) => {
       const {query, currentPage, perPage, onlyFriends}: {query: SearchQuery[], currentPage: number, perPage: number, onlyFriends: boolean} = getArgs(request);
       const {id: userId} = request.user!;
@@ -51,4 +52,24 @@ router.route('/')
       }
     });
 
-export { router as ProfileController};
+const searchEmailRouter = express.Router();
+searchEmailRouter.route('/')
+    .post(async (request, response) => {
+      if (hasPermission(request, Permission.UPDATEUSER)) {
+        const {email}: { email: string } = getArgs(request);
+        try {
+          const user = await performSearchEmail(email);
+          response.status(200).json({user}).end();
+        } catch (e) {
+          console.debug('POST profile/search error', e);
+          response.status(500).json({}).end();
+        }
+      } else {
+        response.status(401).json({}).end();
+      }
+    });
+
+export {
+  searchRouter as ProfileController,
+  searchEmailRouter as ProfileEmailController
+};
