@@ -18,7 +18,7 @@ import express from 'express';
 
 import validator from './validator';
 import {TestController, TestEntryController, TestSuccessRouter} from './controllers/testController';
-import {ProfileController} from './controllers/profileController';
+import {ProfileController, ProfileEmailController} from './controllers/profileController';
 import {AuthMagicLinkController, authPasswordRouter, RefreshTokenController} from './controllers/authController';
 import {EmailMagicLinkSenderController, RemoveOldTokensController} from './controllers/emailSenderController';
 import {UploadImageController} from './controllers/uploadImageController';
@@ -82,6 +82,7 @@ register(app, '/v1/users/:id', UsersController, true);
 register(app, '/v1/user/setPassword', userSetPassword, true);
 register(app, '/v1/user', UserController, true);
 register(app, '/v1/profile/uploadImage', UploadImageController, true);
+register(app, '/v1/profile/searchEmail/', ProfileEmailController, true);
 register(app, '/v1/profile/search/', ProfileController, true);
 register(app, '/v1/search', SearchController, true);
 register(app, '/v1/location/', LocationsController, true);

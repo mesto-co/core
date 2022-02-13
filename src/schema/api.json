@@ -56,6 +56,14 @@
         "required": [ "fieldA", "fieldB" ]
     },
     {
+      "$id": "#POST>/v1/profile/searchEmail/",
+      "allOf": [{ "$ref": "#RequestBase" }],
+      "properties": {
+        "email": {"type": "string"}
+      },
+      "required": [ "email"]
+    },
+    {
         "$id": "#POST>/v1/profile/search/",
         "allOf": [{ "$ref": "#RequestBase" }],
         "properties": {

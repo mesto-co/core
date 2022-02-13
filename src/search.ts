@@ -213,6 +213,15 @@ async function performSearch(query: string, limit: number, offset: number, userI
   };
 }
 
+async function performSearchEmail(email: string) {
+  const result = await knex.raw(`
+    SELECT u."fullName", u.id, u.username, u."imagePath", u.location, u.about, u.skills, u.busy
+    FROM "User" as u
+    WHERE u.email like ? AND u.status = ?
+    LIMIT 1`, [email, UserStatus.APPROVED]);
+  return result.rows.length ? sanitizeUser(result.rows[0]) : null;
+}
+
 const router = express.Router();
 router.route('/')
     .post(async (request, response) => {
@@ -293,6 +302,7 @@ searchController.route('/').post(async (request, response) => {
 export {
   invalidateSearchIndex,
   performSearch,
+  performSearchEmail,
   searchController as SearchController,
   router as InvalidateSearchIndexController,
   invalidateSearchIndexForTestRouter as InvalidateSearchIndexForTest
