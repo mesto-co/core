@@ -84,7 +84,7 @@ amoController.route('/')
             break;
         }
 
-        let approvedLeads = [];
+        const approvedLeads = [];
         for (let i = 0; true; ++i) {
           const id = args[`leads[update][${i}][id]`];
           if (id) {

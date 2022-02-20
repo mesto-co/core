@@ -21,8 +21,6 @@ import {getArgs, getEmail, hasPermission} from '../utils';
 import {UserStatus} from '../enums/UserStatus';
 import {emailService} from '../emailService';
 
-import {TokenHelper} from '../TokenHelper';
-import {RefreshJwtPayloadModel} from '../models/RefreshJwtPayloadModel';
 import { Permission } from '../enums/permission';
 import { URL } from 'url';
 
