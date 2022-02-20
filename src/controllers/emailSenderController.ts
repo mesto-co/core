@@ -92,31 +92,6 @@ emailMagicLinkSenderRouter.route('/')
       }
     });
 
-const emailInviteLinkSenderRouter = express.Router();
-emailInviteLinkSenderRouter.route('/')
-    .post(async (request, response) => {
-      const {email} = getArgs(request);
-      try {
-        if (hasPermission(request, Permission.SENDINVITEEMAIL)) {
-          const user = await UserEntries().where('email', email).andWhere('status', UserStatus.APPROVED).first();
-          if (user) {
-            const {id} = user;
-            const payload: RefreshJwtPayloadModel = { userId: id };
-            const jwt = TokenHelper.signInviteLinkToken(payload);
-            await UserTokenEntries().insert({token: jwt, userId: id});
-            const magicLink = `${magicLinkUrl}token=${jwt}&redirect=/profile/edit/`;
-            await emailService.sendInviteEmail(email, magicLink);
-            return response.status(200).json({}).end();
-          }
-          return response.status(404).json({}).end();
-        }
-        return response.status(401).json({}).end();
-      } catch (e) {
-        console.debug('email/sendMagicLink error', e);
-        response.status(500).json({}).end();
-      }
-    });
-
 const removeOldTokens = express.Router();
 removeOldTokens.route('/')
     .post(async (request, response) => {
@@ -144,4 +119,4 @@ removeOldTokens.route('/')
       }
     });
 
-export { emailMagicLinkSenderRouter as EmailMagicLinkSenderController, emailInviteLinkSenderRouter as EmailInviteLinkSenderController, removeOldTokens as RemoveOldTokensController };
+export { emailMagicLinkSenderRouter as EmailMagicLinkSenderController, removeOldTokens as RemoveOldTokensController };

@@ -354,40 +354,6 @@
       "required": [ "user_id", "permission_id" ]
     },
     {
-      "$id": "#POST>/v1/admin/addUser",
-      "allOf": [{ "$ref": "#RequestBase" }],
-      "properties": {
-        "email": { "type": "string", "format": "email" },
-        "fullName":{ "type":"string", "maxLength": 255, "minLength": 2 },
-        "imagePath": { "type": "string", "format": "uri" },
-        "location": { "type": "string", "isStringNotEmpty": true },
-        "placeId": { "type": "string", "isStringNotEmpty": true },
-        "about": {
-          "type": "string",
-          "maxLength":6000,
-          "minLength": 1
-        },
-        "skills": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength":255
-          },
-          "default": []
-        }
-      },
-      "required": [ "email", "fullName" ]
-    },
-    {
-      "$id": "#POST>/v1/admin/activateUser",
-      "allOf": [{ "$ref": "#RequestBase" }],
-      "properties": {
-        "email": { "type": "string", "format": "email" }
-      },
-      "required": [ "email" ]
-    },
-    {
       "$id": "#POST>/v1/admin/banUser",
       "allOf": [{ "$ref": "#RequestBase" }],
       "properties": {
@@ -402,14 +368,6 @@
         "id": { "type": "string", "format": "uuid" }
       },
       "required": [ "id" ]
-    },
-    {
-      "$id": "#POST>/v1/admin/existUsers",
-      "allOf": [{ "$ref": "#RequestBase" }],
-      "properties": {
-        "emails": { "type": "array", "items": { "type": "string", "format": "email" }}
-      },
-      "required": [ "emails" ]
     },
     {
       "$id": "#POST>/v1/event/addEvent",

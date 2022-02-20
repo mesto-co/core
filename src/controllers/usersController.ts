@@ -245,40 +245,6 @@ if (enableMethodsForTest) {
       });
 }
 
-const addUser = express.Router();
-addUser.route('/').post(async (request, response) => {
-  try {
-    if (hasPermission(request, Permission.ADDUSER)) {
-      const {email, fullName, imagePath, location, placeId, about, skills = []}: {email: string, fullName: string, imagePath: string|undefined, username: string|undefined, location: string|undefined, placeId: string|undefined, about: string|undefined, skills: string[]} = getArgs(request);
-      const {rows: [{id: userId}]} = await knex.raw(`INSERT INTO "User"(email, "fullName", status, "imagePath", username, location, place_id, about, skills, skills_lo) VALUES (?, ?, 'awaiting', ?, ?, ?, ?, ?, ?, ?) RETURNING id`,
-          [email, fullName, imagePath || null, null, location || null, placeId || null, about || '', skills, skills.map(s => s.toLowerCase())]);
-      await invalidateSearchIndex(userId);
-      return response.status(200).json({userId}).end();
-    } else {
-      return response.status(401).json({}).end();
-    }
-  } catch (e) {
-    console.debug('POST admin/addUser error', e);
-    return response.status(500).json({}).end();
-  }
-});
-
-const activateUser = express.Router();
-activateUser.route('/').post(async (request, response) => {
-  try {
-    const email = getEmail(request);
-    if (hasPermission(request, Permission.ACTIVATEUSER)) {
-      await knex.raw('UPDATE "User" SET status = ? WHERE email = ? AND status = ?', [UserStatus.APPROVED, email, UserStatus.AWAITING]);
-      return response.status(200).json({}).end();
-    } else {
-      return response.status(401).json({}).end();
-    }
-  } catch (e) {
-    console.debug('POST admin/activateUser error', e);
-    return response.status(500).json({}).end();
-  }
-});
-
 const banUser = express.Router();
 banUser.route('/').post(async (request, response) => {
   try {
@@ -319,22 +285,6 @@ resolveEmail.route('/').post(async (request, response) => {
   }
 });
 
-const existUsers = express.Router();
-existUsers.route('/').post(async (request, response) => {
-  try {
-    const {emails} = getArgs(request);
-    if (hasPermission(request, Permission.NEWUSERS)) {
-      const {rows}: {rows: {email: string}[]} = await knex.raw(`SELECT email FROM "User" WHERE email IN (${Array(emails.length).fill('?').join(',')})`, [...emails]);
-      return response.status(200).json({emails: rows.map(row => row.email)}).end();
-    } else {
-      return response.status(401).json({}).end();
-    }
-  } catch (e) {
-    console.debug('POST admin/existUsers error', e);
-    return response.status(500).json({}).end();
-  }
-});
-
 export {
   userController as UserController,
   usersController as UsersController,
@@ -343,10 +293,7 @@ export {
   addFakeUsers,
   getUsersCount,
   printSomeUsers,
-  addUser,
-  activateUser,
   banUser,
-  existUsers,
   userSetPassword,
   resolveEmail
 };

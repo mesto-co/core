@@ -66,7 +66,7 @@ amoController.route('/')
               if (arg.startsWith(prefix + '[linked_leads_id]')) {
                 leadsUpdates.push({
                   id: id,
-                  leadId: args[arg];
+                  leadId: args[arg]
                 });
                 break;
               }

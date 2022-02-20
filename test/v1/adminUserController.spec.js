@@ -16,27 +16,6 @@
 
 const { getAuthHeader, getHost, genUsers, post } = require('../utils.js');
 
-test('/v1/admin/addUser', async () => {
-  const [rootUser] = await genUsers(1609658785224, [{}]);
-  const authHeaderWithoutPermission = getAuthHeader({user: rootUser, permissions: []});
-  const email = 'a' + Date.now() + '@gmail.com';
-  expect(await post(getHost() + '/v1/admin/addUser', {email, fullName: 'A B'}, authHeaderWithoutPermission))
-      .toMatchObject({ code: 401 });
-  const authHeader = getAuthHeader({user: rootUser, permissions: [4]});
-  expect(await post(getHost() + '/v1/admin/addUser', {email, fullName: 'A B'}, authHeader))
-      .toMatchObject({ code: 200 });
-});
-
-test('/v1/admin/activateUser', async () => {
-  const [rootUser] = await genUsers(1609658785224, [{}]);
-  const authHeaderWithoutPermission = getAuthHeader({user: rootUser, permissions: []});
-  expect(await post(getHost() + '/v1/admin/activateUser', {email: rootUser.email}, authHeaderWithoutPermission))
-      .toMatchObject({ code: 401 });
-  const authHeader = getAuthHeader({user: rootUser, permissions: [2]});
-  expect(await post(getHost() + '/v1/admin/activateUser', {email: rootUser.email}, authHeader))
-      .toMatchObject({ code: 200 });
-});
-
 test('/v1/admin/banUser', async () => {
   const [rootUser] = await genUsers(1609658785224, [{}]);
   const authHeaderWithoutPermission = getAuthHeader({user: rootUser, permissions: []});
@@ -45,14 +24,4 @@ test('/v1/admin/banUser', async () => {
   const authHeader = getAuthHeader({user: rootUser, permissions: [3]});
   expect(await post(getHost() + '/v1/admin/banUser', {email: rootUser.email}, authHeader))
       .toMatchObject({ code: 200 });
-});
-
-test('/v1/admin/existUsers', async () => {
-  const [rootUser] = await genUsers(1609658785224, [{}]);
-  const authHeaderWithoutPermission = getAuthHeader({user: rootUser, permissions: []});
-  expect(await post(getHost() + '/v1/admin/existUsers', {emails: [rootUser.email]}, authHeaderWithoutPermission))
-      .toMatchObject({ code: 401 });
-  const authHeader = getAuthHeader({user: rootUser, permissions: [6]});
-  expect(await post(getHost() + '/v1/admin/existUsers', {emails: [rootUser.email, Date.now() + 'abc@gmail.com']}, authHeader))
-      .toMatchObject({ code: 200, data: {emails: [rootUser.email]}});
 });
