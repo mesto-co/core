@@ -22,6 +22,27 @@ const {
   amoToken
 } = require('../../config.js');
 
+const parseObject = data => {
+  const inited = Symbol('inited');
+  const output = {};
+  for (const item in data) {
+    const path = item.split(/[[\]]+/g);
+    if (path.length > 1)
+      path.pop();
+    const targetKey = path.pop();
+    let obj = output;
+    for (const key of path) {
+      if (!obj[key] || !obj[key][inited]) {
+        obj[key] = [];
+        obj[key][inited] = true;
+      }
+      obj = obj[key];
+    }
+    obj[targetKey] = data[item];
+  }
+  return output;
+};
+
 const amoController = express.Router();
 amoController.route('/')
     .get(async (request, response) => {
@@ -36,62 +57,39 @@ amoController.route('/')
       const args = getArgs(request);
       if (args && args.token === amoToken) {
         const emailUpdates = [];
-        const leadsUpdates = [];
         const contactsDeleted = [];
+        const leadsUpdates = [];
+        const approvedLeads = [];
 
-        for (let i = 0; true; ++i) {
-          const prefix = `contacts[update][${i}]`;
-          const id = args[prefix + '[id]'];
-          if (id) {
-            for (let j = 0; true; ++j) {
-              if (args[prefix + `[custom_fields][${j}][code]`] === 'EMAIL') {
-                emailUpdates.push({
-                  email: args[prefix + `[custom_fields][${j}][values][0][value]`].toLowerCase(),
-                  id: id,
-                  name: args[prefix + '[name]']
-                });
-                break;
-              } else if (!args[`contacts[update][${i}][custom_fields][${j}][id]`]) {
-                break;
-              }
+        const amoData = parseObject(args);
+        if (amoData.contacts && amoData.contacts.update) {
+          for (const update of amoData.contacts.update) {
+            const emailCustomField = update.custom_fields ? update.custom_fields.find(field => field.code === 'EMAIL') : null;
+            if (emailCustomField && emailCustomField.values.length) {
+              emailUpdates.push({
+                email: emailCustomField.values[0].value,
+                id: update.id,
+                name: update.name
+              });
             }
-            for (let j = 0; true; ++j) {
-              const name = args[prefix + `[tags][${j}][name]`];
-              if (!name)
-                break;
-              if (args[prefix + `[tags][${j}][name]`] === 'Забанен')
-                contactsDeleted.push(id);
+            if (update.tags && update.tags.find(tag => tag.name.toLowerCase() === 'забанен'))
+              contactsDeleted.push(update.id);
+            if (update.linked_leads_id && update.linked_leads_id.length) {
+              leadsUpdates.push({
+                id: update.id,
+                leadId: update.linked_leads_id.pop().ID
+              });
             }
-            for (const arg in args) {
-              if (arg.startsWith(prefix + '[linked_leads_id]')) {
-                leadsUpdates.push({
-                  id: id,
-                  leadId: args[arg]
-                });
-                break;
-              }
-            }
-          } else {
-            break;
           }
         }
-
-        for (let i = 0; true; ++i) {
-          const id = args[`contacts[delete][${i}][id]`];
-          if (id)
-            contactsDeleted.push(id);
-          else
-            break;
+        if (amoData.contacts && amoData.contacts.delete) {
+          for (const item of amoData.contacts.delete)
+            contactsDeleted.push(item.id);
         }
-
-        const approvedLeads = [];
-        for (let i = 0; true; ++i) {
-          const id = args[`leads[update][${i}][id]`];
-          if (id) {
-            if (args[`leads[update][${i}][status_id]`] === '142')
-              approvedLeads.push(id);
-          } else {
-            break;
+        if (amoData.leads && amoData.leads.update) {
+          for (const item of amoData.leads.update) {
+            if (item.status_id === '142')
+              approvedLeads.push(item.id);
           }
         }
 
