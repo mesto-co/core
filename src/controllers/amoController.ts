@@ -22,7 +22,7 @@ const {
   amoToken
 } = require('../../config.js');
 
-const parseObject = data => {
+const parseObject = (data: object): object => {
   const inited = Symbol('inited');
   const output = {};
   for (const item in data) {
@@ -32,12 +32,17 @@ const parseObject = data => {
     const targetKey = path.pop();
     let obj = output;
     for (const key of path) {
+      // @ts-ignore
       if (!obj[key] || !obj[key][inited]) {
+        // @ts-ignore
         obj[key] = [];
+        // @ts-ignore
         obj[key][inited] = true;
       }
+      // @ts-ignore
       obj = obj[key];
     }
+    // @ts-ignore
     obj[targetKey] = data[item];
   }
   return output;
@@ -60,10 +65,14 @@ amoController.route('/')
         const contactsDeleted = [];
         const leadsUpdates = [];
         const approvedLeads = [];
+        const aboutUpdateCollection = [];
 
         const amoData = parseObject(args);
+        // @ts-ignore
         if (amoData.contacts && amoData.contacts.update) {
+          // @ts-ignore
           for (const update of amoData.contacts.update) {
+            // @ts-ignore
             const emailCustomField = update.custom_fields ? update.custom_fields.find(field => field.code === 'EMAIL') : null;
             if (emailCustomField && emailCustomField.values.length) {
               emailUpdates.push({
@@ -72,6 +81,7 @@ amoController.route('/')
                 name: update.name
               });
             }
+            // @ts-ignore
             if (update.tags && update.tags.find(tag => tag.name.toLowerCase() === 'забанен'))
               contactsDeleted.push(update.id);
             if (update.linked_leads_id && update.linked_leads_id.length) {
@@ -82,14 +92,27 @@ amoController.route('/')
             }
           }
         }
+        // @ts-ignore
         if (amoData.contacts && amoData.contacts.delete) {
+          // @ts-ignore
           for (const item of amoData.contacts.delete)
             contactsDeleted.push(item.id);
         }
+        // @ts-ignore
         if (amoData.leads && amoData.leads.update) {
+          // @ts-ignore
           for (const item of amoData.leads.update) {
-            if (item.status_id === '142')
+            if (item.status_id === '142') {
               approvedLeads.push(item.id);
+              // @ts-ignore
+              const aboutMe = (item.custom_fields || []).find(field => field.code === 'ABOUT_MEE');
+              if (aboutMe && aboutMe.values.length) {
+                aboutUpdateCollection.push({
+                  aboutMe: aboutMe.values[0].value.substr(0, 6000),
+                  id: item.id
+                });
+              }
+            }
           }
         }
 
@@ -103,6 +126,8 @@ amoController.route('/')
           await knex.raw('UPDATE "User" SET status = ? WHERE amo_id = ?', [UserStatus.CLOSED, id]);
         for (const leadId of approvedLeads)
           await knex.raw('UPDATE "User" SET status = ? WHERE amo_lead_id = ?', [UserStatus.APPROVED, leadId]);
+        for (const aboutUpdate of aboutUpdateCollection)
+          await knex.raw('UPDATE "User" SET about = ? WHERE amo_id = ?', [aboutUpdate.aboutMe, aboutUpdate.id]);
 
         return response.status(200).json({}).end();
       }
