@@ -52,10 +52,10 @@ searchRouter.route('/')
       }
     });
 
-const searchEmailRouter = express.Router();
-searchEmailRouter.route('/')
+const searchByEmailRouter = express.Router();
+searchByEmailRouter.route('/')
     .post(async (request, response) => {
-      if (hasPermission(request, Permission.UPDATEUSER)) {
+      if (hasPermission(request, Permission.SEARCHBYEMAIL)) {
         const {email}: { email: string } = getArgs(request);
         try {
           const user = await performSearchEmail(email);
@@ -71,5 +71,5 @@ searchEmailRouter.route('/')
 
 export {
   searchRouter as ProfileController,
-  searchEmailRouter as ProfileEmailController
+  searchByEmailRouter as ProfileEmailController
 };
