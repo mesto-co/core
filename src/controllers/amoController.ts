@@ -66,6 +66,7 @@ amoController.route('/')
         const leadsUpdates = [];
         const approvedLeads = [];
         const aboutUpdateCollection = [];
+        const contactsRestored = [];
 
         const amoData = parseObject(args);
         // @ts-ignore
@@ -84,6 +85,9 @@ amoController.route('/')
             // @ts-ignore
             if (update.tags && update.tags.find(tag => tag.name.toLowerCase() === 'забанен'))
               contactsDeleted.push(update.id);
+            else
+              contactsRestored.push(update.id);
+
             if (update.linked_leads_id && update.linked_leads_id.length) {
               leadsUpdates.push({
                 id: update.id,
@@ -125,9 +129,11 @@ amoController.route('/')
         for (const id of contactsDeleted)
           await knex.raw('UPDATE "User" SET status = ? WHERE amo_id = ?', [UserStatus.CLOSED, id]);
         for (const leadId of approvedLeads)
-          await knex.raw('UPDATE "User" SET status = ? WHERE amo_lead_id = ?', [UserStatus.APPROVED, leadId]);
+          await knex.raw('UPDATE "User" SET status = ? WHERE amo_lead_id = ? AND status != ?', [UserStatus.APPROVED, leadId, UserStatus.CLOSED]);
         for (const aboutUpdate of aboutUpdateCollection)
-          await knex.raw('UPDATE "User" SET about = ? WHERE amo_id = ?', [aboutUpdate.aboutMe, aboutUpdate.id]);
+          await knex.raw('UPDATE "User" SET about = ? WHERE amo_id = ? AND status != ?', [aboutUpdate.aboutMe, aboutUpdate.id, UserStatus.CLOSED]);
+        for (const id of contactsRestored)
+          await knex.raw('UPDATE "User" SET status = ? WHERE amo_id = ? AND status = ?', [UserStatus.APPROVED, id, UserStatus.CLOSED]);
 
         return response.status(200).json({}).end();
       }
