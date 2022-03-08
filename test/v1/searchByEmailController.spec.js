@@ -31,17 +31,22 @@ function toExpected(user) {
 }
 
 describe.only('/v1/searchByEmail', () => {
-  let authHeader = null;
+  let headerWithPermission = null;
+  let headerWithoutPermission = null;
   const endpoint = getHost() + '/v1/profile/searchByEmail';
-  const postSearch = body => post(endpoint, body, authHeader);
+  const email = 'test@test.ru';
   beforeEach(async () => {
-    const [current] = await genUsers(1602998724703, [{}]);
-    authHeader = getAuthHeader({id: current.id, permissions: [16]});
+    const [user] = await genUsers(1602998724703, [ {} ]);
+    headerWithPermission = getAuthHeader({ id: user.id, permissions: [ 16 ] });
+    headerWithoutPermission = getAuthHeader({ id: user.id, permissions: [ ] });
   });
   test('/v1/profile/searchByEmail', async () => {
-    const [user] = await genUsers(1603000265436, [{ email: 'test@test.ru' }]);
-    const result = await postSearch({ email: 'test@test.ru' });
-    expect(result)
+    const [user] = await genUsers(1603000265436, [{ email }]);
+    expect(await post(endpoint, { email }, headerWithPermission))
         .toMatchObject({ code: 200, data: { user: toExpected(user) } });
+  });
+  test('/v1/profile/searchByEmail 401', async () => {
+    expect(await post(endpoint, {})).toMatchObject({code: 401});
+    expect(await post(endpoint, { email }, headerWithoutPermission)).toMatchObject({ code: 401 });
   });
 });
