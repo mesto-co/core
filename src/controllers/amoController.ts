@@ -77,7 +77,7 @@ amoController.route('/')
             const emailCustomField = update.custom_fields ? update.custom_fields.find(field => field.code === 'EMAIL') : null;
             if (emailCustomField && emailCustomField.values.length) {
               emailUpdates.push({
-                email: emailCustomField.values[0].value,
+                email: emailCustomField.values[0].value.toLowerCase(),
                 id: update.id,
                 name: update.name
               });
