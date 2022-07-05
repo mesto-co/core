@@ -135,7 +135,6 @@ userSetPassword.route('/').post(async (request, response) => {
     if (request.user) {
       const hash = await storePassword(password, salt);
       const {id} = request.user!;
-      console.log(hash, id);
       await knex.raw(`UPDATE "User" SET "passwordHash" = ? WHERE id = ?`, [hash, id]);
       return response.status(200).json({}).end();
     } else {
