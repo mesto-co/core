@@ -19,11 +19,16 @@ const ENDPOINT = `${getHost()}/v1/auth/refresh`;
 const fs = require('fs').promises;
 const url = require('url');
 
+const jsonwebtoken = require('jsonwebtoken');
+
 const GENERATE_TOKEN_ENDPOINT = `${getHost()}/v1/auth/magicLink`;
 const SEND_MAGIC_LINK_ENDPOINT = `${getHost()}/v1/email/sendMagicLink`;
 const {
   emailService: {
     saveFilePath
+  },
+  accessToken: {
+    jwtSecret: accessSecret
   }
 } = require('../../../config.js');
 
@@ -105,7 +110,7 @@ test('/v1/auth/refresh permissions e2e test', async () => {
 test('/v1/user/setPassword', async () => {
   const authHeader = getAuthHeader({
     ...user,
-    permissions: [1]
+    permissions: [7]
   });
   expect(await post(getHost() + '/v1/user/setPassword', {password: 'abcdef'}, authHeader))
       .toMatchObject({
@@ -117,6 +122,13 @@ test('/v1/user/setPassword', async () => {
   });
   expect(accessToken).not.toBeUndefined();
   expect(refreshToken).not.toBeUndefined();
+
+  await new Promise(resolve => jsonwebtoken.verify(accessToken, accessSecret, async (err, decoded) => {
+    expect(err).toBeNull();
+    expect(decoded.permissions).toMatchObject([7]);
+    expect(decoded.passwordHash).toBeUndefined();
+    resolve();
+  }));
 
   // access token is good for access.
   const userExpected = Object.assign({}, user);

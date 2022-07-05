@@ -102,11 +102,18 @@ authPasswordRouter.route('/')
           const email = getEmail(request);
           const {password} = getArgs(request);
           try {
-            const {rows: [user]} = await knex.raw('SELECT id, "passwordHash" FROM "User" WHERE email = ? AND status = ? LIMIT 1', [email, UserStatus.APPROVED]);
+            const {rows: [user]} = await knex.raw(`
+              SELECT
+                u.id, u."passwordHash",
+                ARRAY(SELECT permission_id FROM user_permission up WHERE u.id = up.user_id) as permissions
+              FROM "User" u
+              WHERE u.email = ? AND u.status = ?
+              LIMIT 1`, [email, UserStatus.APPROVED]);
             if (user && user.passwordHash && await checkPassword(password, salt, user.passwordHash)) {
               const newRefreshToken = TokenHelper.signRefreshToken({userId: user.id});
               const {rows: [{id: tokenId}]} = await knex.raw(`INSERT INTO "UserToken"(token, "userId") VALUES(?, ?) RETURNING id;`, [newRefreshToken, user.id]);
               if (tokenId) {
+                delete user.passwordHash;
                 const accessToken = TokenHelper.signAccessToken(user);
                 return response.status(200).json({accessToken, refreshToken: newRefreshToken}).end();
               }
