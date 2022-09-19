@@ -61,6 +61,9 @@ amoController.route('/')
     .post(async (request, response) => {
       const args = getArgs(request);
       if (args && args.token === amoToken) {
+        // It is quite expensive log but we need it to be able to finally figure out the amo synchronization.
+        console.debug('amoController', args);
+
         const emailUpdates = [];
         const contactsDeleted = [];
         const leadsUpdates = [];
