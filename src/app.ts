@@ -37,7 +37,6 @@ import {UserController, UsersController, AddUsersForTest, DelUsersForTest, addFa
   printSomeUsers, banUser, userSetPassword, resolveEmail} from './controllers/usersController';
 import {InvalidateSearchIndexController, InvalidateSearchIndexForTest, SearchController} from './search';
 import { addEvent, delEvent, editEvent, getEvent, getJoinedUsers, joinEvent, unjoinEvent, searchEvents } from './controllers/eventController';
-import {amoController} from './controllers/amoController';
 
 const config = require('../config.js');
 
@@ -65,8 +64,6 @@ register(app, '/v1/auth/magicLink', AuthMagicLinkController);
 register(app, '/v1/auth/refresh', RefreshTokenController);
 register(app, '/v1/email/sendMagicLink', EmailMagicLinkSenderController);
 register(app, '/v1/auth/getRefreshTokenByPassword', authPasswordRouter);
-
-register(app, '/v1/amo/webhook', amoController);
 
 if (config.enableMethodsForTest) {
   register(app, '/v1/admin/addUsersForTest', AddUsersForTest, false);
