@@ -27,19 +27,19 @@
     },
     {
       "$id": "#GET>/test/success",
-      "allOf": [{ "$ref": "#RequestBase" }],
+      "allOf": [{ "$ref": "#RequestBase" }]
     },
     {
       "$id": "#POST>/test/success",
-      "allOf": [{ "$ref": "#RequestBase" }],
+      "allOf": [{ "$ref": "#RequestBase" }]
     },
     {
       "$id": "#PUT>/test/success",
-      "allOf": [{ "$ref": "#RequestBase" }],
+      "allOf": [{ "$ref": "#RequestBase" }]
     },
     {
       "$id": "#DELETE>/test/success",
-      "allOf": [{ "$ref": "#RequestBase" }],
+      "allOf": [{ "$ref": "#RequestBase" }]
     },
     {
         "$id": "#GET>/v1/test/",

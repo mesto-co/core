@@ -37,6 +37,7 @@ import {UserController, UsersController, AddUsersForTest, DelUsersForTest, addFa
   printSomeUsers, banUser, userSetPassword, resolveEmail} from './controllers/usersController';
 import {InvalidateSearchIndexController, InvalidateSearchIndexForTest, SearchController} from './search';
 import { addEvent, delEvent, editEvent, getEvent, getJoinedUsers, joinEvent, unjoinEvent, searchEvents } from './controllers/eventController';
+import { tildaRouter } from './controllers/tildaController';
 
 const config = require('../config.js');
 
@@ -71,8 +72,11 @@ if (config.enableMethodsForTest) {
   register(app, '/v1/admin/invalidateSearchIndexForTest', InvalidateSearchIndexForTest, false);
 }
 
-// all endpoints closed by authentication below this line
+// This route accepts whatever tilda passes our way and stores it in a table so amoSync can use it later,
+// so we do not need to validate it.
+app.use('/v1/tilda/signup', tildaRouter);
 
+// All endpoints closed by authentication below this line
 register(app, '/v1/email/sendTelegramLink', EmailTelegramLinkSenderController, true);
 register(app, '/v1/auth/checkTelegramSecret', CheckTelegramSecretController, true);
 
