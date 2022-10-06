@@ -44,7 +44,7 @@
     "@types/ws": "^7.2.7",
     "@typescript-eslint/eslint-plugin": "^4.0.1",
     "@typescript-eslint/parser": "^4.0.1",
-    "aws-sdk": "2.712.0",
+    "aws-sdk": "^2.1230.0",
     "eslint": "^7.8.1",
     "eslint-plugin-notice": "^0.9.10",
     "faker": "^5.1.0",
@@ -57,7 +57,7 @@
   },
   "dependencies": {
     "ajv": "^6.12.4",
-    "busboy": "^0.3.1",
+    "busboy": "^1.6.0",
     "cors": "^2.8.5",
     "debug": "^4.1.1",
     "express": "^4.17.1",
