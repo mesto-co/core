@@ -100,7 +100,7 @@ removeOldTokens.route('/')
           const {rows}: {rows: [{id: string, token: string}]} = await knex.raw('SELECT id, token FROM "UserToken"LIMIT 500');
           const remove: string[] = [];
           await Promise.allSettled(rows.map(row =>
-            new Promise(resolve => {
+            new Promise<void>(resolve => {
               jsonwebtoken.verify(row.token, refreshJwtSecret,{algorithms: ['HS256']}, err => {
                 if (err)
                   remove.push(row.id);
@@ -142,7 +142,7 @@ EmailTelegramLinkSenderController.route('/')
         return response.status(401).json({}).end();
       } catch (e) {
         console.debug('email/sendTelegramLinkEmail error', e);
-        response.status(500).json({error: e.stack}).end();
+        response.status(500).json({error: (e as Error).stack}).end();
       }
     });
 

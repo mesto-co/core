@@ -45,53 +45,58 @@ async function uploadFileToS3(content: Buffer, mimeType: string) {
 const uploadRouter = express.Router();
 uploadRouter.route('/')
     .post(async (request, response) => {
-      const busboy = new Busboy({
-        headers: request.headers,
-        limits: {
-          files: 1,
-          fileSize: config.imageUpload.maxSize
-        }
-      });
-
-      busboy.on('file', function(fieldName: string, file: any, filename: string, encoding: string, mimetype: string) {
-        const temp: any = [];
-        let errorMessage: string;
-        let errorCode: number = 0;
-
-        if (mimetype !== 'image/png' && mimetype !== 'image/jpeg'){
-          errorMessage = 'Invalid image MIME type, supported types: jpeg/png.';
-          errorCode = 1;
-          // Ignore the upload, move on to next one
-          file.resume();
-        }
-
-        file.on('data', (data: any) => {
-          temp.push(data);
-        });
-
-        file.on('limit', () => {
-          errorMessage = `Max image size: ${config.imageUpload.maxSize}`;
-          errorCode = 2;
-        });
-
-        file.on('end', async () => {
-          try {
-            if (errorCode > 0)
-              return response.status(500).json({errorMessage, errorCode}).end();
-
-            const content = Buffer.concat(temp);
-            const path = await uploadFileToS3(content, mimetype);
-
-            const url = config.imageUpload.url + path;
-            return response.status(200).json({path: path, url: url }).end();
-          } catch (e) {
-            console.error('uploadImage error', e);
-            return response.status(500).json({}).end();
+      try {
+        const busboy = Busboy({
+          headers: request.headers,
+          limits: {
+            files: 1,
+            fileSize: config.imageUpload.maxSize
           }
         });
-      });
 
-      return request.pipe(busboy);
+        busboy.on('file', function(name, file, info) {
+          const temp: any = [];
+          let errorMessage: string;
+          let errorCode: number = 0;
+
+          if (info.mimeType !== 'image/png' && info.mimeType !== 'image/jpeg'){
+            errorMessage = 'Invalid image MIME type, supported types: jpeg/png, passed: ' + info.mimeType;
+            errorCode = 1;
+            // Ignore the upload, move on to next one
+            file.resume();
+          }
+
+          file.on('data', (data: any) => {
+            temp.push(data);
+          });
+
+          file.on('limit', () => {
+            errorMessage = `Max image size: ${config.imageUpload.maxSize}`;
+            errorCode = 2;
+          });
+
+          file.on('end', async () => {
+            try {
+              if (errorCode > 0)
+                return response.status(500).json({errorMessage, errorCode}).end();
+
+              const content = Buffer.concat(temp);
+              const path = await uploadFileToS3(content, info.mimeType);
+
+              const url = config.imageUpload.url + path;
+              return response.status(200).json({path: path, url: url }).end();
+            } catch (e) {
+              console.error('uploadImage error', e);
+              return response.status(500).json({}).end();
+            }
+          });
+        });
+
+        return request.pipe(busboy);
+      } catch (e) {
+        console.debug(e);
+        return response.status(500).json({});
+      }
     });
 
 export { uploadRouter as UploadImageController };
