@@ -20,7 +20,7 @@ import validator from './validator';
 import {TestController, TestEntryController, TestSuccessRouter} from './controllers/testController';
 import {ProfileController, ProfileEmailController} from './controllers/profileController';
 import {AuthMagicLinkController, authPasswordRouter, RefreshTokenController, CheckTelegramSecretController} from './controllers/authController';
-import {EmailMagicLinkSenderController, EmailTelegramLinkSenderController, RemoveOldTokensController} from './controllers/emailSenderController';
+import {EmailMagicLinkSenderController, EmailTelegramLinkSenderController, getMagicUrl, RemoveOldTokensController} from './controllers/emailSenderController';
 import {UploadImageController} from './controllers/uploadImageController';
 import {FriendEntryController} from './controllers/friendController';
 import {LocationsController,PlaceIdResolverController} from './controllers/locationController';
@@ -38,6 +38,9 @@ import {UserController, UsersController, AddUsersForTest, DelUsersForTest, addFa
 import {InvalidateSearchIndexController, InvalidateSearchIndexForTest, SearchController} from './search';
 import { addEvent, delEvent, editEvent, getEvent, getJoinedUsers, joinEvent, unjoinEvent, searchEvents } from './controllers/eventController';
 import { tildaRouter } from './controllers/tildaController';
+import { getArgs, hasPermission } from './utils';
+import {Permission} from './enums/permission';
+import knex from './knex';
 
 const config = require('../config.js');
 
@@ -65,6 +68,16 @@ register(app, '/v1/auth/magicLink', AuthMagicLinkController);
 register(app, '/v1/auth/refresh', RefreshTokenController);
 register(app, '/v1/email/sendMagicLink', EmailMagicLinkSenderController);
 register(app, '/v1/auth/getRefreshTokenByPassword', authPasswordRouter);
+app.post('/v1/auth/retrieveMagicLink', accessTokenHandler, validator('/v1/auth/retrieveMagicLink'), async (request, response) => {
+  if (hasPermission(request, Permission.RETRIEVEMAGICLINK)) {
+    const {tokenId} = getArgs(request);
+    const {rows: [entry]} = await knex.raw(`SELECT token FROM "UserToken" WHERE id = :tokenId`, {tokenId});
+    if (entry)
+      return response.status(200).json({url: `${getMagicUrl(request)}token=${entry.token}`}).end();
+    return response.status(404).end();
+  }
+  return response.status(401).end();
+});
 
 if (config.enableMethodsForTest) {
   register(app, '/v1/admin/addUsersForTest', AddUsersForTest, false);

@@ -130,6 +130,14 @@
       "required": [ "email" ]
     },
     {
+      "$id": "#POST>/v1/auth/retrieveMagicLink",
+      "allOf": [{ "$ref": "#RequestBase" }],
+      "properties": {
+        "tokenId": { "type": "string", "format": "uuid" }
+      },
+      "required": [ "tokenId" ]
+    },
+    {
       "$id": "#POST>/v1/auth/getRefreshTokenByPassword",
       "allOf": [{ "$ref": "#RequestBase" }],
       "properties": {

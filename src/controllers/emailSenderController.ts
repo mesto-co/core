@@ -43,7 +43,7 @@ const UserEntries = () => knex('User');
 
 const UserTokenEntries = () => knex('UserToken');
 
-const getMagicUrl = (request: express.Request) => {
+export const getMagicUrl = (request: express.Request) => {
   try {
     const referer = request.headers['referer'];
     if (referer && magicLinkUrlOverrides)

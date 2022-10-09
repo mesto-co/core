@@ -27,6 +27,7 @@ enum Permission {
     RESOLVEEMAIL = 14,
     UPDATEUSER = 15,
     SEARCHBYEMAIL = 16,
+    RETRIEVEMAGICLINK = 20,
 }
 
 export { Permission };
