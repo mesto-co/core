@@ -23,6 +23,7 @@ import {RefreshJwtPayloadModel} from '../models/RefreshJwtPayloadModel';
 import jsonwebtoken, {VerifyErrors} from 'jsonwebtoken';
 import {checkPassword} from '../password';
 import { Permission } from '../enums/permission';
+import { verifyAccessToken } from '../accessTokenHandler';
 
 const {
   refreshToken: {
@@ -35,11 +36,17 @@ const authMagicLinkRouter = express.Router();
 authMagicLinkRouter.route('/')
     .post(async (request, response) => {
       const email = getEmail(request);
+      const {expireIn} = getArgs(request);
+      if (expireIn) {
+        const user = await verifyAccessToken(request);
+        if (!user || !user.permissions || !user.permissions.includes(Permission.CUSTOMMAGICLINKEXPIREIN))
+          return response.status(401).end();
+      }
       try {
         const {rows: [user]} = await knex.raw('SELECT id FROM "User" WHERE email = ? AND status = ? LIMIT 1', [email, UserStatus.APPROVED]);
         if (user) {
           const payload: RefreshJwtPayloadModel = { userId: user.id };
-          const jwt = TokenHelper.signMagicLinkToken(payload);
+          const jwt = TokenHelper.signMagicLinkToken(payload, expireIn);
           const {rows: [{id: tokenId}]} = await knex.raw(`INSERT INTO "UserToken"(token, "userId") VALUES(?, ?) RETURNING id;`, [jwt, user.id]);
           if (tokenId)
             return response.status(200).json({tokenId}).end();

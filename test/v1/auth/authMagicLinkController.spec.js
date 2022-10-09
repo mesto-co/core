@@ -20,7 +20,14 @@ const ENDPOINT = `${getHost()}/v1/auth/magicLink`;
 const GENERATE_TOKEN_ENDPOINT = `${getHost()}/v1/auth/magicLink`;
 const SEND_MAGIC_LINK_ENDPOINT = `${getHost()}/v1/email/sendMagicLink`;
 
-const { magicLink } = require('../../../config.js');
+const {
+  magicLink,
+  refreshToken: {
+    jwtSecret: refreshJwtSecret
+  },
+} = require('../../../config.js');
+
+const jsonwebtoken = require('jsonwebtoken');
 
 let [email, awaitingEmail, closedEmail, rejectedEmail] = [null, null, null, null];
 let users = [];
@@ -69,8 +76,8 @@ test('/v1/auth/retrieveMagicLink with invalid tokenId', async () => {
   expect(code).toBe(404);
 });
 
-test.only('/v1/auth/retrieveMagicLink', async () => {
-  const {data:{tokenId}} = await post(`${getHost()}/v1/auth/magicLink`, {email});
+test('/v1/auth/retrieveMagicLink', async () => {
+  const {data: {tokenId}} = await post(`${getHost()}/v1/auth/magicLink`, {email});
   expect(tokenId).toEqual(expect.any(String));
 
   const authHeader = getAuthHeader({
@@ -81,6 +88,35 @@ test.only('/v1/auth/retrieveMagicLink', async () => {
   const {code, data: {url}} = await post(`${getHost()}/v1/auth/retrieveMagicLink`, {tokenId}, authHeader);
   expect(code).toBe(200);
   expect(url).toEqual(expect.stringContaining(magicLink.url));
+});
+
+test('/v1/auth/retrieveMagicLin without proper auth', async () => {
+  {
+    const {code} = await post(`${getHost()}/v1/auth/magicLink`, {email, expireIn: '14d'});
+    expect(code).toBe(401);
+  }
+  {
+    const authHeader = getAuthHeader({user: users[0], permissions: [1]});
+    const {code} = await post(`${getHost()}/v1/auth/magicLink`, {email, expireIn: '14d'}, authHeader);
+    expect(code).toBe(401);
+  }
+});
+
+test('/v1/auth/retrieveMagicLin expireIn', async () => {
+  const {code: magicLinkCode, data: {tokenId}} = await post(
+      `${getHost()}/v1/auth/magicLink`, {email, expireIn: '14d'}, getAuthHeader({user: users[0], permissions: [21]}));
+  expect(magicLinkCode).toBe(200);
+  expect(tokenId).toEqual(expect.any(String));
+
+  const {code, data: {url}} = await post(
+      `${getHost()}/v1/auth/retrieveMagicLink`, {tokenId}, getAuthHeader({user: users[0], permissions: [20]}));
+  expect(code).toBe(200);
+  expect(url).toEqual(expect.stringContaining(magicLink.url));
+  const token = url.split('token=')[1];
+  await new Promise(resolve => jsonwebtoken.verify(token, refreshJwtSecret, async (err, decoded) => {
+    expect(decoded.exp - decoded.iat).toBe(14 * 24 * 60 * 60);
+    resolve();
+  }));
 });
 
 test('/v1/auth/magicLink case insensitive', async () => {

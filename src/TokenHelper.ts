@@ -36,8 +36,8 @@ const {
 } = require('../config.js');
 
 class TokenHelper {
-  static signMagicLinkToken(payload: RefreshJwtPayloadModel) {
-    return jsonwebtoken.sign(payload, refreshJwtSecret, {expiresIn: magicLinkJwtExpiresIn, algorithm: 'HS256'});
+  static signMagicLinkToken(payload: RefreshJwtPayloadModel, expireIn?: string) {
+    return jsonwebtoken.sign(payload, refreshJwtSecret, {expiresIn: expireIn || magicLinkJwtExpiresIn, algorithm: 'HS256'});
   }
 
   static signInviteLinkToken(payload: RefreshJwtPayloadModel) {

@@ -28,6 +28,7 @@ enum Permission {
     UPDATEUSER = 15,
     SEARCHBYEMAIL = 16,
     RETRIEVEMAGICLINK = 20,
+    CUSTOMMAGICLINKEXPIREIN = 21,
 }
 
 export { Permission };

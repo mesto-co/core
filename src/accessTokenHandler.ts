@@ -19,6 +19,7 @@ import express from 'express';
 import {getArgs} from './utils';
 import {TokenHelper} from './TokenHelper';
 import jsonwebtoken, {VerifyErrors} from 'jsonwebtoken';
+import { UserModel } from './models/UserModel';
 
 const {
   accessToken: {
@@ -26,18 +27,27 @@ const {
   }
 } = require('../config.js');
 
-function accessTokenHandler(request: express.Request, response: express.Response, next: express.NextFunction) {
-  const {RqUid} = getArgs(request);
+async function verifyAccessToken(request: express.Request): Promise<UserModel|null> {
   const token = TokenHelper.getTokenFromAuthHeader(request);
   if (!token)
-    return response.status(401).json({RqUid}).end();
-  jsonwebtoken.verify(token, accessJwtSecret, {algorithms: ['HS256']}, async (err: VerifyErrors | null, decoded: any) => {
+    return null;
+  return new Promise(resolve => jsonwebtoken.verify(token, accessJwtSecret, {algorithms: ['HS256']}, async (err: VerifyErrors | null, decoded: any) => {
     if (err)
-      return response.status(401).json({RqUid}).end();
-
-    request.user = decoded;
-    next();
-  });
+      resolve(null);
+    else
+      resolve(decoded);
+  }));
 }
 
-export { accessTokenHandler };
+async function accessTokenHandler(request: express.Request, response: express.Response, next: express.NextFunction) {
+  const {RqUid} = getArgs(request);
+  const user = await verifyAccessToken(request);
+  if (user) {
+    request.user = user;
+    next();
+  } else {
+    return response.status(401).json({RqUid}).end();
+  }
+}
+
+export { accessTokenHandler, verifyAccessToken };
