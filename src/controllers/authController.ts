@@ -141,7 +141,7 @@ checkTelegramSecretRouter.route('/')
       const {secret} = getArgs(request);
       try {
         if (hasPermission(request, Permission.SENDTELEGRAMLINK)) {
-          const {rows} = await knex.raw(`SELECT ts.check_email, u.email FROM telegram_secret ts INNER JOIN "User" u ON u.id = ts.user_id WHERE ts.secret = ?)`, [secret])
+          const {rows} = await knex.raw(`SELECT ts.check_email, u.email FROM telegram_secret ts INNER JOIN "User" u ON u.id = ts.user_id WHERE ts.secret = ?`, [secret]);
           if (!rows.length)
             return response.status(404).json({}).end();
           if (rows[0].check_email && email !== rows[0].email)
