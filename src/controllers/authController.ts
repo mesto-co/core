@@ -141,11 +141,12 @@ checkTelegramSecretRouter.route('/')
       const {secret} = getArgs(request);
       try {
         if (hasPermission(request, Permission.SENDTELEGRAMLINK)) {
-          const isValidSecret = await knex.raw(`SELECT EXISTS(SELECT 1 FROM telegram_secret ts INNER JOIN "User" u ON u.id = ts.user_id WHERE u.email = ? AND ts.secret = ?)`, [email, secret])
-              .then((result: {rows: {exists: boolean}[]}) => result.rows.length > 0 ? result.rows[0].exists : false);
-          if (!isValidSecret)
+          const {rows} = await knex.raw(`SELECT ts.check_email, u.email FROM telegram_secret ts INNER JOIN "User" u ON u.id = ts.user_id WHERE ts.secret = ?)`, [secret])
+          if (!rows.length)
             return response.status(404).json({}).end();
-          await knex.raw(`DELETE FROM telegram_secret ts USING "User" u WHERE u.id = ts.user_id AND u.email = ? AND ts.secret = ?`, [email, secret]);
+          if (rows[0].check_email && email !== rows[0].email)
+            return response.status(404).json({}).end();
+          await knex.raw(`DELETE FROM telegram_secret ts WHERE ts.secret = ?`, [secret]);
           return response.status(200).json({}).end();
         }
         return response.status(401).json({}).end();

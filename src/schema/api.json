@@ -179,7 +179,7 @@
             "email": { "type": "string", "format": "email" },
             "secret": { "type": "string" }
         },
-        "required": ["email", "secret"]
+        "required": ["secret"]
     },
     {
       "$id": "#POST>/v1/auth/refresh",
