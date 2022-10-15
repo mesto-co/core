@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - name: checkout
-        uses: actions/checkout@3
+        uses: actions/checkout@v3
       - name: run-tests
         run: docker-compose -f docker-compose-ci.yml up --exit-code-from test
       - name: pack
