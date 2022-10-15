@@ -50,14 +50,14 @@ test('/v1/auth/magicLink', async () => {
 });
 
 test('/v1/auth/retrieveMagicLink without authorization', async () => {
-  const {data:{tokenId}} = await post(`${getHost()}/v1/auth/magicLink`, {email});
+  const {data: {tokenId}} = await post(`${getHost()}/v1/auth/magicLink`, {email});
   expect(tokenId).toEqual(expect.any(String));
   const {code} = await post(`${getHost()}/v1/auth/retrieveMagicLink`, {tokenId});
   expect(code).toBe(401);
 });
 
 test('/v1/auth/retrieveMagicLink with wrong permissions', async () => {
-  const {data:{tokenId}} = await post(`${getHost()}/v1/auth/magicLink`, {email});
+  const {data: {tokenId}} = await post(`${getHost()}/v1/auth/magicLink`, {email});
   expect(tokenId).toEqual(expect.any(String));
   const authHeader = getAuthHeader({
     user: users[0],
