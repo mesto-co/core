@@ -1,9 +1,7 @@
 name: deploy
-# on:
-#   push:
-#     branches: [ main ]
 on:
-  workflow_dispatch:
+  push:
+    branches: [ master ]
 jobs:
   deploy:
     runs-on: ubuntu-18.04
