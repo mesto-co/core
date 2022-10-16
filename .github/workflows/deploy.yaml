@@ -18,6 +18,7 @@ jobs:
         run: |
           aws lambda update-function-code --function-name arn:aws:lambda:eu-central-1:518363737301:function:mestoCoreProdLocations --zip-file fileb://./lambda.zip --query FunctionName
           aws lambda update-function-code --function-name arn:aws:lambda:eu-central-1:518363737301:function:mestoCoreProd --zip-file fileb://./lambda.zip --query FunctionName
+          sleep 10 # ugly wait to wait until AWS deploys lambda
           curl -v -X POST 'https://api.mesto.co/v1/admin/migrate/latest' -H 'authorization: Bearer '$MESTO_AUTHORIZATION --fail
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_SECRET_ID }}
