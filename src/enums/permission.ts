@@ -30,6 +30,9 @@ enum Permission {
     RETRIEVEMAGICLINK = 20,
     CUSTOMMAGICLINKEXPIREIN = 21,
     MIGRATE = 22,
+    ADDSIGNUPDATA = 23,
+    GETSIGNUPDATA = 24,
+    UPDATESIGNUPDATA = 25,
 }
 
 export { Permission };

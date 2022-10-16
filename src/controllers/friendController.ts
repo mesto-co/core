@@ -46,7 +46,7 @@ friendEntryRouter.route('/')
       } catch (e) {
         console.debug('POST user/friend/:friendId error', e);
 
-        if (e.code === '23505')
+        if ((e as any).code === '23505')
           return response.status(209).json({}).end();
 
         response.status(500).json({}).end();

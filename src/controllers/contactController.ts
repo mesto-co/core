@@ -46,7 +46,7 @@ singleContactRouter.route('/')
           return response.status(404).json({}).end();
       } catch (e) {
         const UNIQUE_VIOLATION_CODE = '23505';
-        if (e.code === UNIQUE_VIOLATION_CODE)
+        if ((e as any).code === UNIQUE_VIOLATION_CODE)
           return response.status(422).json({}).end();
         console.debug('PUT contact/:id', e);
         response.status(500).json({}).end();

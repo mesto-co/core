@@ -265,7 +265,7 @@
           },
           "busy": {
             "type": "boolean",
-            "defaul": false
+            "default": false
           }
       },
       "required":["about","fullName"]
@@ -503,5 +503,89 @@
     },
     {
       "$id": "#POST>/v1/amo/webhook"
+    },
+    {
+      "$id": "#POST>/v1/signupData",
+      "additionalProperties": false,
+      "properties": {
+        "userId": { "type": "string", "format": "uuid" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "birthdate": { "type": "string", "format": "date" },
+        "birthdatePrecision": { "enum": [ "year", "month", "day" ]},
+        "country": { "type": "string" },
+        "socialMediaLink": { "type": "string" },
+        "telegram": { "type": "string" },
+        "heardAboutUs": { "type": "array", "items": { "type": "string" } },
+        "aboutMe": { "type": "string" },
+        "profession": { "type": "string" },
+        "professionDetails": { "type": "string" },
+        "groups": { "type": "array", "items": { "type": "string" } },
+        "projectType": { "type": "array", "items": { "type": "string" } },  
+        "projectDetails": { "type": "string" },
+        "canHelp": { "type": "array", "items": { "type": "string" } },
+        "lookingFor": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": [ "name", "email" ],
+      "errorMessage": {
+        "properties": {
+          "heardAboutUs": "heardAboutUs should be an array of strings",
+          "groups": "groups should be an array of strings",
+          "canHelp": "canHelp should be an array of strings",
+          "lookingFor": "lookingFor should be an array of strings",
+          "projectType": "projectType should be an array of strings",
+          "userId": "userId should match uuid format",
+          "birthdate": "birthdate should match date format, you can use Date.toISOString().substring(0, 10)",
+          "birthdatePrecision": "birthdatePrecision should be year|month|day"
+        }
+      }
+    },
+    {
+      "$id": "#POST>/v1/signupData/:userId",
+      "additionalProperties": false,
+      "properties": {
+        "userId": { "type": "string", "format": "uuid" },
+        "name": { "type": "string" },
+        "birthdate": { "type": "string", "format": "date" },
+        "birthdatePrecision": { "enum": [ "year", "month", "day" ]},
+        "country": { "type": "string" },
+        "socialMediaLink": { "type": "string" },
+        "telegram": { "type": "string" },
+        "heardAboutUs": { "type": "array", "items": { "type": "string" } },
+        "aboutMe": { "type": "string" },
+        "profession": { "type": "string" },
+        "professionDetails": { "type": "string" },
+        "groups": { "type": "array", "items": { "type": "string" } },
+        "projectType": { "type": "array", "items": { "type": "string" } },
+        "projectDetails": { "type": "string" },
+        "canHelp": { "type": "array", "items": { "type": "string" } },
+        "lookingFor": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": [ "userId" ],
+      "errorMessage": {
+        "properties": {
+          "heardAboutUs": "heardAboutUs should be an array of strings",
+          "groups": "groups should be an array of strings",
+          "canHelp": "canHelp should be an array of strings",
+          "lookingFor": "lookingFor should be an array of strings",
+          "projectType": "projectType should be an array of strings",
+          "userId": "userId should match uuid format",
+          "birthdate": "birthdate should match date format, you can use Date.toISOString().substring(0, 10)",
+          "birthdatePrecision": "birthdatePrecision should be year|month|day"
+        }
+      }
+    },
+    {
+      "$id": "#GET>/v1/signupData/:userId",
+      "additionalProperties": false,
+      "properties": {
+        "userId": { "type": "string", "format": "uuid" }
+      },
+      "required": [ "userId" ],
+      "errorMessage": {
+        "properties": {
+          "userId": "userId should match uuid format"
+        }
+      }
     }
 ]

@@ -130,7 +130,7 @@ test('/v1/search/ POST with exceed the limit', async () => {
   const testEntry = {'perPage': 1001,'query': [{'fullName': 'Иван','location': 'Иван'}]};
   const {data: getSearchData, code: searchCode} = await post(ENDPOINT, JSON.stringify(testEntry), header);
   expect(searchCode).toBe(400);
-  expect(getSearchData.message).toEqual('should be <= 1000');
+  expect(getSearchData.message).toEqual('must be <= 1000');
 });
 
 test('/v1/search/ POST with array parameter which exceed the limit: fullname', async () => {
@@ -138,21 +138,21 @@ test('/v1/search/ POST with array parameter which exceed the limit: fullname', a
   const testEntry = {'perPage': 20,'query': [{'fullName': longName}]};
   const {data: getSearchData, code: searchCode} = await post(ENDPOINT, JSON.stringify(testEntry), header);
   expect(searchCode).toBe(400);
-  expect(getSearchData.message).toEqual('should NOT be longer than 255 characters');
+  expect(getSearchData.message).toEqual('must NOT have more than 255 characters');
 });
 
 test('/v1/search/ POST without perPage and currentPage and with empty query', async () => {
   const testEntry = {'query': 'text'};
   const {data: getSearchData, code: searchCode} = await post(ENDPOINT, JSON.stringify(testEntry), header);
   expect(searchCode).toBe(400);
-  expect(getSearchData.message).toEqual('should be array');
+  expect(getSearchData.message).toEqual('must be array');
 });
 
 test('/v1/search/ POST without query', async () => {
   const testEntry = {'perPage': 100};
   const {data: getSearchData, code: searchCode} = await post(ENDPOINT, JSON.stringify(testEntry), header);
   expect(searchCode).toBe(400);
-  expect(getSearchData.message).toEqual(`should have required property 'query'`);
+  expect(getSearchData.message).toEqual(`must have required property 'query'`);
 });
 
 test('/v1/search/ POST without access token', async () => {

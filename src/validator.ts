@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import Ajv from 'ajv';
+import Ajv, { ErrorObject } from 'ajv';
+import addFormats from 'ajv-formats';
+import addErrors from 'ajv-errors';
 import express from 'express';
 
 import {getArgs} from './utils';
@@ -25,10 +27,14 @@ import baseSchemas from './schema/base.json';
 const ajv = new Ajv({
   useDefaults: true,
   removeAdditional: true,
-  coerceTypes: true
+  coerceTypes: true,
+  allErrors: true,
 });
+addFormats(ajv);
+addErrors(ajv, {singleError: true});
 
 ajv.addKeyword('isStringNotEmpty', {
+  keyword: 'isStringNotEmpty',
   type: 'string',
   validate: function(schema: any, data: any) {
     return typeof data === 'string' && data.trim() !== '';
@@ -39,18 +45,18 @@ ajv.addKeyword('isStringNotEmpty', {
 ajv.addSchema(apiSchemas).addSchema(baseSchemas);
 
 class ValidationError extends Error {
-    validationError: Ajv.ErrorObject|null;
+    validationError: ErrorObject|null;
 
-    constructor(error: Ajv.ErrorObject|null) {
+    constructor(error: ErrorObject|null) {
       super(error && error.message || '');
       this.validationError = error;
     }
 }
 
 // TODO(ak239spb): we need a way to describe and validate response.
-export default (endpoint: string) => {
+export default (endpoint: string, ignoreMethod = false) => {
   return (request: express.Request, response: express.Response, next: express.NextFunction) => {
-    const schemaId = `#${request.method}>${endpoint}`;
+    const schemaId = `#${ignoreMethod ? '' : request.method + '>'}${endpoint}`;
     if (!ajv.validate(schemaId, getArgs(request)))
       next(new ValidationError(ajv.errors && ajv.errors[0] || null));
     next();

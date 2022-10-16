@@ -108,7 +108,7 @@ addEvent.route('/').post(async (request, response) => {
     ]);
     return response.status(200).json({id}).end();
   } catch (e) {
-    switch (e.code) {
+    switch ((e as any).code) {
       case '22007':
         // invalid_datetime_format
         return response.status(400).json({message: 'Invalid time format'}).end();
@@ -147,9 +147,9 @@ editEvent.route('/').post(async (request, response) => {
     return response.status(200).json({}).end();
   } catch (e) {
     // invalid_datetime_format
-    if (e.code === '22007')
+    if ((e as any).code === '22007')
       return response.status(400).json({message: 'Invalid time format'}).end();
-    if (e.code === '23514')
+    if ((e as any).code === '23514')
       return response.status(400).json({message: 'Invalid creator'}).end();
     console.debug('POST event/edit', e);
     return response.status(500).json({}).end();
@@ -185,7 +185,7 @@ joinEvent.route('/').post(async (request, response) => {
     });
     return response.status(200).json({}).end();
   } catch (e) {
-    switch (e.code) {
+    switch ((e as any).code) {
       case '23505':
         // UNIQUE VIOLATION
         return response.status(409).json({message: 'The user is already registered for the event '}).end();
@@ -279,7 +279,7 @@ searchEvents.route('/').post(async (request, response) => {
     const total = rows.length > 0 ? rows[0].total * 1 : 0;
     return response.status(200).json({ data: result, total: total }).end();
   } catch (e) {
-    if (e.code === '22007')
+    if ((e as any).code === '22007')
       return response.status(400).json({message: 'Invalid time format'}).end();
     console.debug('POST event/search', e);
     return response.status(500).json({}).end();

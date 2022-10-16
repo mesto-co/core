@@ -181,18 +181,18 @@ if (enableMethodsForTest) {
       if (override.skills)
         override.skills_lo = override.skills.map(v => v.toLowerCase());
       return Object.assign({
-        id: faker.random.uuid(),
+        id: faker.datatype.uuid(),
         fullName: faker.name.firstName() + ' ' + faker.name.lastName(),
         username: faker.internet.userName(),
         email: faker.internet.email().toLowerCase(),
         passwordHash: null,
         imagePath: faker.image.imageUrl(),
         location: faker.address.city(),
-        place_id: faker.random.uuid(),
+        place_id: faker.datatype.uuid(),
         phone: faker.phone.phoneNumber(),
         about: faker.lorem.paragraphs().substr(0, 6000),
         role: faker.random.word(),
-        busy: faker.random.boolean(),
+        busy: faker.datatype.boolean(),
         status: 'approved',
         skills: skills,
         skills_lo: skills.map((v: string) => v.toLowerCase())
@@ -239,6 +239,7 @@ if (enableMethodsForTest) {
         await knex.raw(`DELETE FROM "UserToken" WHERE "userId" IN (${Array(userIds.length).fill('?').join(',')})`, userIds);
         await knex.raw(`DELETE FROM "Contact" WHERE "ownerId" IN (${Array(userIds.length).fill('?').join(',')})`, userIds);
         await knex.raw(`DELETE FROM user_last_email_sent WHERE user_id IN (${Array(userIds.length).fill('?').join(',')})`, userIds);
+        await knex.raw(`DELETE FROM signup_data WHERE user_id IN (${Array(userIds.length).fill('?').join(',')})`, userIds);
         await knex.raw(`DELETE FROM "User" WHERE id IN (${Array(userIds.length).fill('?').join(',')})`, userIds);
         response.status(200).json({}).end();
       });
