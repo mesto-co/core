@@ -16,8 +16,8 @@ jobs:
         run: ./utils/lambda.sh
       - name: deploy to AWS
         run: |
-          aws lambda update-function-code --function-name arn:aws:lambda:eu-central-1:518363737301:function:mestoCoreProdLocations --zip-file fileb://./lambda.zip
-          aws lambda update-function-code --function-name arn:aws:lambda:eu-central-1:518363737301:function:mestoCoreProd --zip-file fileb://./lambda.zip
+          aws lambda update-function-code --function-name arn:aws:lambda:eu-central-1:518363737301:function:mestoCoreProdLocations --zip-file fileb://./lambda.zip --query FunctionName
+          aws lambda update-function-code --function-name arn:aws:lambda:eu-central-1:518363737301:function:mestoCoreProd --zip-file fileb://./lambda.zip --query FunctionName
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_SECRET_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
