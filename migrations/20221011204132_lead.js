@@ -47,7 +47,7 @@ exports.up = async function(knex) {
 };
 
 exports.down = async function(knex) {
-  await knex.raw('DROP TABLE leads');
+  await knex.raw('DROP TABLE lead');
 };
 
 

@@ -54,7 +54,7 @@ class EmailService {
       return;
     }
 
-    return new Promise((resolve, reject) => this.transport().sendMail({
+    return new Promise<void>((resolve, reject) => this.transport().sendMail({
       from: config.emailService.senderEmailAddress,
       to: recipient,
       subject: subject,

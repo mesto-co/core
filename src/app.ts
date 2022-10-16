@@ -66,6 +66,134 @@ register(app, '/v1/test/:id', TestEntryController);
 register(app, '/v1/test/', TestController);
 register(app, '/test/success', TestSuccessRouter);
 
+const snakeToCamel = (str: string) =>
+  str.toLowerCase().replace(/([-_][a-z])/g, group =>
+    group
+        .toUpperCase()
+        .replace('-', '')
+        .replace('_', '')
+  );
+
+const SIGNUPDATA_COLUMNS = [
+  'user_id', 'name', 'email', 'birthdate', 'birthdate_precision', 'country', 'social_media_link',
+  'telegram', 'heard_about_us', 'about_me', 'profession', 'profession_details', 'groups',
+  'project_type', 'project_details', 'can_help', 'looking_for',
+];
+// Signup data
+app.post('/v1/signupData', accessTokenHandler, validator('/v1/signupData'), async (request, response) => {
+  try {
+    if (hasPermission(request, Permission.ADDSIGNUPDATA)) {
+      const args = getArgs(request);
+      const columns = SIGNUPDATA_COLUMNS;
+      const EMPTY = Object.fromEntries(columns.map(column => [snakeToCamel(column), null]));
+      if (!args.userId) {
+        // We should try to lookup for user by email.
+        const {rows} = await knex.raw('SELECT id FROM "User" WHERE email = :email', {email: args.email});
+        if (rows && rows.length)
+          args.userId = rows[0].id;
+      }
+      if (!args.userId) {
+        // At this point we know that there is no userId passed as argument and there is no user with given email,
+        // so we create user outselves.
+        const {rows} = await knex.raw('INSERT INTO "User" ("fullName", email, about, status) VALUES (:name, :email, :about, :status) RETURNING id', {
+          name: args.name,
+          email: args.email,
+          about: args.aboutMe || null,
+          status: 'awaiting',
+        });
+        args.userId = rows[0].id;
+      }
+      if (!args.userId) {
+        return response.status(500).json({
+          message: 'We tried our best to detect userIf but something when wrong',
+        });
+      }
+      // When we pass userId - we are adding signupData for existing user.
+      const {rows} = await knex.raw('SELECT EXISTS(SELECT 1 FROM signup_data WHERE user_id = ?)', [args.userId]);
+      if (rows.length && rows[0].exists)
+        return response.status(400).json({message: 'Given user has signupData, please use /v1/signupData/:id to update it'}).end();
+      const {rows: userRows} = await knex.raw(`SELECT email, "fullName", about FROM "User" WHERE id = :userId`, {userId: args.userId});
+      if (!userRows.length)
+        return response.status(404).json({message: 'There is no user with given userId'});
+      const {email, fullName, about} = userRows[0];
+      if (email !== args.email)
+        return response.status(400).json({message: 'User with given userId has different email'});
+      // We always prefer existing fullName and about from the user if any.
+      args.name = fullName;
+      if (about)
+        args.aboutMe = about;
+      await knex.raw(`
+        INSERT INTO signup_data
+          (${columns.join(',')})
+        VALUES
+          (${columns.map(column => `:${snakeToCamel(column)}`).join(',')})
+        `, {...EMPTY, ...args});
+      return response.status(200).json({userId: args.userId}).end();
+    } else {
+      return response.status(401).end();
+    }
+  } catch (e) {
+    console.debug('POST /v1/signupData', e);
+    return response.status(500).end();
+  }
+});
+
+app.get('/v1/signupData/:userId', accessTokenHandler, validator('/v1/signupData/:userId'), async (request, response) => {
+  try {
+    const args = getArgs(request);
+    if (hasPermission(request, Permission.GETSIGNUPDATA) || request.user?.id === args.userId) {
+      const columns = SIGNUPDATA_COLUMNS.filter(column => column !== 'email');
+      const {rows} = await knex.raw(`SELECT ${columns.join(',')} FROM signup_data WHERE user_id = :userId`, {
+        userId: args.userId,
+      });
+      if (rows && rows.length) {
+        const result = Object.fromEntries(
+            columns
+                .map(column => [snakeToCamel(column), rows[0][column]])
+                .filter(entry => entry[1] !== null)
+        );
+        return response.status(200).json(result).end();
+      }
+      return response.status(404).json({message: 'There is no signupData for given userId'}).end();
+    } else {
+      return response.status(401).end();
+    }
+  } catch (e) {
+    console.debug('GET /v1/signupData/:userId', e);
+    return response.status(500).end();
+  }
+});
+
+app.post('/v1/signupData/:userId', accessTokenHandler, validator('/v1/signupData/:userId'), async (request, response) => {
+  try {
+    const args = getArgs(request);
+    if (hasPermission(request, Permission.GETSIGNUPDATA) || request.user?.id === args.userId) {
+      const {rows} = await knex.raw(`SELECT EXISTS(SELECT 1 FROM signup_data WHERE user_id = :userId)`, {
+        userId: args.userId,
+      });
+      if (rows && rows[0].exists) {
+        const columns = SIGNUPDATA_COLUMNS
+            .filter(column => column !== 'email' && column !== 'user_id')
+            .filter(column => !!args[snakeToCamel(column)]);
+        const EMPTY = Object.fromEntries(columns.map(column => [snakeToCamel(column), null]));
+        if (columns.length) {
+          await knex.raw(`UPDATE signup_data SET ${columns
+              .map(column => `${column} = :${snakeToCamel(column)}`)
+              .join(',')}
+            WHERE user_id = :userId`, {...EMPTY, ...args});
+        }
+        return response.status(200).json({userId: args.userId}).end();
+      }
+      return response.status(404).json({message: 'There is no signupData for given userId'}).end();
+    } else {
+      return response.status(401).end();
+    }
+  } catch (e) {
+    console.debug('POST /v1/signupData/:userId', e);
+    return response.status(500).end();
+  }
+});
+
 register(app, '/v1/auth/magicLink', AuthMagicLinkController);
 register(app, '/v1/auth/refresh', RefreshTokenController);
 register(app, '/v1/email/sendMagicLink', EmailMagicLinkSenderController);

@@ -74,14 +74,15 @@ function getAuthHeader(user, jwtAlgorithm = 'HS256') {
 }
 
 let userIds = [];
-async function genUsers(seed, overrides) {
+let beforeAllUserIds = [];
+async function genUsers(seed, overrides, beforeAll = false) {
   if (!seed) {
     seed = Date.now();
     console.log('Possible seed value: ', seed);
   }
   const {code, data: users} = await post(`${getHost()}/v1/admin/addUsersForTest`, JSON.stringify({users: overrides, seed}));
   expect(code).toBe(200);
-  userIds.push(...users.map(user => user.id));
+  (beforeAll ? beforeAllUserIds : userIds).push(...users.map(user => user.id));
   expect(users.length).toBe(overrides.length);
   const {code: invalidateCode} = await post(`${getHost()}/v1/admin/invalidateSearchIndexForTest`, JSON.stringify({userIds}));
   expect(invalidateCode).toBe(200);
@@ -93,6 +94,10 @@ async function delUsers(userIds) {
   expect(delCode).toBe(200);
 }
 
+function registerUser(userId, beforeAll = false) {
+  (beforeAll ? beforeAllUserIds : userIds).push(userId);
+}
+
 afterEach(async () => {
   if (userIds.length) {
     await delUsers(userIds);
@@ -100,4 +105,11 @@ afterEach(async () => {
   }
 });
 
-module.exports = { get, post, put, del, getHost, getAuthHeader, genUsers, delUsers };
+afterAll(async () => {
+  if (beforeAllUserIds.length) {
+    await delUsers(beforeAllUserIds);
+    beforeAllUserIds = [];
+  }
+});
+
+module.exports = { get, post, put, del, getHost, getAuthHeader, genUsers, registerUser, delUsers };
