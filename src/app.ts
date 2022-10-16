@@ -42,6 +42,8 @@ import { getArgs, hasPermission } from './utils';
 import {Permission} from './enums/permission';
 import knex from './knex';
 
+import path from 'path';
+
 const config = require('../config.js');
 
 const app = express();
@@ -125,7 +127,7 @@ register(app, '/v1/admin/removeOldTokens', RemoveOldTokensController, true);
 app.post('/v1/admin/migrate/latest', accessTokenHandler, async (request, response) => {
   if (hasPermission(request, Permission.MIGRATE)) {
     try {
-      await knex.migrate.latest();
+      await knex.migrate.latest({directory: path.join(__dirname, '..', 'migrations')});
       return response.json({version: await knex.migrate.currentVersion()}).status(200).end();
     } catch (e) {
       console.debug('/v1/admin/migrate/latest', e);
