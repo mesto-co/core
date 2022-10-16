@@ -13,23 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-enum Permission {
-    ADDDELPERMISSION = 1,
-    ACTIVATEUSER = 2,
-    BANUSER = 3,
-    // ADDUSER = 4,
-    // SENDINVITEEMAIL = 5,
-    // NEWUSERS = 6,
-    EVENT = 7,
-    DELEVENT = 8,
-    REMOVEOLDTOKENS = 9,
-    SENDTELEGRAMLINK = 13,
-    RESOLVEEMAIL = 14,
-    UPDATEUSER = 15,
-    SEARCHBYEMAIL = 16,
-    RETRIEVEMAGICLINK = 20,
-    CUSTOMMAGICLINKEXPIREIN = 21,
-    MIGRATE = 22,
-}
 
-export { Permission };
+const jsonwebtoken = require('jsonwebtoken');
+
+(async () => {
+  const [,,secret, expireIn, id, fullName, ...permissions] = process.argv;
+  const payload = {
+    id: id,
+    fullName: fullName,
+    permissions: permissions.map(v => parseInt(v, 10)),
+  };
+  console.log(jsonwebtoken.sign(payload, Buffer.from(secret, 'base64'), {
+    expiresIn: expireIn,
+    algorithm: 'HS256'
+  }));
+})();

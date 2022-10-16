@@ -10,3 +10,4 @@
 !knexfile.js
 !app/**/*.js
 !app/**/*.json
+!migrations/*.js

@@ -122,6 +122,18 @@ register(app, '/v1/event/search', searchEvents, true);
 register(app, '/v1/admin/banUser', banUser, true);
 register(app, '/v1/admin/resolveEmail', resolveEmail, true);
 register(app, '/v1/admin/removeOldTokens', RemoveOldTokensController, true);
+app.post('/v1/admin/migrate/latest', accessTokenHandler, async (request, response) => {
+  if (hasPermission(request, Permission.MIGRATE)) {
+    try {
+      await knex.migrate.latest();
+      return response.json({version: await knex.migrate.currentVersion()}).status(200).end();
+    } catch (e) {
+      console.debug('/v1/admin/migrate/latest', e);
+      return response.status(500).end();
+    }
+  }
+  return response.status(401).end();
+});
 
 register(app, '/v1/database/getSkills', GetSkillsController, true);
 register(app, '/v1/database/getLocations', GetLocationsController, true);

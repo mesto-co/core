@@ -25,3 +25,12 @@ test('/v1/admin/banUser', async () => {
   expect(await post(getHost() + '/v1/admin/banUser', {email: rootUser.email}, authHeader))
       .toMatchObject({ code: 200 });
 });
+
+test('/v1/admin/migrate/latest', async () => {
+  const authHeader = getAuthHeader({permissions: [22]});
+  const result = await post(getHost() + '/v1/admin/migrate/latest', {}, authHeader);
+  expect(result).toMatchObject({
+    code: 200,
+    data: {version: expect.any(String)},
+  });
+});
