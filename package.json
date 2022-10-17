@@ -5,7 +5,7 @@
   "repository": "github:mesto-co/core.git",
   "homepage": "https://github.com/mesto-co/core#readme",
   "engines": {
-    "node": ">=12.18.3"
+    "node": ">=16.16.0"
   },
   "main": "index.js",
   "scripts": {
