@@ -524,7 +524,8 @@
         "projectType": { "type": "array", "items": { "type": "string" } },  
         "projectDetails": { "type": "string" },
         "canHelp": { "type": "array", "items": { "type": "string" } },
-        "lookingFor": { "type": "array", "items": { "type": "string" } }
+        "lookingFor": { "type": "array", "items": { "type": "string" } },
+        "h-captcha-response": { "type": "string" }
       },
       "required": [ "name", "email" ],
       "errorMessage": {

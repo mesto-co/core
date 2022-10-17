@@ -74,6 +74,7 @@ const lambdaConfig = {
   amoToken: process.env.AMO_TOKEN || '133a68442d0557dca95f17c055f38d7e517769e9ef990196ab5706faff4f5c3d',
   telegramSecretLink: 'http://t.me/MestoInfoBot?start=',
   tildaToken: process.env.TILDA_TOKEN || 'f44e84e57f2d3cc5e0ad9699a1741b8d40b081784fe40b1ffd18f7ab59f55488',
+  hCaptchaSecret: process.env.HCAPTCHA_SECRET || '0x0000000000000000000000000000000000000000',
 };
 
 const developmentConfig = {

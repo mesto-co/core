@@ -22,7 +22,7 @@ const GET_PERMISSION_ID = 24;
 
 describe('#POST>/v1/signupData', () => {
   test('without authorization', async () => {
-    expect(await post(getHost() + '/v1/signupData', {})).toMatchObject({code: 401});
+    expect(await post(getHost() + '/v1/signupData', {email: 'a@a.com', name: 'a a'})).toMatchObject({code: 401});
   });
   test('without permission', async () => {
     const authHeader = getAuthHeader({permissions: []});
@@ -161,6 +161,25 @@ describe('#POST>/v1/signupData', () => {
     });
   });
 
+  test('pass another data for the same email', async () => {
+    const authHeader = getAuthHeader({permissions: [ADD_PERMISSION_ID]});
+    const [user] = await genUsers(1665948641842, [{}]);
+    expect(await post(getHost() + '/v1/signupData', {
+      name: 'Mesto Mestovich',
+      email: user.email,
+    }, authHeader)).toMatchObject({
+      code: 200,
+      data: {userId: user.id},
+    });
+    expect(await post(getHost() + '/v1/signupData', {
+      name: 'Mesto Mestovich',
+      email: user.email,
+    }, authHeader)).toMatchObject({
+      code: 400,
+      data: {message: expect.stringContaining('Given user has signupData')},
+    });
+  });
+
   test('add data for existing user', async () => {
     const authHeader = getAuthHeader({permissions: [ADD_PERMISSION_ID]});
     const [user] = await genUsers(1665950612801, [{}]);
@@ -230,6 +249,31 @@ describe('#POST>/v1/signupData', () => {
         name: user.fullName,
         aboutMe: user.about,
       }
+    });
+  });
+
+  test('auth with h-captcha good response', async () => {
+    const [user] = await genUsers(1665950612801, [{}]);
+    expect(await post(getHost() + '/v1/signupData', {
+      'name': 'Mesto Mestovich',
+      'email': user.email,
+      'userId': user.id,
+      'h-captcha-response': '10000000-aaaa-bbbb-cccc-000000000001',
+    })).toMatchObject({
+      code: 200,
+      data: {userId: user.id},
+    });
+  });
+
+  test('auth with h-captcha wrong reponse', async () => {
+    const [user] = await genUsers(1665950612801, [{}]);
+    expect(await post(getHost() + '/v1/signupData', {
+      'name': 'Mesto Mestovich',
+      'email': user.email,
+      'userId': user.id,
+      'h-captcha-response': 'wrong-key',
+    })).toMatchObject({
+      code: 401,
     });
   });
 

@@ -30,7 +30,7 @@ import {PeerboardAuthController} from './controllers/peerboardController';
 import {addPermission, delPermission} from './controllers/permissionController';
 
 import { errorHandler, notFoundHandler } from './errorHandler';
-import {accessTokenHandler} from './accessTokenHandler';
+import {accessTokenHandler, verifyAccessToken} from './accessTokenHandler';
 import requestIdHandler from './requestId';
 import cors from 'cors';
 import {UserController, UsersController, AddUsersForTest, DelUsersForTest, addFakeUsers, getUsersCount,
@@ -42,6 +42,7 @@ import { getArgs, hasPermission } from './utils';
 import {Permission} from './enums/permission';
 import knex from './knex';
 
+import https from 'https';
 import path from 'path';
 
 const config = require('../config.js');
@@ -80,58 +81,85 @@ const SIGNUPDATA_COLUMNS = [
   'project_type', 'project_details', 'can_help', 'looking_for',
 ];
 // Signup data
-app.post('/v1/signupData', accessTokenHandler, validator('/v1/signupData'), async (request, response) => {
+app.post('/v1/signupData', validator('/v1/signupData'), async (request, response) => {
   try {
-    if (hasPermission(request, Permission.ADDSIGNUPDATA)) {
-      const args = getArgs(request);
-      const columns = SIGNUPDATA_COLUMNS;
-      const EMPTY = Object.fromEntries(columns.map(column => [snakeToCamel(column), null]));
-      if (!args.userId) {
-        // We should try to lookup for user by email.
-        const {rows} = await knex.raw('SELECT id FROM "User" WHERE email = :email', {email: args.email});
-        if (rows && rows.length)
-          args.userId = rows[0].id;
-      }
-      if (!args.userId) {
-        // At this point we know that there is no userId passed as argument and there is no user with given email,
-        // so we create user outselves.
-        const {rows} = await knex.raw('INSERT INTO "User" ("fullName", email, about, status) VALUES (:name, :email, :about, :status) RETURNING id', {
-          name: args.name,
-          email: args.email,
-          about: args.aboutMe || null,
-          status: 'awaiting',
-        });
-        args.userId = rows[0].id;
-      }
-      if (!args.userId) {
-        return response.status(500).json({
-          message: 'We tried our best to detect userIf but something when wrong',
-        });
-      }
-      // When we pass userId - we are adding signupData for existing user.
-      const {rows} = await knex.raw('SELECT EXISTS(SELECT 1 FROM signup_data WHERE user_id = ?)', [args.userId]);
-      if (rows.length && rows[0].exists)
-        return response.status(400).json({message: 'Given user has signupData, please use /v1/signupData/:id to update it'}).end();
-      const {rows: userRows} = await knex.raw(`SELECT email, "fullName", about FROM "User" WHERE id = :userId`, {userId: args.userId});
-      if (!userRows.length)
-        return response.status(404).json({message: 'There is no user with given userId'});
-      const {email, fullName, about} = userRows[0];
-      if (email !== args.email)
-        return response.status(400).json({message: 'User with given userId has different email'});
-      // We always prefer existing fullName and about from the user if any.
-      args.name = fullName;
-      if (about)
-        args.aboutMe = about;
-      await knex.raw(`
-        INSERT INTO signup_data
-          (${columns.join(',')})
-        VALUES
-          (${columns.map(column => `:${snakeToCamel(column)}`).join(',')})
-        `, {...EMPTY, ...args});
-      return response.status(200).json({userId: args.userId}).end();
+    const user = await verifyAccessToken(request);
+    const args = getArgs(request);
+    if (user) {
+      request.user = user;
+      if (!hasPermission(request, Permission.ADDSIGNUPDATA))
+        return response.status(401).end();
     } else {
-      return response.status(401).end();
+      const hCaptchaResponse = args['h-captcha-response'];
+      const verified = await new Promise((resolve, reject) => {
+        const request = https.request('https://hcaptcha.com/siteverify', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        }, response => {
+          response.once('error', reject);
+          let data = '';
+          response.on('data', d => data += d);
+          response.once('end', () => {
+            try {
+              const {success} = JSON.parse(data);
+              resolve(success ?? false);
+            } catch (e) {
+              reject(e);
+            }
+          });
+        });
+        request.once('error', reject);
+        request.end(`response=${hCaptchaResponse}&secret=${config.hCaptchaSecret}`);
+      });
+      if (!verified)
+        return response.status(401).end();
     }
+
+    const columns = SIGNUPDATA_COLUMNS;
+    const EMPTY = Object.fromEntries(columns.map(column => [snakeToCamel(column), null]));
+    if (!args.userId) {
+      // We should try to lookup for user by email.
+      const {rows} = await knex.raw('SELECT id FROM "User" WHERE email = :email', {email: args.email});
+      if (rows && rows.length)
+        args.userId = rows[0].id;
+    }
+    if (!args.userId) {
+      // At this point we know that there is no userId passed as argument and there is no user with given email,
+      // so we create user outselves.
+      const {rows} = await knex.raw('INSERT INTO "User" ("fullName", email, about, status) VALUES (:name, :email, :about, :status) RETURNING id', {
+        name: args.name,
+        email: args.email,
+        about: args.aboutMe || null,
+        status: 'awaiting',
+      });
+      args.userId = rows[0].id;
+    }
+    if (!args.userId) {
+      return response.status(500).json({
+        message: 'We tried our best to detect userId but something when wrong',
+      });
+    }
+    // When we pass userId - we are adding signupData for existing user.
+    const {rows} = await knex.raw('SELECT EXISTS(SELECT 1 FROM signup_data WHERE user_id = ?)', [args.userId]);
+    if (rows.length && rows[0].exists)
+      return response.status(400).json({message: 'Given user has signupData, please use /v1/signupData/:id to update it'}).end();
+    const {rows: userRows} = await knex.raw(`SELECT email, "fullName", about FROM "User" WHERE id = :userId`, {userId: args.userId});
+    if (!userRows.length)
+      return response.status(404).json({message: 'There is no user with given userId'});
+    const {email, fullName, about} = userRows[0];
+    if (email !== args.email)
+      return response.status(400).json({message: 'User with given userId has different email'});
+    // We always prefer existing fullName and about from the user if any.
+    args.name = fullName;
+    if (about)
+      args.aboutMe = about;
+    await knex.raw(`
+      INSERT INTO signup_data
+        (${columns.join(',')})
+      VALUES
+        (${columns.map(column => `:${snakeToCamel(column)}`).join(',')})
+      `, {...EMPTY, ...args});
+    return response.status(200).json({userId: args.userId}).end();
   } catch (e) {
     console.debug('POST /v1/signupData', e);
     return response.status(500).end();
