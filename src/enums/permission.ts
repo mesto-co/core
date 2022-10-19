@@ -33,6 +33,7 @@ enum Permission {
     ADDSIGNUPDATA = 23,
     GETSIGNUPDATA = 24,
     UPDATESIGNUPDATA = 25,
+    SETANYPASSWORD = 26,
 }
 
 export { Permission };

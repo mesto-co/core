@@ -152,3 +152,43 @@ test('/v1/user/setPassword', async () => {
   expect(accessTokenAfterRefresh).not.toBeUndefined();
   expect(refreshTokenAfterRefresh).not.toBeUndefined();
 });
+
+describe.only('POST>#/v1/user/setPassword', () => {
+  let userA, userB;
+  let userAAuthHeader;
+  let adminAuthHeader;
+  beforeAll(async () => {
+    [userA, userB] = await genUsers(1666203253872, [{}, {}], true);
+    userAAuthHeader = getAuthHeader({id: userA.id});
+    adminAuthHeader = getAuthHeader({permissions: [26]});
+  });
+  test('without authorization', async () => {
+    expect(await post(getHost() + '/v1/user/setPassword', {password: '123456'}))
+        .toMatchObject({code: 401});
+  });
+  test('with userId but not allowed authorization', async () => {
+    expect(await post(getHost() + '/v1/user/setPassword', {password: '123456', userId: userB.id}, userAAuthHeader))
+        .toMatchObject({code: 401});
+  });
+  test('with userId of current user', async () => {
+    expect(await post(getHost() + '/v1/user/setPassword', {password: '123456', userId: userA.id}, userAAuthHeader))
+        .toMatchObject({code: 200});
+  });
+  test('admin can change any password', async () => {
+    expect(await post(getHost() + '/v1/user/setPassword', {password: '123456', userId: userA.id}, adminAuthHeader))
+        .toMatchObject({code: 200});
+    expect(await post(getHost() + '/v1/user/setPassword', {password: '123456', userId: userB.id}, adminAuthHeader))
+        .toMatchObject({code: 200});
+  });
+  test('password set by admin can be resolve into tokens', async () => {
+    expect(await post(getHost() + '/v1/user/setPassword', {password: '654321', userId: userA.id}, adminAuthHeader))
+        .toMatchObject({code: 200});
+    expect(await post(getHost() + '/v1/auth/getRefreshTokenByPassword', {
+      password: '654321',
+      email: userA.email,
+    })).toMatchObject({
+      code: 200,
+      data: {accessToken: expect.any(String), refreshToken: expect.any(String)},
+    });
+  });
+});

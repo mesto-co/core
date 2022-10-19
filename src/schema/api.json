@@ -274,6 +274,7 @@
       "$id": "#POST>/v1/user/setPassword",
       "allOf": [{ "$ref": "#RequestBase" }],
       "properties": {
+        "userId": { "type": "string", "format": "uuid" },
         "password": { "type": "string", "maxLength": 128, "minLength": 6 }
       },
       "required":["password"]

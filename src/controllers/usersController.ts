@@ -131,15 +131,15 @@ userController.route('/')
 const userSetPassword = express.Router();
 userSetPassword.route('/').post(async (request, response) => {
   try {
-    const {password} = getArgs(request);
-    if (request.user) {
-      const hash = await storePassword(password, salt);
-      const {id} = request.user!;
-      await knex.raw(`UPDATE "User" SET "passwordHash" = ? WHERE id = ?`, [hash, id]);
-      return response.status(200).json({}).end();
-    } else {
+    const {password, userId} = getArgs(request);
+    if (userId && (userId !== request.user?.id) && !hasPermission(request, Permission.SETANYPASSWORD))
       return response.status(401).json({}).end();
-    }
+    if (!userId && !request.user)
+      return response.status(401).json({}).end();
+    const id = userId ?? request.user?.id;
+    const hash = await storePassword(password, salt);
+    await knex.raw(`UPDATE "User" SET "passwordHash" = ? WHERE id = ?`, [hash, id]);
+    return response.status(200).json({}).end();
   } catch (e) {
     console.debug('userSetPassword error', e);
     return response.status(500).json({}).end();
